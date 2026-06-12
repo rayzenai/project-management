@@ -30,7 +30,7 @@
         </div>
         <button
             type="button"
-            class="rounded-md bg-amber-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-amber-600"
+            class="rounded-md bg-amber-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-amber-600 dark:text-neutral-950"
             onclick={() => (creating = !creating)}>{creating ? 'Cancel' : '+ New project'}</button
         >
     </div>
@@ -73,7 +73,7 @@
                 <button
                     type="submit"
                     disabled={form.processing}
-                    class="rounded-md bg-amber-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-amber-600 disabled:opacity-50">Create</button
+                    class="rounded-md bg-amber-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-amber-600 disabled:opacity-50 dark:text-neutral-950">Create</button
                 >
             </div>
             {#if form.errors.title}<p class="mt-2 text-xs text-red-600 dark:text-red-400">{form.errors.title}</p>{/if}

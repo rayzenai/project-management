@@ -206,7 +206,7 @@
                 <button
                     type="button"
                     onclick={startCompose}
-                    class="rounded-full bg-amber-500 px-4 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-amber-600">+ New note</button
+                    class="rounded-full bg-amber-500 px-4 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-amber-600 dark:text-neutral-950">+ New note</button
                 >
                 <button
                     type="button"
@@ -378,7 +378,7 @@
                             <button
                                 type="submit"
                                 disabled={!draftBody.trim() || saving}
-                                class="rounded-lg bg-amber-500 px-4 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-50"
+                                class="rounded-lg bg-amber-500 px-4 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-950"
                                 >Add note</button
                             >
                         </div>

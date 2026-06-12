@@ -349,7 +349,7 @@
                             type="submit"
                             disabled={editForm.processing || !editForm.isDirty}
                             title="Save (⌘S / Ctrl+S)"
-                            class="rounded-md bg-amber-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-amber-600 disabled:opacity-50"
+                            class="rounded-md bg-amber-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-amber-600 disabled:opacity-50 dark:text-neutral-950"
                             >Save</button
                         >
                     </div>
@@ -373,7 +373,7 @@
                         <button
                             type="submit"
                             disabled={todoForm.processing || !todoForm.body.trim()}
-                            class="rounded-md bg-amber-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-amber-600 disabled:opacity-50"
+                            class="rounded-md bg-amber-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-amber-600 disabled:opacity-50 dark:text-neutral-950"
                             >Add</button
                         >
                     </div>
@@ -440,7 +440,7 @@
                         <button
                             type="submit"
                             disabled={noteForm.processing || !noteForm.body.trim()}
-                            class="rounded-md bg-amber-500 px-3 py-1 text-xs font-semibold text-white hover:bg-amber-600 disabled:opacity-50"
+                            class="rounded-md bg-amber-500 px-3 py-1 text-xs font-semibold text-white hover:bg-amber-600 disabled:opacity-50 dark:text-neutral-950"
                             >Add note</button
                         >
                     </div>
@@ -508,7 +508,7 @@
                         <button
                             type="submit"
                             disabled={contactForm.processing || !contactForm.name.trim()}
-                            class="rounded-md bg-amber-500 px-3 py-1 text-xs font-semibold text-white hover:bg-amber-600 disabled:opacity-50"
+                            class="rounded-md bg-amber-500 px-3 py-1 text-xs font-semibold text-white hover:bg-amber-600 disabled:opacity-50 dark:text-neutral-950"
                             >Add contact</button
                         >
                     </div>
