@@ -1,7 +1,7 @@
 <script lang="ts">
     import { router } from '@inertiajs/svelte';
     import { initials } from '../lib/format';
-    import type { Assignment, Task, User } from '../lib/types';
+    import type { Assignment, Member, Task } from '../lib/types';
     import Popover from './Popover.svelte';
 
     let {
@@ -12,7 +12,7 @@
         onUpdated,
     }: {
         task: Pick<Task, 'id' | 'slug'> & { assignments?: Assignment[] };
-        team: User[];
+        team: Member[];
         max?: number;
         size?: 'sm' | 'md';
         onUpdated?: () => void;
@@ -23,24 +23,24 @@
     let busy = $state(false);
 
     const assignments = $derived(task.assignments ?? []);
-    const assignedIds = $derived(new Set(assignments.map((a) => a.user_id)));
+    const assignedIds = $derived(new Set(assignments.map((a) => a.member_id)));
     const visible = $derived(assignments.slice(0, max));
     const overflow = $derived(assignments.length - max);
     const candidates = $derived(
         team.filter(
-            (u) => query.trim() === '' || u.name.toLowerCase().includes(query.toLowerCase()) || u.email.toLowerCase().includes(query.toLowerCase()),
+            (u) => query.trim() === '' || u.name.toLowerCase().includes(query.toLowerCase()) || (u.email ?? '').toLowerCase().includes(query.toLowerCase()),
         ),
     );
 
     const dim = $derived(size === 'sm' ? 'h-5 w-5 text-[9px]' : 'h-6 w-6 text-[10px]');
 
-    function assign(user: User) {
-        if (busy || assignedIds.has(user.id)) return;
+    function assign(member: Member) {
+        if (busy || assignedIds.has(member.id)) return;
         busy = true;
 
         router.post(
             `/workspace/tasks/${task.id}/assignments`,
-            { user_id: user.id },
+            { member_id: member.id },
             {
                 preserveState: true,
                 preserveScroll: true,
@@ -68,10 +68,10 @@
         <span class="flex items-center -space-x-1.5">
             {#each visible as assignment (assignment.id)}
                 <span
-                    title={assignment.user?.name}
+                    title={assignment.member?.name}
                     class={`flex items-center justify-center rounded-full bg-neutral-200 font-semibold text-neutral-700 ring-2 ring-white dark:bg-neutral-700 dark:text-neutral-200 dark:ring-neutral-900 ${dim}`}
                 >
-                    {initials(assignment.user?.name)}
+                    {initials(assignment.member?.name)}
                 </span>
             {/each}
             {#if overflow > 0}
@@ -104,10 +104,10 @@
         <div class="border-b border-neutral-100 px-1 pb-1 dark:border-neutral-800">
             {#each assignments as assignment (assignment.id)}
                 <div class="flex items-center gap-2 rounded px-2 py-1 text-sm text-neutral-700 dark:text-neutral-200">
-                    <span class="min-w-0 flex-1 truncate">{assignment.user?.name}</span>
+                    <span class="min-w-0 flex-1 truncate">{assignment.member?.name}</span>
                     <button
                         type="button"
-                        aria-label={`Unassign ${assignment.user?.name ?? 'user'}`}
+                        aria-label={`Unassign ${assignment.member?.name ?? 'member'}`}
                         class="text-neutral-400 hover:text-red-500 disabled:opacity-40"
                         disabled={assignment.id <= 0}
                         onclick={() => unassign(assignment)}
@@ -120,19 +120,19 @@
     {/if}
 
     <div class="max-h-52 overflow-auto px-1 pt-1">
-        {#each candidates.filter((u) => !assignedIds.has(u.id)) as user (user.id)}
+        {#each candidates.filter((u) => !assignedIds.has(u.id)) as member (member.id)}
             <button
                 type="button"
                 data-popover-item
                 class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-sm text-neutral-700 hover:bg-neutral-100 dark:text-neutral-200 dark:hover:bg-neutral-800"
-                onclick={() => assign(user)}
+                onclick={() => assign(member)}
             >
                 <span
                     class="flex h-5 w-5 items-center justify-center rounded-full bg-neutral-200 text-[9px] font-semibold text-neutral-700 dark:bg-neutral-700 dark:text-neutral-200"
                 >
-                    {initials(user.name)}
+                    {initials(member.name)}
                 </span>
-                <span class="min-w-0 flex-1 truncate">{user.name}</span>
+                <span class="min-w-0 flex-1 truncate">{member.name}</span>
             </button>
         {:else}
             <p class="px-2 py-1.5 text-xs text-neutral-400">No matches.</p>

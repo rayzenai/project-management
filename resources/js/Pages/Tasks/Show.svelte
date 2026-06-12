@@ -5,7 +5,7 @@
     import PillGroup from '../../components/PillGroup.svelte';
     import StatusBadge from '../../components/StatusBadge.svelte';
     import { initials, formatDate } from '../../lib/format';
-    import type { Assignment, Contact, Note, Project, Subtask, Task, User } from '../../lib/types';
+    import type { Assignment, Contact, Member, Note, Project, Subtask, Task } from '../../lib/types';
 
     let {
         project,
@@ -21,7 +21,7 @@
         notes: Note[];
         contacts: Contact[];
         subtasks: Subtask[];
-        team: User[];
+        team: Member[];
         statuses: { value: string; label: string }[];
     } = $props();
 
@@ -68,7 +68,7 @@
     const noteForm = useForm({ body: '', type: 'general', happened_at: '' });
     const contactForm = useForm({ name: '', role: '', email: '', phone: '', organization: '', notes: '' });
     const assignForm = useForm({
-        user_id: 0,
+        member_id: 0,
         role: '',
     });
 
@@ -146,7 +146,7 @@
 
     function assign() {
         if (pickerSelected.length === 0) return;
-        assignForm.user_id = pickerSelected[0];
+        assignForm.member_id = pickerSelected[0];
         assignForm.post(`/workspace/tasks/${task.id}/assignments`, {
             preserveScroll: true,
             onSuccess: () => {
@@ -158,7 +158,7 @@
     }
 
     function unassign(assignment: Assignment) {
-        if (!confirm(`Remove ${assignment.user?.name} from this task?`)) return;
+        if (!confirm(`Remove ${assignment.member?.name} from this task?`)) return;
         router.delete(`/workspace/assignments/${assignment.id}`, { preserveScroll: true });
     }
 
@@ -546,10 +546,10 @@
                             <span
                                 class="flex h-7 w-7 items-center justify-center rounded-full bg-neutral-200 text-xs font-semibold text-neutral-700 dark:bg-neutral-700 dark:text-neutral-200"
                             >
-                                {initials(a.user?.name)}
+                                {initials(a.member?.name)}
                             </span>
                             <div class="min-w-0 flex-1">
-                                <div class="truncate text-sm font-medium">{a.user?.name}</div>
+                                <div class="truncate text-sm font-medium">{a.member?.name}</div>
                                 <div class="truncate text-xs text-neutral-500 dark:text-neutral-400">
                                     {a.personal_progress}%
                                 </div>

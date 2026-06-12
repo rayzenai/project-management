@@ -10,7 +10,7 @@
     import ProjectSummaryStrip from '../../components/project/ProjectSummaryStrip.svelte';
     import { peek } from '../../lib/peek.svelte';
     import { quickAdd } from '../../lib/quickAdd.svelte';
-    import type { Project, SharedProps, Task, User } from '../../lib/types';
+    import type { Member, Project, SharedProps, Task } from '../../lib/types';
 
     let { project, tasks }: { project: Project; tasks: Task[] } = $props();
 
@@ -46,10 +46,10 @@
 
     const teammates = $derived.by(() => {
         // Unique, name-sorted, from assignments.
-        const m = new SvelteMap<number, User>();
+        const m = new SvelteMap<number, Member>();
         for (const t of tasks) {
             for (const a of t.assignments ?? []) {
-                if (a.user) m.set(a.user.id, a.user);
+                if (a.member) m.set(a.member.id, a.member);
             }
         }
         return [...m.values()].sort((a, b) => a.name.localeCompare(b.name));
@@ -67,7 +67,7 @@
     const filteredTasks = $derived(
         tasks.filter(
             (t) =>
-                (filters.assigneeIds.length === 0 || (t.assignments ?? []).some((a) => filters.assigneeIds.includes(a.user_id))) &&
+                (filters.assigneeIds.length === 0 || (t.assignments ?? []).some((a) => filters.assigneeIds.includes(a.member_id))) &&
                 (!filters.overdueOnly || isOverdue(t)) &&
                 (filters.category === null || t.category === filters.category),
         ),

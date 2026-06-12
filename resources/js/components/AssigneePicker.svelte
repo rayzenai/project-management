@@ -1,6 +1,6 @@
 <script lang="ts">
     import { initials } from '../lib/format';
-    import type { User } from '../lib/types';
+    import type { Member } from '../lib/types';
 
     let {
         team,
@@ -8,7 +8,7 @@
         placeholder = 'Assign...',
         max = 1,
     }: {
-        team: User[];
+        team: Member[];
         selectedIds: number[];
         placeholder?: string;
         max?: number;
@@ -20,23 +20,23 @@
     const filtered = $derived(
         query.trim() === ''
             ? team
-            : team.filter((u) => u.name.toLowerCase().includes(query.toLowerCase()) || u.email.toLowerCase().includes(query.toLowerCase())),
+            : team.filter((u) => u.name.toLowerCase().includes(query.toLowerCase()) || (u.email ?? '').toLowerCase().includes(query.toLowerCase())),
     );
     const selected = $derived(team.filter((u) => selectedIds.includes(u.id)));
 
-    function toggle(userId: number) {
-        if (selectedIds.includes(userId)) {
-            selectedIds = selectedIds.filter((id) => id !== userId);
+    function toggle(memberId: number) {
+        if (selectedIds.includes(memberId)) {
+            selectedIds = selectedIds.filter((id) => id !== memberId);
         } else if (max === 1) {
-            selectedIds = [userId];
+            selectedIds = [memberId];
             open = false;
         } else if (selectedIds.length < max) {
-            selectedIds = [...selectedIds, userId];
+            selectedIds = [...selectedIds, memberId];
         }
     }
 
-    function remove(userId: number) {
-        selectedIds = selectedIds.filter((id) => id !== userId);
+    function remove(memberId: number) {
+        selectedIds = selectedIds.filter((id) => id !== memberId);
     }
 </script>
 

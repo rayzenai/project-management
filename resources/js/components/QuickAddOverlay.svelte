@@ -5,8 +5,8 @@
     import QuickAddForm from './QuickAddForm.svelte';
 
     const shared = $derived((page.props ?? {}) as unknown as SharedProps);
-    const context = $derived(shared.quickAddContext ?? { projects: [], team: [] });
-    const currentUser = $derived(shared.auth?.user ?? null);
+    const context = $derived(shared.quickAddContext ?? { projects: [], team: [], currentMemberId: null });
+    const currentMemberId = $derived(shared.quickAddContext?.currentMemberId ?? null);
 
     let formComp = $state<{ focusInput: () => void } | null>(null);
 
@@ -58,7 +58,7 @@
                 bind:this={formComp}
                 projects={context.projects}
                 team={context.team}
-                {currentUser}
+                {currentMemberId}
                 defaultProjectId={quickAdd.projectId}
                 prefill={quickAdd.prefill}
                 variant="overlay"

@@ -10,7 +10,7 @@
     import QuickAddBar from '../components/QuickAddBar.svelte';
     import { palette } from '../lib/palette.svelte';
     import { peek } from '../lib/peek.svelte';
-    import type { Assignment, Contact, Note, ProjectSummary, SharedProps, Subtask, Task, User } from '../lib/types';
+    import type { Assignment, Contact, Member, Note, ProjectSummary, SharedProps, Subtask, Task } from '../lib/types';
 
     let {
         assignments,
@@ -27,13 +27,13 @@
         recentNotes: Note[];
         recentContacts: Contact[];
         projects: ProjectSummary[];
-        team: User[];
+        team: Member[];
     } = $props();
 
     const DUE_WINDOW_DAYS = 7;
 
     const shared = $derived((page.props ?? {}) as unknown as SharedProps);
-    const currentUser = $derived(shared.auth?.user ?? null);
+    const currentMemberId = $derived(shared.quickAddContext?.currentMemberId ?? null);
     const stickyNotes = $derived(shared.workspaceNotes ?? []);
 
     const completeStatuses = $derived(new Set((shared.statuses ?? []).filter((s) => s.is_complete).map((s) => s.value)));
@@ -130,7 +130,7 @@
                         >⌘K</kbd
                     >
                 </button>
-                <QuickAddBar {projects} {team} {currentUser} />
+                <QuickAddBar {projects} {team} {currentMemberId} />
             </div>
 
             {#if allClear}

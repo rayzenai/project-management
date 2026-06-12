@@ -14,7 +14,7 @@
 
 <script lang="ts">
     import { initials } from '../../lib/format';
-    import type { User } from '../../lib/types';
+    import type { Member } from '../../lib/types';
 
     let {
         filters = $bindable(),
@@ -24,7 +24,7 @@
         totalCount,
     }: {
         filters: ProjectFiltersState;
-        teammates: User[];
+        teammates: Member[];
         categories: CategoryOption[];
         shownCount: number;
         totalCount: number;

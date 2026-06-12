@@ -6,6 +6,26 @@ export interface User {
     email: string;
 }
 
+export interface Member {
+    id: Id;
+    name: string;
+    email?: string | null;
+    title?: string | null;
+    user_id?: Id | null;
+    is_active?: boolean;
+    team_ids?: Id[];
+}
+
+export interface Team {
+    id: Id;
+    name: string;
+    slug: string;
+    description?: string | null;
+    color?: string | null;
+    members_count?: number;
+    member_ids?: Id[];
+}
+
 export interface ProjectSummary {
     id: Id;
     slug: string;
@@ -27,8 +47,8 @@ export type Priority = 'low' | 'medium' | 'high' | 'urgent';
 export interface Assignment {
     id: Id;
     task_id: Id;
-    user_id: Id;
-    user?: User;
+    member_id: Id;
+    member?: Member;
     role?: string | null;
     priority: Priority;
     is_focused: boolean;
@@ -166,12 +186,13 @@ export interface TaskPreview {
     notes: Note[];
     contacts: Contact[];
     activity: ActivityEntry[];
-    team: User[];
+    team: Member[];
 }
 
 export interface QuickAddContext {
     projects: ProjectSummary[];
-    team: User[];
+    team: Member[];
+    currentMemberId: Id | null;
 }
 
 export interface Flash {

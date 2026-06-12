@@ -92,7 +92,7 @@
                 {#each assignees.slice(0, 3) as a (a.id)}
                     <span
                         class="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-neutral-200 text-[10px] font-semibold text-neutral-700 dark:border-neutral-900 dark:bg-neutral-700 dark:text-neutral-200"
-                        title={a.user?.name}>{initials(a.user?.name)}</span
+                        title={a.member?.name}>{initials(a.member?.name)}</span
                     >
                 {/each}
                 {#if assignees.length > 3}

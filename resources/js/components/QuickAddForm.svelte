@@ -1,6 +1,6 @@
 <script lang="ts">
     import { useForm } from '@inertiajs/svelte';
-    import type { Priority, ProjectSummary, User } from '../lib/types';
+    import type { Member, Priority, ProjectSummary } from '../lib/types';
     import AssigneePicker from './AssigneePicker.svelte';
     import PillGroup from './PillGroup.svelte';
     import TokenInput from './TokenInput.svelte';
@@ -8,7 +8,7 @@
     let {
         projects,
         team,
-        currentUser,
+        currentMemberId,
         defaultProjectId = null,
         prefill = '',
         variant = 'inline',
@@ -16,8 +16,8 @@
         onCancel,
     }: {
         projects: ProjectSummary[];
-        team: User[];
-        currentUser: User | null;
+        team: Member[];
+        currentMemberId: number | null;
         defaultProjectId?: number | null;
         prefill?: string;
         variant?: 'inline' | 'overlay';
@@ -33,14 +33,14 @@
     const form = useForm({
         project_id: initialProject,
         title: prefill,
-        assignee_user_ids: [] as number[],
+        assignee_member_ids: [] as number[],
         deadline_at: '',
         priority: '' as Priority | '',
     });
 
     form.transform((data) => {
         const payload: Record<string, unknown> = { project_id: data.project_id, title: data.title };
-        if (data.assignee_user_ids.length > 0) payload.assignee_user_ids = data.assignee_user_ids;
+        if (data.assignee_member_ids.length > 0) payload.assignee_member_ids = data.assignee_member_ids;
         if (data.deadline_at) payload.deadline_at = data.deadline_at;
         if (data.priority) payload.priority = data.priority;
         return payload;
@@ -59,7 +59,7 @@
             preserveScroll: true,
             onSuccess: () => {
                 form.reset('title', 'deadline_at');
-                form.assignee_user_ids = [];
+                form.assignee_member_ids = [];
                 form.priority = '';
                 tokenInput?.focus();
                 onSuccess?.();
@@ -68,9 +68,9 @@
     }
 
     function assignMe() {
-        if (!currentUser) return;
-        if (!form.assignee_user_ids.includes(currentUser.id)) {
-            form.assignee_user_ids = [...form.assignee_user_ids, currentUser.id];
+        if (!currentMemberId) return;
+        if (!form.assignee_member_ids.includes(currentMemberId)) {
+            form.assignee_member_ids = [...form.assignee_member_ids, currentMemberId];
         }
     }
 </script>
@@ -78,7 +78,7 @@
 {#snippet advancedFields()}
     <div>
         <label class="mb-1 block text-xs font-medium text-neutral-600 dark:text-neutral-400">Assign to</label>
-        <AssigneePicker {team} bind:selectedIds={form.assignee_user_ids} max={5} placeholder="Pick teammates..." />
+        <AssigneePicker {team} bind:selectedIds={form.assignee_member_ids} max={5} placeholder="Pick teammates..." />
         <button type="button" class="mt-1 text-xs text-amber-600 hover:underline dark:text-amber-400" onclick={assignMe}>Assign me</button>
     </div>
     <div>

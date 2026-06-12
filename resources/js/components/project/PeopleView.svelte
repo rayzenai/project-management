@@ -1,14 +1,14 @@
 <script lang="ts">
     import { SvelteMap, SvelteSet } from 'svelte/reactivity';
     import { initials } from '../../lib/format';
-    import type { Project, Status, Task, User } from '../../lib/types';
+    import type { Member, Project, Status, Task } from '../../lib/types';
     import TaskTableRow from './TaskTableRow.svelte';
 
     let { project, tasks, statuses }: { project: Project; tasks: Task[]; statuses: Status[] } = $props();
 
     interface PersonBucket {
         key: string;
-        user: User | null;
+        member: Member | null;
         open: number;
         done: number;
         tasks: Task[];
@@ -21,8 +21,8 @@
     const buckets = $derived.by(() => {
         const map = new SvelteMap<string, PersonBucket>();
 
-        function push(key: string, user: User | null, task: Task) {
-            if (!map.has(key)) map.set(key, { key, user, open: 0, done: 0, tasks: [] });
+        function push(key: string, member: Member | null, task: Task) {
+            if (!map.has(key)) map.set(key, { key, member, open: 0, done: 0, tasks: [] });
             const bucket = map.get(key)!;
             bucket.tasks.push(task);
             if (completeSet.has(task.status)) {
@@ -38,7 +38,7 @@
                 push('unassigned', null, t);
             } else {
                 for (const a of assignments) {
-                    if (a.user) push(`user:${a.user.id}`, a.user, t);
+                    if (a.member) push(`member:${a.member.id}`, a.member, t);
                 }
             }
         }
@@ -46,7 +46,7 @@
         const unassigned = map.get('unassigned') ?? null;
         const people = [...map.values()]
             .filter((b) => b.key !== 'unassigned')
-            .sort((a, b) => b.open - a.open || (a.user?.name ?? '').localeCompare(b.user?.name ?? ''));
+            .sort((a, b) => b.open - a.open || (a.member?.name ?? '').localeCompare(b.member?.name ?? ''));
         if (unassigned) people.push(unassigned); // always last; omitted when empty since empty buckets never get created
         return people;
     });
@@ -72,13 +72,13 @@
     {#each buckets as bucket (bucket.key)}
         <section class="rounded-xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
             <header class="flex items-center gap-3 px-4 py-3">
-                {#if bucket.user}
+                {#if bucket.member}
                     <span
                         class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-neutral-200 text-[10px] font-semibold text-neutral-700 dark:bg-neutral-700 dark:text-neutral-200"
                     >
-                        {initials(bucket.user.name)}
+                        {initials(bucket.member.name)}
                     </span>
-                    <h3 class="min-w-0 flex-1 truncate text-sm font-semibold text-neutral-900 dark:text-neutral-100">{bucket.user.name}</h3>
+                    <h3 class="min-w-0 flex-1 truncate text-sm font-semibold text-neutral-900 dark:text-neutral-100">{bucket.member.name}</h3>
                 {:else}
                     <span
                         class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-dashed border-neutral-300 text-neutral-400 dark:border-neutral-600 dark:text-neutral-500"
@@ -94,8 +94,8 @@
                     type="button"
                     aria-expanded={!collapsed.has(bucket.key)}
                     aria-label={collapsed.has(bucket.key)
-                        ? `Expand ${bucket.user?.name ?? 'Unassigned'}`
-                        : `Collapse ${bucket.user?.name ?? 'Unassigned'}`}
+                        ? `Expand ${bucket.member?.name ?? 'Unassigned'}`
+                        : `Collapse ${bucket.member?.name ?? 'Unassigned'}`}
                     class="shrink-0 rounded px-1 text-neutral-400 transition hover:text-neutral-900 dark:text-neutral-500 dark:hover:text-neutral-100"
                     onclick={() => toggleCollapsed(bucket.key)}
                 >
