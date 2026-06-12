@@ -173,7 +173,7 @@ class Task extends Model
     {
         $direction = strtolower($direction) === 'desc' ? 'DESC' : 'ASC';
 
-        return $query->orderByRaw("(metadata->>'item_number')::int {$direction} NULLS LAST");
+        return $query->orderByRaw("CAST(metadata->>'item_number' AS INTEGER) {$direction} NULLS LAST");
     }
 
     /**

@@ -49,7 +49,7 @@ class Project extends Model
      */
     public function tasks(): HasMany
     {
-        return $this->hasMany(Task::class)->orderBy('sort_order')->orderByRaw("(metadata->>'item_number')::int ASC NULLS LAST");
+        return $this->hasMany(Task::class)->orderBy('sort_order')->orderByRaw("CAST(metadata->>'item_number' AS INTEGER) ASC NULLS LAST");
     }
 
     /**

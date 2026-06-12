@@ -80,7 +80,7 @@ class QuickAddTaskService
     {
         $max = (int) (Task::query()
             ->where('project_id', $projectId)
-            ->max(DB::raw("(metadata->>'item_number')::int")) ?? 0);
+            ->max(DB::raw("CAST(metadata->>'item_number' AS INTEGER)")) ?? 0);
 
         return $max + 1;
     }

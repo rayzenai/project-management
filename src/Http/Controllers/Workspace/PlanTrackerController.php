@@ -23,7 +23,7 @@ class PlanTrackerController extends Controller
 
         $tasks = $project->tasks()
             ->with(['assignments.user', 'project'])
-            ->orderByRaw("(metadata->>'item_number')::int ASC NULLS LAST")
+            ->orderByRaw("CAST(metadata->>'item_number' AS INTEGER) ASC NULLS LAST")
             ->get();
 
         return Inertia::render('PlanTracker', [

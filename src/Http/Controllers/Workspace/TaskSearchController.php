@@ -44,7 +44,7 @@ class TaskSearchController extends Controller
                     $query->orWhereRaw("metadata->>'item_number' = ?", [(int) $q]);
                 }
             })
-            ->orderByRaw("CASE WHEN (metadata->>'item_number')::int = ? THEN 0 ELSE 1 END", [(int) $q])
+            ->orderByRaw("CASE WHEN CAST(metadata->>'item_number' AS INTEGER) = ? THEN 0 ELSE 1 END", [(int) $q])
             ->orderByRaw('similarity(title, ?) DESC', [$q])
             ->limit(15)
             ->get();
