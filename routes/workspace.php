@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\AssignmentController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\ContactController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\DashboardController;
+use RayzenAI\ProjectManagement\Http\Controllers\Workspace\MemberController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\MyWorkspaceController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\NoteController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\PlanTrackerController;
@@ -14,6 +15,7 @@ use RayzenAI\ProjectManagement\Http\Controllers\Workspace\TaskController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\TaskPreviewController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\TaskReorderController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\TaskSearchController;
+use RayzenAI\ProjectManagement\Http\Controllers\Workspace\TeamController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\WorkspaceNoteController;
 use RayzenAI\ProjectManagement\Http\Middleware\ShareWorkspaceData;
 
@@ -26,6 +28,15 @@ Route::middleware([...config('project-management.middleware', ['web', 'auth']), 
         Route::get('/my', MyWorkspaceController::class)->name('my');
         Route::post('/quick-add', QuickAddController::class)->name('quick-add');
         Route::get('/search', TaskSearchController::class)->name('search');
+
+        Route::get('/team', [TeamController::class, 'index'])->name('team');
+        Route::post('/teams', [TeamController::class, 'store'])->name('teams.store');
+        Route::patch('/teams/{team}', [TeamController::class, 'update'])->name('teams.update');
+        Route::delete('/teams/{team}', [TeamController::class, 'destroy'])->name('teams.destroy');
+
+        Route::post('/members', [MemberController::class, 'store'])->name('members.store');
+        Route::patch('/members/{member}', [MemberController::class, 'update'])->name('members.update');
+        Route::delete('/members/{member}', [MemberController::class, 'destroy'])->name('members.destroy');
 
         Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
         Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');

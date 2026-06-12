@@ -22,6 +22,10 @@ class UpdateProjectService
 
             $project->save();
 
+            if (array_key_exists('team_ids', $attributes)) {
+                $project->teams()->sync($attributes['team_ids'] ?? []);
+            }
+
             return ServiceResult::success($project->fresh(), 'Project updated.');
         } catch (Throwable $e) {
             report($e);

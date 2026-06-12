@@ -4,13 +4,13 @@ namespace RayzenAI\ProjectManagement\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use RayzenAI\ProjectManagement\Models\Project;
+use RayzenAI\ProjectManagement\Models\Member;
 use RayzenAI\ProjectManagement\Models\Team;
 
 /**
- * @mixin Project
+ * @mixin Member
  */
-class ProjectResource extends JsonResource
+class MemberResource extends JsonResource
 {
     public static $wrap = null;
 
@@ -21,16 +21,12 @@ class ProjectResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'slug' => $this->slug,
+            'name' => $this->name,
+            'email' => $this->email,
             'title' => $this->title,
-            'title_np' => $this->title_np,
-            'description' => $this->description,
-            'description_np' => $this->description_np,
-            'is_public' => (bool) $this->is_public,
-            'tasks_count' => $this->whenCounted('tasks'),
+            'user_id' => $this->user_id,
+            'is_active' => (bool) $this->is_active,
             'team_ids' => $this->whenLoaded('teams', fn () => $this->teams->map(fn (Team $t): int => $t->id)->all()),
-            'created_at' => $this->created_at?->toIso8601String(),
-            'updated_at' => $this->updated_at?->toIso8601String(),
         ];
     }
 }

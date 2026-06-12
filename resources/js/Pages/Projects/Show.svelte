@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { page } from '@inertiajs/svelte';
+    import { page, router } from '@inertiajs/svelte';
     import { onMount } from 'svelte';
     import { SvelteMap, SvelteSet } from 'svelte/reactivity';
     import AppShell from '../../components/AppShell.svelte';
@@ -10,9 +10,15 @@
     import ProjectSummaryStrip from '../../components/project/ProjectSummaryStrip.svelte';
     import { peek } from '../../lib/peek.svelte';
     import { quickAdd } from '../../lib/quickAdd.svelte';
-    import type { Member, Project, SharedProps, Task } from '../../lib/types';
+    import type { Member, Project, SharedProps, Task, Team } from '../../lib/types';
 
-    let { project, tasks }: { project: Project; tasks: Task[] } = $props();
+    let { project, tasks, teams = [] }: { project: Project; tasks: Task[]; teams?: Team[] } = $props();
+
+    function toggleProjectTeam(team: Team) {
+        const current = project.team_ids ?? [];
+        const next = current.includes(team.id) ? current.filter((id) => id !== team.id) : [...current, team.id];
+        router.patch(`/workspace/projects/${project.slug}`, { team_ids: next }, { preserveState: true, preserveScroll: true });
+    }
 
     type Tab = 'board' | 'list' | 'people';
 
@@ -99,6 +105,30 @@
             {/if}
             {#if project.description}
                 <p class="mt-2 max-w-2xl text-sm text-neutral-600 dark:text-neutral-400">{project.description}</p>
+            {/if}
+            {#if teams.length > 0}
+                <div class="mt-3 flex flex-wrap items-center gap-1.5">
+                    <span class="ws-eyebrow text-neutral-500 dark:text-neutral-400">Teams</span>
+                    {#each teams as team (team.id)}
+                        {@const attached = (project.team_ids ?? []).includes(team.id)}
+                        <button
+                            type="button"
+                            aria-pressed={attached}
+                            title={attached ? `Detach ${team.name}` : `Attach ${team.name} — scopes the assignee picker to its members`}
+                            class={`rounded-full px-2.5 py-1 text-xs font-medium transition ${
+                                attached
+                                    ? 'bg-amber-100 text-amber-900 ring-1 ring-amber-400 dark:bg-amber-500/20 dark:text-amber-200 dark:ring-amber-500/60'
+                                    : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700'
+                            }`}
+                            onclick={() => toggleProjectTeam(team)}
+                        >
+                            {team.name}
+                        </button>
+                    {/each}
+                    {#if (project.team_ids ?? []).length === 0}
+                        <span class="text-xs text-neutral-400 dark:text-neutral-500">none — everyone is assignable</span>
+                    {/if}
+                </div>
             {/if}
         </div>
     </header>

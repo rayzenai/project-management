@@ -12,7 +12,9 @@ use RayzenAI\ProjectManagement\Http\Requests\StoreProjectRequest;
 use RayzenAI\ProjectManagement\Http\Requests\UpdateProjectRequest;
 use RayzenAI\ProjectManagement\Http\Resources\ProjectResource;
 use RayzenAI\ProjectManagement\Http\Resources\TaskResource;
+use RayzenAI\ProjectManagement\Http\Resources\TeamResource;
 use RayzenAI\ProjectManagement\Models\Project;
+use RayzenAI\ProjectManagement\Models\Team;
 use RayzenAI\ProjectManagement\Services\Workspace\CreateProjectService;
 use RayzenAI\ProjectManagement\Services\Workspace\UpdateProjectService;
 
@@ -34,11 +36,12 @@ class ProjectController extends Controller
 
     public function show(Project $project): Response
     {
-        $project->load(['tasks' => fn ($q) => $q->with('assignments.member')->withCount(['notes', 'contacts'])]);
+        $project->load(['teams:id', 'tasks' => fn ($q) => $q->with('assignments.member')->withCount(['notes', 'contacts'])]);
 
         return Inertia::render('Projects/Show', [
             'project' => (new ProjectResource($project))->resolve(),
             'tasks' => TaskResource::collection($project->tasks)->resolve(),
+            'teams' => TeamResource::collection(Team::query()->orderBy('name')->get())->resolve(),
         ]);
     }
 

@@ -34,6 +34,7 @@ export interface ProjectSummary {
 
 export interface Project extends ProjectSummary {
     title_np?: string | null;
+    team_ids?: Id[];
     description?: string | null;
     description_np?: string | null;
     is_public?: boolean;

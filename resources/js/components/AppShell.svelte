@@ -53,6 +53,7 @@
         { label: 'Overview', href: '/workspace', icon: '▦' },
         { label: 'My Workspace', href: '/workspace/my', icon: '✦' },
         { label: 'Projects', href: '/workspace/projects', icon: '▤' },
+        { label: 'Team', href: '/workspace/team', icon: '◎' },
     ];
 
     function isActive(href: string) {

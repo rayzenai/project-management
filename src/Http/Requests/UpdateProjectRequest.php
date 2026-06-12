@@ -22,6 +22,8 @@ class UpdateProjectRequest extends FormRequest
             'description' => ['sometimes', 'nullable', 'string'],
             'description_np' => ['sometimes', 'nullable', 'string'],
             'is_public' => ['sometimes', 'nullable', 'boolean'],
+            'team_ids' => ['sometimes', 'array'],
+            'team_ids.*' => ['integer', 'exists:teams,id'],
         ];
     }
 }
