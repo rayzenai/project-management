@@ -2,7 +2,6 @@
 
 namespace RayzenAI\ProjectManagement\Http\Controllers\Workspace;
 
-use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller;
 use Inertia\Inertia;
@@ -15,6 +14,7 @@ use RayzenAI\ProjectManagement\Http\Resources\NoteResource;
 use RayzenAI\ProjectManagement\Http\Resources\ProjectResource;
 use RayzenAI\ProjectManagement\Http\Resources\SubtaskResource;
 use RayzenAI\ProjectManagement\Http\Resources\TaskResource;
+use RayzenAI\ProjectManagement\Models\Member;
 use RayzenAI\ProjectManagement\Models\Project;
 use RayzenAI\ProjectManagement\Models\Subtask;
 use RayzenAI\ProjectManagement\Models\Task;
@@ -30,11 +30,9 @@ class TaskController extends Controller
     {
         abort_unless($task->project_id === $project->id, 404);
 
-        $task->load(['assignments.user', 'notes.user', 'contacts', 'project']);
+        $task->load(['assignments.member', 'notes.user', 'contacts', 'project']);
 
-        $team = config('project-management.user_model', User::class)::query()
-            ->orderBy('name')
-            ->get(['id', 'name', 'email']);
+        $team = Member::assignableFor($project)->get(['id', 'name', 'email', 'user_id']);
 
         $mySubtasks = Subtask::query()
             ->where('task_id', $task->id)
@@ -49,7 +47,7 @@ class TaskController extends Controller
             'notes' => NoteResource::collection($task->notes)->resolve(),
             'contacts' => ContactResource::collection($task->contacts)->resolve(),
             'subtasks' => SubtaskResource::collection($mySubtasks)->resolve(),
-            'team' => $team->map(fn ($u) => ['id' => $u->id, 'name' => $u->name, 'email' => $u->email])->all(),
+            'team' => $team->map(fn (Member $m) => ['id' => $m->id, 'name' => $m->name, 'email' => $m->email, 'user_id' => $m->user_id])->all(),
         ]);
     }
 

@@ -127,18 +127,19 @@ class Task extends Model
     }
 
     /**
-     * Tasks that are "mine" — either explicitly assigned to the user, or in one of their
-     * coordinator categories.
+     * Tasks that are "mine" — either explicitly assigned to the member behind
+     * the given login, or in one of that member's coordinator categories.
      *
      * @param  Builder<Task>  $query
      * @return Builder<Task>
      */
     public function scopeMine(Builder $query, mixed $user): Builder
     {
-        $categories = $user->coordinator_categories ?? [];
+        $member = Member::forUser($user);
+        $categories = $member->coordinator_categories ?? [];
 
-        return $query->where(function (Builder $q) use ($user, $categories) {
-            $q->whereHas('assignments', fn (Builder $a) => $a->where('user_id', $user->id));
+        return $query->where(function (Builder $q) use ($member, $categories) {
+            $q->whereHas('assignments', fn (Builder $a) => $a->where('member_id', $member->id));
 
             if (! empty($categories)) {
                 $q->orWhereIn(DB::raw("metadata->>'category'"), $categories);

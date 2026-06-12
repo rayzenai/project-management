@@ -2,7 +2,6 @@
 
 namespace RayzenAI\ProjectManagement\Http\Controllers\Workspace;
 
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Inertia\Inertia;
@@ -12,6 +11,7 @@ use RayzenAI\ProjectManagement\Http\Resources\ContactResource;
 use RayzenAI\ProjectManagement\Http\Resources\NoteResource;
 use RayzenAI\ProjectManagement\Http\Resources\ProjectResource;
 use RayzenAI\ProjectManagement\Http\Resources\SubtaskResource;
+use RayzenAI\ProjectManagement\Models\Member;
 use RayzenAI\ProjectManagement\Models\Project;
 use RayzenAI\ProjectManagement\Models\ProjectAssignment;
 use RayzenAI\ProjectManagement\Models\ProjectContact;
@@ -23,12 +23,13 @@ class MyWorkspaceController extends Controller
     public function __invoke(Request $request): Response
     {
         $user = $request->user();
+        $member = Member::forUser($user);
 
         $now = now()->startOfDay();
 
         $assignments = ProjectAssignment::query()
-            ->with(['task.project', 'task.assignments.user', 'user'])
-            ->where('user_id', $user->id)
+            ->with(['task.project', 'task.assignments.member', 'member'])
+            ->where('member_id', $member->id)
             ->whereHas('task', fn ($q) => $q->incomplete())
             ->where(function ($q) use ($now) {
                 $q->whereNull('snoozed_until')->orWhere('snoozed_until', '<=', $now);
@@ -38,7 +39,7 @@ class MyWorkspaceController extends Controller
             ->get();
 
         $snoozedCount = ProjectAssignment::query()
-            ->where('user_id', $user->id)
+            ->where('member_id', $member->id)
             ->where('snoozed_until', '>', $now)
             ->count();
 
@@ -70,9 +71,7 @@ class MyWorkspaceController extends Controller
 
         $projects = Project::query()->orderBy('title')->get(['id', 'slug', 'title']);
 
-        $teamUsers = config('project-management.user_model', User::class)::query()
-            ->orderBy('name')
-            ->get(['id', 'name', 'email']);
+        $teamMembers = Member::query()->active()->orderBy('name')->get(['id', 'name', 'email', 'user_id']);
 
         $openTodos = Subtask::query()
             ->with(['task.project'])
@@ -90,7 +89,7 @@ class MyWorkspaceController extends Controller
             'recentNotes' => NoteResource::collection($recentNotes)->resolve(),
             'recentContacts' => ContactResource::collection($recentContacts)->resolve(),
             'projects' => ProjectResource::collection($projects)->resolve(),
-            'team' => $teamUsers->map(fn ($u) => ['id' => $u->id, 'name' => $u->name, 'email' => $u->email])->all(),
+            'team' => $teamMembers->map(fn (Member $m) => ['id' => $m->id, 'name' => $m->name, 'email' => $m->email, 'user_id' => $m->user_id])->all(),
         ]);
     }
 }

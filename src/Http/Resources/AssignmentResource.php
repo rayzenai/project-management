@@ -21,11 +21,12 @@ class AssignmentResource extends JsonResource
         return [
             'id' => $this->id,
             'task_id' => $this->task_id,
-            'user_id' => $this->user_id,
-            'user' => $this->whenLoaded('user', fn () => [
-                'id' => $this->user->id,
-                'name' => $this->user->name,
-                'email' => $this->user->email,
+            'member_id' => $this->member_id,
+            'member' => $this->whenLoaded('member', fn () => [
+                'id' => $this->member->id,
+                'name' => $this->member->name,
+                'email' => $this->member->email,
+                'user_id' => $this->member->user_id,
             ]),
             'role' => $this->role,
             'priority' => $this->priority,

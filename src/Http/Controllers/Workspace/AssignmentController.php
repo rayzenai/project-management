@@ -9,20 +9,20 @@ use RayzenAI\ProjectManagement\Http\Requests\StoreAssignmentRequest;
 use RayzenAI\ProjectManagement\Http\Requests\UpdateAssignmentRequest;
 use RayzenAI\ProjectManagement\Models\ProjectAssignment;
 use RayzenAI\ProjectManagement\Models\Task;
-use RayzenAI\ProjectManagement\Services\Workspace\AssignUserService;
-use RayzenAI\ProjectManagement\Services\Workspace\UnassignUserService;
+use RayzenAI\ProjectManagement\Services\Workspace\AssignMemberService;
+use RayzenAI\ProjectManagement\Services\Workspace\UnassignMemberService;
 use RayzenAI\ProjectManagement\Services\Workspace\UpdateAssignmentService;
 
 class AssignmentController extends Controller
 {
     use RedirectsWithServiceResult;
 
-    public function store(StoreAssignmentRequest $request, Task $task, AssignUserService $service): RedirectResponse
+    public function store(StoreAssignmentRequest $request, Task $task, AssignMemberService $service): RedirectResponse
     {
         $result = $service->execute(
             task: $task,
-            userId: $request->integer('user_id'),
-            attributes: $request->safe()->except('user_id'),
+            memberId: $request->integer('member_id'),
+            attributes: $request->safe()->except('member_id'),
         );
 
         return $this->redirectWithResult($result);
@@ -35,7 +35,7 @@ class AssignmentController extends Controller
         return $this->redirectWithResult($result);
     }
 
-    public function destroy(ProjectAssignment $assignment, UnassignUserService $service): RedirectResponse
+    public function destroy(ProjectAssignment $assignment, UnassignMemberService $service): RedirectResponse
     {
         $result = $service->execute($assignment);
 

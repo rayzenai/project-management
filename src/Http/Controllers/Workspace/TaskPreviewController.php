@@ -2,7 +2,6 @@
 
 namespace RayzenAI\ProjectManagement\Http\Controllers\Workspace;
 
-use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 use RayzenAI\ProjectManagement\Http\Resources\AssignmentResource;
@@ -10,6 +9,7 @@ use RayzenAI\ProjectManagement\Http\Resources\ContactResource;
 use RayzenAI\ProjectManagement\Http\Resources\NoteResource;
 use RayzenAI\ProjectManagement\Http\Resources\SubtaskResource;
 use RayzenAI\ProjectManagement\Http\Resources\TaskResource;
+use RayzenAI\ProjectManagement\Models\Member;
 use RayzenAI\ProjectManagement\Models\ProjectActivity;
 use RayzenAI\ProjectManagement\Models\Task;
 use RayzenAI\ProjectManagement\Support\ApiResponser;
@@ -26,7 +26,7 @@ class TaskPreviewController extends Controller
 
     public function __invoke(Task $task): JsonResponse
     {
-        $task->loadMissing(['project', 'notes.user', 'contacts', 'assignments.user', 'subtasks.user']);
+        $task->loadMissing(['project', 'notes.user', 'contacts', 'assignments.member', 'subtasks.user']);
 
         $activity = ProjectActivity::query()
             ->where('task_id', $task->id)
@@ -42,10 +42,9 @@ class TaskPreviewController extends Controller
                 'created_at' => $entry->created_at?->toIso8601String(),
             ]);
 
-        $team = config('project-management.user_model', User::class)::query()
-            ->orderBy('name')
-            ->get(['id', 'name', 'email'])
-            ->map(fn ($user): array => ['id' => $user->id, 'name' => $user->name, 'email' => $user->email]);
+        $team = Member::assignableFor($task->project)
+            ->get(['id', 'name', 'email', 'user_id'])
+            ->map(fn (Member $m): array => ['id' => $m->id, 'name' => $m->name, 'email' => $m->email, 'user_id' => $m->user_id]);
 
         return $this->dataResponse([
             'task' => (new TaskResource($task))->resolve(),

@@ -2,12 +2,11 @@
 
 namespace RayzenAI\ProjectManagement\Http\Controllers\Workspace;
 
-use App\Models\User;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\Concerns\RedirectsWithServiceResult;
 use RayzenAI\ProjectManagement\Http\Requests\QuickAddTaskRequest;
+use RayzenAI\ProjectManagement\Models\Member;
 use RayzenAI\ProjectManagement\Models\Project;
 use RayzenAI\ProjectManagement\Services\Workspace\QuickAddTaskService;
 use RayzenAI\ProjectManagement\Support\QuickAddParser;
@@ -17,6 +16,10 @@ use RayzenAI\ProjectManagement\Support\QuickAddParser;
  * for #project / @assignee / !priority / date tokens; explicit picker fields
  * win over parsed values, resolved tokens are stripped from the title, and
  * unresolvable tokens stay in it so nothing typed is silently lost.
+ *
+ * `@name` resolves against the project's assignable members (its teams'
+ * members, or every active member when no teams are attached), so the project
+ * must be resolved first.
  */
 class QuickAddController extends Controller
 {
@@ -31,12 +34,12 @@ class QuickAddController extends Controller
         $project = $this->resolveProject($tokens, $consumed)
             ?? Project::query()->findOrFail($request->integer('project_id'));
 
-        $assignees = array_map('intval', (array) ($request->input('assignee_user_ids') ?: []));
+        $assignees = array_map('intval', (array) ($request->input('assignee_member_ids') ?: []));
         if ($assignees === []) {
-            $assignees = $this->resolveAssignees($tokens, $consumed);
+            $assignees = $this->resolveAssignees($project, $tokens, $consumed);
         }
         if ($assignees === []) {
-            $assignees = [$request->user()->id];
+            $assignees = [Member::forUser($request->user())->id];
         }
 
         $priority = $request->input('priority');
@@ -57,7 +60,7 @@ class QuickAddController extends Controller
         $result = $service->execute(
             project: $project,
             title: QuickAddParser::strip($rawTitle, $consumed),
-            assigneeUserIds: $assignees,
+            assigneeMemberIds: $assignees,
             deadline: $deadline,
             priority: $priority ?? 'medium',
             authorUserId: $request->user()->id,
@@ -100,9 +103,8 @@ class QuickAddController extends Controller
      * @param  list<array{type: string, raw: string, value: string, offset: int}>  $consumed
      * @return list<int>
      */
-    private function resolveAssignees(array $tokens, array &$consumed): array
+    private function resolveAssignees(Project $project, array $tokens, array &$consumed): array
     {
-        $userModel = config('project-management.user_model', User::class);
         $ids = [];
 
         foreach ($tokens as $token) {
@@ -112,14 +114,12 @@ class QuickAddController extends Controller
 
             $needle = mb_strtolower($token['value']);
 
-            /** @var Model|null $user */
-            $user = $userModel::query()
+            $member = Member::assignableFor($project)
                 ->whereRaw('LOWER(name) LIKE ?', [$needle.'%'])
-                ->orderBy('name')
                 ->first();
 
-            if ($user) {
-                $ids[] = (int) $user->getKey();
+            if ($member) {
+                $ids[] = (int) $member->getKey();
                 $consumed[] = $token;
             }
         }

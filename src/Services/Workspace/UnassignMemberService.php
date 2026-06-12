@@ -6,7 +6,7 @@ use RayzenAI\ProjectManagement\Models\ProjectAssignment;
 use RayzenAI\ProjectManagement\Support\ServiceResult;
 use Throwable;
 
-class UnassignUserService
+class UnassignMemberService
 {
     public function execute(ProjectAssignment $assignment): ServiceResult
     {

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->date('deadline_at')->nullable();
             $table->string('status')->default('unclear')->index();
+            $table->string('priority', 16)->default('medium')->index();
             $table->text('status_note')->nullable();
             $table->string('source_url', 500)->nullable();
             $table->json('source_links')->nullable();

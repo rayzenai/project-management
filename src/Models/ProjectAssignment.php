@@ -10,7 +10,7 @@ class ProjectAssignment extends Model
     protected $table = 'project_assignments';
 
     protected $fillable = [
-        'user_id',
+        'member_id',
         'task_id',
         'role',
         'priority',
@@ -42,9 +42,12 @@ class ProjectAssignment extends Model
         return $this->snoozed_until !== null && $this->snoozed_until->isFuture();
     }
 
-    public function user(): BelongsTo
+    /**
+     * @return BelongsTo<Member, $this>
+     */
+    public function member(): BelongsTo
     {
-        return $this->belongsTo(config('project-management.user_model'));
+        return $this->belongsTo(Member::class);
     }
 
     /**

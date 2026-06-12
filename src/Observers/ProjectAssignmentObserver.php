@@ -10,7 +10,7 @@ class ProjectAssignmentObserver
 {
     public function created(ProjectAssignment $assignment): void
     {
-        $name = optional($assignment->user)->name ?? 'user #'.$assignment->user_id;
+        $name = $assignment->member?->name ?? 'member #'.$assignment->member_id;
 
         ProjectActivityRecorder::record(
             taskId: $assignment->task_id,

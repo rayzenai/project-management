@@ -4,6 +4,7 @@ namespace RayzenAI\ProjectManagement\Services\Workspace;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use RayzenAI\ProjectManagement\Models\Member;
 use RayzenAI\ProjectManagement\Models\Project;
 use RayzenAI\ProjectManagement\Models\ProjectAssignment;
 use RayzenAI\ProjectManagement\Models\Task;
@@ -11,7 +12,7 @@ use RayzenAI\ProjectManagement\Support\ServiceResult;
 use Throwable;
 
 /**
- * The killer feature: create a task and assign it to one or more users in a
+ * The killer feature: create a task and assign it to one or more members in a
  * single atomic call. Designed for inline quick-add boxes on Today / My
  * Workspace where typing a title + selecting an assignee should result in a
  * fully-formed assigned task with no follow-up forms.
@@ -19,12 +20,12 @@ use Throwable;
 class QuickAddTaskService
 {
     /**
-     * @param  array<int, int>  $assigneeUserIds  list of user IDs to assign; defaults to [authUser->id] in the controller
+     * @param  array<int, int>  $assigneeMemberIds  list of member IDs to assign; the controller defaults to the acting user's member
      */
     public function execute(
         Project $project,
         string $title,
-        array $assigneeUserIds,
+        array $assigneeMemberIds,
         ?string $deadline = null,
         ?string $priority = 'medium',
         ?int $authorUserId = null,
@@ -34,12 +35,19 @@ class QuickAddTaskService
             return ServiceResult::failure('Title is required.', 422);
         }
 
-        if (empty($assigneeUserIds)) {
+        if (empty($assigneeMemberIds)) {
             return ServiceResult::failure('At least one assignee is required.', 422);
         }
 
+        $assigneeMemberIds = array_values(array_unique(array_map('intval', $assigneeMemberIds)));
+
+        $inScope = Member::assignableFor($project)->pluck('id')->all();
+        if (array_diff($assigneeMemberIds, $inScope) !== []) {
+            return ServiceResult::failure("That person is not on this project's teams.", 422);
+        }
+
         try {
-            return DB::transaction(function () use ($project, $title, $assigneeUserIds, $deadline, $priority): ServiceResult {
+            return DB::transaction(function () use ($project, $title, $assigneeMemberIds, $deadline, $priority): ServiceResult {
                 $itemNumber = $this->nextItemNumber($project->id);
                 $sortOrder = ((int) Task::query()->where('project_id', $project->id)->max('sort_order')) + 100;
 
@@ -56,9 +64,9 @@ class QuickAddTaskService
                     'sort_order' => $sortOrder,
                 ]);
 
-                foreach (array_unique($assigneeUserIds) as $userId) {
+                foreach ($assigneeMemberIds as $memberId) {
                     ProjectAssignment::create([
-                        'user_id' => (int) $userId,
+                        'member_id' => $memberId,
                         'task_id' => $task->id,
                         'priority' => $priority ?: 'medium',
                         'personal_progress' => 0,
@@ -66,7 +74,7 @@ class QuickAddTaskService
                 }
 
                 return ServiceResult::success(
-                    data: $task->fresh(['assignments.user']),
+                    data: $task->fresh(['assignments.member']),
                     message: 'Task created and assigned.',
                 );
             });

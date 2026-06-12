@@ -5,11 +5,13 @@ namespace RayzenAI\ProjectManagement;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 use RayzenAI\ProjectManagement\Console\Commands\SendProjectWeeklyDigest;
+use RayzenAI\ProjectManagement\Models\Member;
 use RayzenAI\ProjectManagement\Models\ProjectAssignment;
 use RayzenAI\ProjectManagement\Models\ProjectContact;
 use RayzenAI\ProjectManagement\Models\ProjectNote;
 use RayzenAI\ProjectManagement\Models\Subtask;
 use RayzenAI\ProjectManagement\Models\Task;
+use RayzenAI\ProjectManagement\Models\Team;
 use RayzenAI\ProjectManagement\Observers\ProjectAssignmentObserver;
 use RayzenAI\ProjectManagement\Observers\ProjectContactObserver;
 use RayzenAI\ProjectManagement\Observers\ProjectNoteObserver;
@@ -42,6 +44,8 @@ class ProjectManagementServiceProvider extends ServiceProvider
             'project-contact' => ProjectContact::class,
             'subtask' => Subtask::class,
             'project-assignment' => ProjectAssignment::class,
+            'team' => Team::class,
+            'member' => Member::class,
         ]);
 
         Task::observe(TaskObserver::class);

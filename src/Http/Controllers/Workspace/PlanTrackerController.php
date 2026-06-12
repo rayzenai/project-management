@@ -22,7 +22,7 @@ class PlanTrackerController extends Controller
         $project = Project::query()->where('slug', '100-day-plan')->firstOrFail();
 
         $tasks = $project->tasks()
-            ->with(['assignments.user', 'project'])
+            ->with(['assignments.member', 'project'])
             ->orderByRaw("CAST(metadata->>'item_number' AS INTEGER) ASC NULLS LAST")
             ->get();
 

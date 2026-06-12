@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('project_assignments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('member_id')->constrained()->cascadeOnDelete();
             $table->foreignId('task_id')->constrained()->cascadeOnDelete();
             $table->string('role')->nullable();
             $table->string('priority')->default('medium');
@@ -21,10 +21,10 @@ return new class extends Migration
             $table->date('snoozed_until')->nullable();
             $table->timestamps();
 
-            $table->unique(['user_id', 'task_id']);
-            $table->index(['user_id', 'priority']);
-            $table->index(['user_id', 'is_focused']);
-            $table->index(['user_id', 'snoozed_until']);
+            $table->unique(['member_id', 'task_id']);
+            $table->index(['member_id', 'priority']);
+            $table->index(['member_id', 'is_focused']);
+            $table->index(['member_id', 'snoozed_until']);
         });
     }
 

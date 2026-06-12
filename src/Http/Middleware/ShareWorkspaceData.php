@@ -2,11 +2,11 @@
 
 namespace RayzenAI\ProjectManagement\Http\Middleware;
 
-use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use RayzenAI\ProjectManagement\Http\Resources\WorkspaceNoteResource;
+use RayzenAI\ProjectManagement\Models\Member;
 use RayzenAI\ProjectManagement\Models\Project;
 use RayzenAI\ProjectManagement\Models\WorkspaceNote;
 use Symfony\Component\HttpFoundation\Response;
@@ -47,11 +47,11 @@ class ShareWorkspaceData
                 'projects' => Project::query()->orderBy('title')->get(['id', 'slug', 'title'])
                     ->map(fn (Project $p): array => ['id' => $p->id, 'slug' => $p->slug, 'title' => $p->title])
                     ->all(),
-                'team' => config('project-management.user_model', User::class)::query()
-                    ->orderBy('name')
-                    ->get(['id', 'name', 'email'])
-                    ->map(fn ($u): array => ['id' => $u->id, 'name' => $u->name, 'email' => $u->email])
+                'team' => Member::query()->active()->orderBy('name')
+                    ->get(['id', 'name', 'email', 'user_id'])
+                    ->map(fn (Member $m): array => ['id' => $m->id, 'name' => $m->name, 'email' => $m->email, 'user_id' => $m->user_id])
                     ->all(),
+                'currentMemberId' => Member::forUser($request->user())->id,
             ];
         });
 

@@ -34,7 +34,7 @@ class ProjectController extends Controller
 
     public function show(Project $project): Response
     {
-        $project->load(['tasks' => fn ($q) => $q->with('assignments.user')->withCount(['notes', 'contacts'])]);
+        $project->load(['tasks' => fn ($q) => $q->with('assignments.member')->withCount(['notes', 'contacts'])]);
 
         return Inertia::render('Projects/Show', [
             'project' => (new ProjectResource($project))->resolve(),
