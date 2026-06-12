@@ -39,6 +39,7 @@ class TaskResource extends JsonResource
             'status_color' => $this->status_color,
             'status_note' => $this->status_note,
             'status_updated_at' => $this->status_updated_at?->toIso8601String(),
+            'priority' => $this->priority ?? 'medium',
             'progress' => (int) $this->progress,
             'sort_order' => (int) $this->sort_order,
             'deadline_at' => $this->deadline_at?->toDateString(),

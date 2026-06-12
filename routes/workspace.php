@@ -15,9 +15,9 @@ use RayzenAI\ProjectManagement\Http\Controllers\Workspace\TaskPreviewController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\TaskReorderController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\TaskSearchController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\WorkspaceNoteController;
-use RayzenAI\ProjectManagement\Http\Middleware\ShareWorkspaceNotes;
+use RayzenAI\ProjectManagement\Http\Middleware\ShareWorkspaceData;
 
-Route::middleware([...config('project-management.middleware', ['web', 'auth']), ShareWorkspaceNotes::class])
+Route::middleware([...config('project-management.middleware', ['web', 'auth']), ShareWorkspaceData::class])
     ->prefix('workspace')
     ->name('workspace.')
     ->group(function () {

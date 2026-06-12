@@ -27,8 +27,9 @@ class MyWorkspaceController extends Controller
         $now = now()->startOfDay();
 
         $assignments = ProjectAssignment::query()
-            ->with(['task.project', 'user'])
+            ->with(['task.project', 'task.assignments.user', 'user'])
             ->where('user_id', $user->id)
+            ->whereHas('task', fn ($q) => $q->incomplete())
             ->where(function ($q) use ($now) {
                 $q->whereNull('snoozed_until')->orWhere('snoozed_until', '<=', $now);
             })
@@ -42,7 +43,7 @@ class MyWorkspaceController extends Controller
             ->count();
 
         $openTaskIds = $assignments
-            ->filter(fn ($a) => $a->task && ! in_array($a->task->status, ['done', 'done_late'], true))
+            ->filter(fn ($a) => $a->task && ! $a->task->isComplete())
             ->pluck('task_id')
             ->unique()
             ->values()

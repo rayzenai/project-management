@@ -17,7 +17,7 @@ class TaskFactory extends Factory
     public function definition(): array
     {
         $categories = array_keys(config('government.categories'));
-        $statuses = array_keys(config('government.statuses'));
+        $statuses = array_keys(config('project-management.statuses'));
         $deadlines = array_keys(config('government.deadline_types'));
 
         return [

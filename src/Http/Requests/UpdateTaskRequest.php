@@ -20,7 +20,8 @@ class UpdateTaskRequest extends FormRequest
         return [
             'title' => ['sometimes', 'required', 'string', 'max:255'],
             'description' => ['sometimes', 'nullable', 'string'],
-            'status' => ['sometimes', 'required', 'string', Rule::in(array_keys((array) config('government.statuses', [])))],
+            'status' => ['sometimes', 'required', 'string', Rule::in(array_keys((array) config('project-management.statuses', [])))],
+            'priority' => ['sometimes', 'required', 'in:low,medium,high,urgent'],
             'progress' => ['sometimes', 'required', 'integer', 'min:0', 'max:100'],
             'deadline_at' => ['sometimes', 'nullable', 'date'],
             'status_note' => ['sometimes', 'nullable', 'string'],

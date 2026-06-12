@@ -5,6 +5,8 @@ namespace RayzenAI\ProjectManagement\Http\Controllers\Workspace;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
+use RayzenAI\ProjectManagement\Models\Project;
 use RayzenAI\ProjectManagement\Models\ProjectContact;
 use RayzenAI\ProjectManagement\Models\ProjectNote;
 use RayzenAI\ProjectManagement\Models\Task;
@@ -27,40 +29,52 @@ class TaskSearchController extends Controller
         $q = trim((string) $request->query('q', ''));
 
         if (mb_strlen($q) < 2) {
-            return $this->dataResponse(['tasks' => [], 'notes' => [], 'contacts' => []]);
+            return $this->dataResponse(['tasks' => [], 'projects' => [], 'notes' => [], 'contacts' => []]);
         }
 
         $escaped = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $q);
         $like = '%'.$escaped.'%';
+        $pgsql = DB::connection()->getDriverName() === 'pgsql';
+        $likeOp = $pgsql ? 'ILIKE' : 'LIKE';
 
         $tasks = Task::query()
             ->with('project:id,slug,title')
-            ->where(function ($query) use ($like, $q) {
-                $query->where('title', 'ILIKE', $like)
-                    ->orWhere('short_title', 'ILIKE', $like)
-                    ->orWhereRaw("metadata->>'title_np' ILIKE ?", [$like]);
+            ->where(function ($query) use ($like, $likeOp, $q) {
+                $query->where('title', $likeOp, $like)
+                    ->orWhere('short_title', $likeOp, $like)
+                    ->orWhereRaw("metadata->>'title_np' {$likeOp} ?", [$like]);
 
                 if (ctype_digit($q)) {
                     $query->orWhereRaw("metadata->>'item_number' = ?", [(int) $q]);
                 }
             })
-            ->orderByRaw("CASE WHEN CAST(metadata->>'item_number' AS INTEGER) = ? THEN 0 ELSE 1 END", [(int) $q])
-            ->orderByRaw('similarity(title, ?) DESC', [$q])
+            ->when($pgsql, fn ($query) => $query
+                ->orderByRaw("CASE WHEN CAST(metadata->>'item_number' AS INTEGER) = ? THEN 0 ELSE 1 END", [(int) $q])
+                ->orderByRaw('similarity(title, ?) DESC', [$q]))
             ->limit(15)
+            ->get();
+
+        $matchedProjects = Project::query()
+            ->withCount('tasks')
+            ->where(function ($query) use ($likeOp, $like) {
+                $query->where('title', $likeOp, $like)->orWhere('slug', $likeOp, $like);
+            })
+            ->orderBy('title')
+            ->limit(5)
             ->get();
 
         $notes = ProjectNote::query()
             ->with(['task:id,slug,title,project_id', 'task.project:id,slug,title'])
-            ->where('body', 'ILIKE', $like)
+            ->where('body', $likeOp, $like)
             ->latest()
             ->limit(15)
             ->get();
 
         $stickies = WorkspaceNote::query()
             ->where('user_id', $request->user()->id)
-            ->where(function ($query) use ($like) {
-                $query->where('title', 'ILIKE', $like)
-                    ->orWhere('body', 'ILIKE', $like);
+            ->where(function ($query) use ($like, $likeOp) {
+                $query->where('title', $likeOp, $like)
+                    ->orWhere('body', $likeOp, $like);
             })
             ->latest()
             ->limit(15)
@@ -68,18 +82,24 @@ class TaskSearchController extends Controller
 
         $contacts = ProjectContact::query()
             ->with(['task:id,slug,title,project_id', 'task.project:id,slug,title'])
-            ->where(function ($query) use ($like) {
-                $query->where('name', 'ILIKE', $like)
-                    ->orWhere('organization', 'ILIKE', $like)
-                    ->orWhere('role', 'ILIKE', $like)
-                    ->orWhere('email', 'ILIKE', $like)
-                    ->orWhere('phone', 'ILIKE', $like);
+            ->where(function ($query) use ($like, $likeOp) {
+                $query->where('name', $likeOp, $like)
+                    ->orWhere('organization', $likeOp, $like)
+                    ->orWhere('role', $likeOp, $like)
+                    ->orWhere('email', $likeOp, $like)
+                    ->orWhere('phone', $likeOp, $like);
             })
             ->latest()
             ->limit(15)
             ->get();
 
         return $this->dataResponse([
+            'projects' => $matchedProjects->map(fn (Project $project): array => [
+                'id' => $project->id,
+                'slug' => $project->slug,
+                'title' => $project->title,
+                'tasks_count' => (int) $project->tasks_count,
+            ])->all(),
             'tasks' => $tasks->map(fn (Task $task): array => [
                 'id' => $task->id,
                 'slug' => $task->slug,
@@ -128,6 +148,7 @@ class TaskSearchController extends Controller
         }
 
         return [
+            'id' => $task->id,
             'slug' => $task->slug,
             'title' => $task->title,
             'project' => $task->project ? [

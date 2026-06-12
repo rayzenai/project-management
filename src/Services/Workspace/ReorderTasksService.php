@@ -100,6 +100,6 @@ class ReorderTasksService
             return 'none';
         }
 
-        return config("government.statuses.{$status}.label", $status);
+        return config("project-management.statuses.{$status}.label", $status);
     }
 }

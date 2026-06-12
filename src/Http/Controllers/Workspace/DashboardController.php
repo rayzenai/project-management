@@ -13,16 +13,9 @@ use RayzenAI\ProjectManagement\Models\Task;
 
 class DashboardController extends Controller
 {
-    /**
-     * Statuses that count a task as finished.
-     *
-     * @var list<string>
-     */
-    private const COMPLETE = ['done', 'done_late'];
-
     public function __invoke(Request $request): Response
     {
-        $statuses = collect((array) config('government.statuses'));
+        $statuses = collect((array) config('project-management.statuses'));
         $today = now()->startOfDay();
         $weekEnd = $today->copy()->addDays(7);
         $stalledBefore = now()->subDays(14);
@@ -31,7 +24,7 @@ class DashboardController extends Controller
         $projects = Project::query()->orderBy('title')->get(['id', 'slug', 'title']);
         $byProject = $tasks->groupBy('project_id');
 
-        $isComplete = fn (Task $t): bool => in_array($t->status, self::COMPLETE, true);
+        $isComplete = fn (Task $t): bool => $t->isComplete();
         $isStalled = fn (Task $t): bool => ! $isComplete($t)
             && $t->status_updated_at !== null
             && $t->status_updated_at->lt($stalledBefore);

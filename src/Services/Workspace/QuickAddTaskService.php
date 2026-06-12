@@ -49,6 +49,7 @@ class QuickAddTaskService
                     'slug' => $this->uniqueSlug($title, $itemNumber),
                     'description' => '',
                     'status' => 'unclear',
+                    'priority' => $priority ?: 'medium',
                     'progress' => 0,
                     'deadline_at' => $deadline,
                     'item_number' => $itemNumber,

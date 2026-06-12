@@ -32,4 +32,39 @@ return [
 
     'middleware' => ['web', 'auth'],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Task statuses
+    |--------------------------------------------------------------------------
+    |
+    | The ordered workflow a task moves through. Board columns, status chips,
+    | and dashboards all render from this single definition; `is_complete`
+    | marks the statuses that count a task as finished everywhere (progress
+    | percentages, the My Workspace triage, the one-click complete checkbox).
+    | Override in the host app to change the workflow.
+    |
+    */
+
+    'statuses' => [
+        'not_started' => ['label' => 'Not Started', 'color' => '#9CA3AF', 'is_complete' => false],
+        'unclear' => ['label' => 'Unclear', 'color' => '#9CA3AF', 'is_complete' => false],
+        'in_progress' => ['label' => 'In Progress', 'color' => '#3B82F6', 'is_complete' => false],
+        'late' => ['label' => 'Late', 'color' => '#F59E0B', 'is_complete' => false],
+        'done' => ['label' => 'Done', 'color' => '#10B981', 'is_complete' => true],
+        'done_late' => ['label' => 'Done (Late)', 'color' => '#059669', 'is_complete' => true],
+        'failed' => ['label' => 'Failed', 'color' => '#EF4444', 'is_complete' => false],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | One-click complete status
+    |--------------------------------------------------------------------------
+    |
+    | The status applied when a task is completed via a checkbox (as opposed
+    | to an explicit status pick). Must be a key of `statuses` above.
+    |
+    */
+
+    'complete_status' => 'done',
+
 ];

@@ -28,6 +28,7 @@ class Task extends Model
         'description',
         'deadline_at',
         'status',
+        'priority',
         'progress',
         'status_note',
         'source_url',
@@ -152,6 +153,44 @@ class Task extends Model
     public function scopeStatus(Builder $query, string $status): Builder
     {
         return $query->where('status', $status);
+    }
+
+    /**
+     * Statuses flagged `is_complete` in the package config — the single
+     * source of truth for "this task is finished".
+     *
+     * @return list<string>
+     */
+    public static function completeStatuses(): array
+    {
+        return collect((array) config('project-management.statuses'))
+            ->filter(fn (array $meta): bool => (bool) ($meta['is_complete'] ?? false))
+            ->keys()
+            ->values()
+            ->all();
+    }
+
+    public function isComplete(): bool
+    {
+        return in_array($this->status, self::completeStatuses(), true);
+    }
+
+    /**
+     * @param  Builder<Task>  $query
+     * @return Builder<Task>
+     */
+    public function scopeComplete(Builder $query): Builder
+    {
+        return $query->whereIn('status', self::completeStatuses());
+    }
+
+    /**
+     * @param  Builder<Task>  $query
+     * @return Builder<Task>
+     */
+    public function scopeIncomplete(Builder $query): Builder
+    {
+        return $query->whereNotIn('status', self::completeStatuses());
     }
 
     /**
@@ -292,7 +331,7 @@ class Task extends Model
      */
     protected function statusLabel(): Attribute
     {
-        return Attribute::get(fn () => config("government.statuses.{$this->status}.label", ucfirst((string) $this->status)));
+        return Attribute::get(fn () => config("project-management.statuses.{$this->status}.label", ucfirst((string) $this->status)));
     }
 
     /**
@@ -300,7 +339,7 @@ class Task extends Model
      */
     protected function statusColor(): Attribute
     {
-        return Attribute::get(fn () => config("government.statuses.{$this->status}.color", '#9CA3AF'));
+        return Attribute::get(fn () => config("project-management.statuses.{$this->status}.color", '#9CA3AF'));
     }
 
     /**

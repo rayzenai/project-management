@@ -50,7 +50,7 @@ class TaskController extends Controller
             'contacts' => ContactResource::collection($task->contacts)->resolve(),
             'subtasks' => SubtaskResource::collection($mySubtasks)->resolve(),
             'team' => $team->map(fn ($u) => ['id' => $u->id, 'name' => $u->name, 'email' => $u->email])->all(),
-            'statuses' => collect((array) config('government.statuses'))
+            'statuses' => collect((array) config('project-management.statuses'))
                 ->map(fn ($meta, $value) => ['value' => $value, 'label' => $meta['label'] ?? $value])
                 ->values()
                 ->all(),

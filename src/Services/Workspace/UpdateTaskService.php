@@ -17,14 +17,14 @@ class UpdateTaskService
     {
         try {
             return DB::transaction(function () use ($task, $attributes): ServiceResult {
-                $before = $task->only(['title', 'status', 'progress', 'deadline_at', 'sort_order']);
+                $before = $task->only(['title', 'status', 'priority', 'progress', 'deadline_at', 'sort_order']);
                 $beforeMeta = [
                     'category' => $task->category,
                     'deadline_type' => $task->deadline_type,
                     'responsible_ministry' => $task->responsible_ministry,
                 ];
 
-                foreach (['title', 'description', 'status', 'progress', 'deadline_at', 'sort_order', 'status_note', 'source_url'] as $key) {
+                foreach (['title', 'description', 'status', 'priority', 'progress', 'deadline_at', 'sort_order', 'status_note', 'source_url'] as $key) {
                     if (! array_key_exists($key, $attributes)) {
                         continue;
                     }
@@ -74,6 +74,10 @@ class UpdateTaskService
             $parts[] = 'Status: '.$this->statusLabel($before['status']).' → '.$this->statusLabel($task->status);
         }
 
+        if (($before['priority'] ?? null) !== $task->priority) {
+            $parts[] = 'Priority: '.($before['priority'] ?? 'medium').' → '.$task->priority;
+        }
+
         if ((int) $before['progress'] !== (int) $task->progress) {
             $parts[] = 'Progress: '.(int) $before['progress'].'% → '.(int) $task->progress.'%';
         }
@@ -107,6 +111,6 @@ class UpdateTaskService
             return 'none';
         }
 
-        return config("government.statuses.{$status}.label", $status);
+        return config("project-management.statuses.{$status}.label", $status);
     }
 }
