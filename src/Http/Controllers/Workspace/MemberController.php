@@ -5,6 +5,7 @@ namespace RayzenAI\ProjectManagement\Http\Controllers\Workspace;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use RayzenAI\ProjectManagement\Http\Requests\StoreMemberRequest;
 use RayzenAI\ProjectManagement\Http\Requests\UpdateMemberRequest;
@@ -93,6 +94,10 @@ class MemberController extends Controller
 
     public function destroy(Member $member): RedirectResponse
     {
+        if (Gate::has('manage-workspace-members')) {
+            Gate::authorize('manage-workspace-members');
+        }
+
         DB::transaction(function () use ($member): void {
             $user = $member->user;
             $member->delete();

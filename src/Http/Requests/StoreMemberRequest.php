@@ -3,13 +3,11 @@
 namespace RayzenAI\ProjectManagement\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use RayzenAI\ProjectManagement\Http\Requests\Concerns\AuthorizesMemberManagement;
 
 class StoreMemberRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return (bool) $this->user();
-    }
+    use AuthorizesMemberManagement;
 
     /**
      * A password provisions a login (host users row) for the member, in which

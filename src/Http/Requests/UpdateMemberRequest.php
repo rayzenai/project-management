@@ -4,14 +4,12 @@ namespace RayzenAI\ProjectManagement\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use RayzenAI\ProjectManagement\Http\Requests\Concerns\AuthorizesMemberManagement;
 use RayzenAI\ProjectManagement\Models\Member;
 
 class UpdateMemberRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return (bool) $this->user();
-    }
+    use AuthorizesMemberManagement;
 
     /**
      * Name/email changes sync to the linked login; a password value resets it
