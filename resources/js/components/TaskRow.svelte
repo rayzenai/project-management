@@ -1,7 +1,11 @@
 <script lang="ts">
-    import { initials, formatRelative } from '../lib/format';
-    import StatusBadge from './StatusBadge.svelte';
+    import { initials } from '../lib/format';
+    import { peek } from '../lib/peek.svelte';
     import type { Task } from '../lib/types';
+    import DateChip from './DateChip.svelte';
+    import PriorityFlag from './PriorityFlag.svelte';
+    import StatusBadge from './StatusBadge.svelte';
+    import StatusChip from './StatusChip.svelte';
 
     let {
         task,
@@ -10,21 +14,30 @@
         compact = false,
     }: { task: Task; project?: { slug: string } | null; showProject?: boolean; compact?: boolean } = $props();
 
-    // The route expects {project:slug}, never an id. Prefer an explicit
-    // `project` prop (passed from a page that already knows the project),
-    // then the nested resource on the task. Without either, omit the link
-    // rather than emit a broken URL.
+    // Chips PATCH /workspace/projects/{project:slug}/tasks/{task:slug}; prefer
+    // an explicit `project` prop, then the nested resource. Without either the
+    // row degrades to read-only badges.
     const projectSlug = $derived(project?.slug ?? task.project?.slug ?? null);
-    const href = $derived(projectSlug ? `/workspace/projects/${projectSlug}/tasks/${task.slug}` : null);
 
     const assignees = $derived(task.assignments ?? []);
+
+    function openPeek() {
+        peek.open({ id: task.id, slug: task.slug });
+    }
 </script>
 
-<svelte:element
-    this={href ? 'a' : 'div'}
-    {href}
-    class="group block rounded-lg border border-neutral-200 bg-white p-3 transition hover:border-amber-300 hover:shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-amber-500/40"
+<div
+    role="button"
+    tabindex="0"
+    class="group block w-full cursor-pointer rounded-lg border border-neutral-200 bg-white p-3 text-left transition hover:border-amber-300 hover:shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-amber-500/40"
     class:p-2={compact}
+    onclick={openPeek}
+    onkeydown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openPeek();
+        }
+    }}
 >
     <div class="flex items-start gap-3">
         {#if task.item_number}
@@ -51,11 +64,12 @@
             {/if}
 
             <div class="mt-2 flex flex-wrap items-center gap-2 text-xs">
-                <StatusBadge status={task.status} label={task.status_label} />
-                {#if task.deadline_at}
-                    <span class="text-neutral-500 dark:text-neutral-400">
-                        ⏱ {task.days_relative_label || formatRelative(task.deadline_at)}
-                    </span>
+                {#if projectSlug}
+                    <StatusChip {task} {projectSlug} />
+                    <PriorityFlag {task} {projectSlug} quiet />
+                    <DateChip {task} {projectSlug} ghost />
+                {:else}
+                    <StatusBadge status={task.status} label={task.status_label} />
                 {/if}
                 {#if task.progress > 0}
                     <span class="text-neutral-500 dark:text-neutral-400">{task.progress}%</span>
@@ -91,4 +105,4 @@
             </div>
         {/if}
     </div>
-</svelte:element>
+</div>

@@ -2,7 +2,10 @@
     import { page, router } from '@inertiajs/svelte';
     import { initials } from '../lib/format';
     import { notesBoard } from '../lib/notesBoard.svelte';
+    import { toast } from '../lib/toast.svelte';
     import type { SharedProps } from '../lib/types';
+    import TaskPeek from './TaskPeek.svelte';
+    import Toasts from './Toasts.svelte';
     import WorkspaceNotesBoard from './WorkspaceNotesBoard.svelte';
 
     let { children } = $props<{ children: import('svelte').Snippet }>();
@@ -15,7 +18,7 @@
 
     let isDark = $state(false);
     let mobileOpen = $state(false);
-    let flashShown = $state<string | null>(null);
+    let lastFlash = $state<string | null>(null);
 
     $effect(() => {
         if (typeof window === 'undefined') return;
@@ -35,12 +38,9 @@
 
     $effect(() => {
         const message = flash?.message ?? null;
-        if (message && message !== flashShown) {
-            flashShown = message;
-            const timeout = setTimeout(() => {
-                flashShown = null;
-            }, 3200);
-            return () => clearTimeout(timeout);
+        if (message && message !== lastFlash) {
+            lastFlash = message;
+            toast.show(message, { variant: flash?.success === false ? 'error' : 'success' });
         }
     });
 
@@ -164,23 +164,12 @@
             </div>
         </header>
 
-        {#if flashShown}
-            {@const isError = flash?.success === false}
-            <div
-                class={`mx-auto mt-3 w-full max-w-3xl rounded-lg px-4 py-2 text-sm shadow-sm ring-1 ${
-                    isError
-                        ? 'bg-red-50 text-red-800 ring-red-200 dark:bg-red-500/10 dark:text-red-300 dark:ring-red-500/30'
-                        : 'bg-emerald-50 text-emerald-800 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-300 dark:ring-emerald-500/30'
-                }`}
-            >
-                {flashShown}
-            </div>
-        {/if}
-
         <main class="mx-auto w-full max-w-[1600px] flex-1 px-4 py-6 lg:px-8">
             {@render children()}
         </main>
     </div>
 
     <WorkspaceNotesBoard open={notesBoard.open} onClose={() => notesBoard.hide()} />
+    <TaskPeek />
+    <Toasts />
 </div>

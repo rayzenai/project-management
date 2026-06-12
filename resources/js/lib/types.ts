@@ -55,6 +55,7 @@ export interface Task {
     status_color?: string;
     status_note?: string | null;
     status_updated_at?: string | null;
+    priority: Priority;
     progress: number;
     sort_order?: number | null;
     deadline_at?: string | null;
@@ -143,6 +144,36 @@ export interface WorkspaceNote {
     updated_at?: string;
 }
 
+export interface Status {
+    value: string;
+    label: string;
+    color: string;
+    is_complete: boolean;
+}
+
+export interface ActivityEntry {
+    id: Id;
+    description: string;
+    user?: { id: Id; name: string } | null;
+    created_at?: string | null;
+}
+
+/** Payload of GET /workspace/tasks/{id}/preview — everything the Task Peek renders. */
+export interface TaskPreview {
+    task: Task;
+    assignments: Assignment[];
+    subtasks: Subtask[];
+    notes: Note[];
+    contacts: Contact[];
+    activity: ActivityEntry[];
+    team: User[];
+}
+
+export interface QuickAddContext {
+    projects: ProjectSummary[];
+    team: User[];
+}
+
 export interface Flash {
     success?: boolean;
     message?: string | null;
@@ -156,5 +187,8 @@ export interface SharedProps {
     auth: { user: AuthUser | null };
     flash?: Flash;
     workspaceNotes?: WorkspaceNote[];
+    statuses?: Status[];
+    completeStatus?: string;
+    quickAddContext?: QuickAddContext | null;
     [key: string]: unknown;
 }

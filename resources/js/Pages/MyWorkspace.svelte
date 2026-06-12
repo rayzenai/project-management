@@ -110,7 +110,9 @@
                     <div
                         class="rounded-xl border border-dashed border-amber-300 bg-amber-50/60 p-4 text-center dark:border-amber-500/30 dark:bg-amber-500/5"
                     >
-                        <p class="font-mono text-xs text-amber-800/80 dark:text-amber-400/80">Nothing pinned — drag any task here, or hover and click ☆.</p>
+                        <p class="font-mono text-xs text-amber-800/80 dark:text-amber-400/80">
+                            Nothing pinned — drag any task here, or hover and click ☆.
+                        </p>
                     </div>
                 {:else}
                     <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">

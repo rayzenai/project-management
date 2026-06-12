@@ -1,13 +1,16 @@
 <script lang="ts">
     import { router } from '@inertiajs/svelte';
     import { formatDate } from '../lib/format';
-    import TaskFocusModal from './TaskFocusModal.svelte';
+    import { peek } from '../lib/peek.svelte';
     import type { Subtask } from '../lib/types';
 
     let { todos }: { todos: Subtask[] } = $props();
 
     let hidden = $state(false);
-    let focused = $state<Subtask | null>(null);
+
+    function openTask(t: Subtask) {
+        if (t.task) peek.open({ id: t.task.id, slug: t.task.slug });
+    }
 
     type Group = { key: string; label: string; items: Subtask[] };
 
@@ -98,8 +101,8 @@
                                         <button
                                             type="button"
                                             class="min-w-0 flex-1 cursor-pointer text-left text-sm"
-                                            onclick={() => (focused = t)}
-                                            title="Open task in focus"
+                                            onclick={() => openTask(t)}
+                                            title="Open task"
                                         >
                                             <p
                                                 class="line-clamp-1 leading-snug text-neutral-900 dark:text-neutral-100"
@@ -138,7 +141,3 @@
         {/if}
     {/if}
 </section>
-
-{#if focused}
-    <TaskFocusModal todo={focused} onClose={() => (focused = null)} />
-{/if}
