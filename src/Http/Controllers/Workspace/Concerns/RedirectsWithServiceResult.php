@@ -1,0 +1,44 @@
+<?php
+
+namespace RayzenAI\ProjectManagement\Http\Controllers\Workspace\Concerns;
+
+use Illuminate\Http\RedirectResponse;
+use RayzenAI\ProjectManagement\Support\ServiceResult;
+
+/**
+ * Translates a {@see ServiceResult} into an Inertia-friendly redirect. Inertia
+ * surfaces flash messages via shared props (see HandleInertiaRequests::share)
+ * — controllers just `back()->with('flash', ...)` and the Svelte app reads it.
+ */
+trait RedirectsWithServiceResult
+{
+    protected function redirectWithResult(ServiceResult $result, string $successRoute = '', ?string $defaultRoute = null): RedirectResponse
+    {
+        $flash = [
+            'success' => $result->success,
+            'message' => $result->message,
+        ];
+
+        if ($result->success) {
+            return $successRoute
+                ? redirect()->route($successRoute)->with('workspace_flash', $flash)
+                : back()->with('workspace_flash', $flash);
+        }
+
+        return back()
+            ->withErrors($this->extractErrorBag($result))
+            ->with('workspace_flash', $flash);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function extractErrorBag(ServiceResult $result): array
+    {
+        if (is_array($result->data) && ! empty($result->data)) {
+            return array_map(static fn ($v): string => is_array($v) ? (string) array_values($v)[0] : (string) $v, $result->data);
+        }
+
+        return ['__global' => $result->message ?? 'Something went wrong.'];
+    }
+}
