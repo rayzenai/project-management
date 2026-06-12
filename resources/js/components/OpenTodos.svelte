@@ -52,7 +52,7 @@
 <section class="rounded-xl border border-emerald-200 bg-emerald-50/40 p-4 dark:border-emerald-500/30 dark:bg-emerald-500/5">
     <header class="mb-3 flex items-baseline justify-between">
         <div class="flex items-baseline gap-3">
-            <h2 class="text-sm font-semibold tracking-wider text-emerald-800 uppercase dark:text-emerald-300">✓ My Open Todos</h2>
+            <h2 class="ws-eyebrow text-emerald-800 dark:text-emerald-300">✓ My Open Todos</h2>
             <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">
                 {todos.length}
             </span>

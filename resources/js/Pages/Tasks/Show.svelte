@@ -73,6 +73,17 @@
     });
 
     let pickerSelected = $state<number[]>([]);
+    let lastAttemptedAssignee = 0;
+
+    // Assign immediately when a teammate is picked — no separate Assign button.
+    // `lastAttemptedAssignee` stops a failed request from retrying in a loop.
+    $effect(() => {
+        const id = pickerSelected[0];
+        if (id && id !== lastAttemptedAssignee && !assignForm.processing) {
+            lastAttemptedAssignee = id;
+            assign();
+        }
+    });
 
     function submitEdit() {
         if (!editForm.isDirty || editForm.processing) return;
@@ -140,6 +151,7 @@
             preserveScroll: true,
             onSuccess: () => {
                 pickerSelected = [];
+                lastAttemptedAssignee = 0;
                 assignForm.reset();
             },
         });
@@ -538,7 +550,7 @@
                 </div>
                 <div class="mt-3 border-t border-neutral-200 pt-3 dark:border-neutral-800">
                     <AssigneePicker {team} bind:selectedIds={pickerSelected} placeholder="Add assignee..." />
-                    <div class="mt-2 flex flex-wrap items-center justify-between gap-2">
+                    <div class="mt-2">
                         <PillGroup
                             bind:value={assignForm.priority}
                             options={[
@@ -549,13 +561,6 @@
                             ]}
                             size="sm"
                         />
-                        <button
-                            type="button"
-                            onclick={assign}
-                            disabled={pickerSelected.length === 0 || assignForm.processing}
-                            class="rounded-md bg-amber-500 px-3 py-1 text-xs font-semibold text-white hover:bg-amber-600 disabled:opacity-50"
-                            >Assign</button
-                        >
                     </div>
                 </div>
             </section>

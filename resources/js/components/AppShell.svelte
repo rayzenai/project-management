@@ -20,7 +20,7 @@
     $effect(() => {
         if (typeof window === 'undefined') return;
         const stored = window.localStorage.getItem('workspace.theme');
-        const prefersDark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const prefersDark = stored ? stored === 'dark' : true;
         isDark = prefersDark;
         document.documentElement.classList.toggle('dark', prefersDark);
     });
@@ -63,7 +63,7 @@
     }
 </script>
 
-<div class="flex min-h-screen bg-neutral-50 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
+<div class="ws-canvas flex min-h-screen bg-neutral-50 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
     {#if mobileOpen}
         <button type="button" aria-label="Close menu" class="fixed inset-0 z-30 bg-black/40 lg:hidden" onclick={() => (mobileOpen = false)}></button>
     {/if}
@@ -74,8 +74,8 @@
     >
         <div class="mb-8 flex items-center justify-between">
             <div>
-                <div class="text-xs font-semibold tracking-wider text-amber-600 uppercase dark:text-amber-500">Kiran Timsina</div>
-                <div class="text-lg font-bold">Workspace</div>
+                <div class="ws-eyebrow text-amber-600 dark:text-amber-400">Kiran Timsina</div>
+                <div class="font-display text-lg font-bold tracking-tight">Workspace</div>
             </div>
             <button
                 type="button"
@@ -90,10 +90,10 @@
                 {@const active = isActive(item.href)}
                 <a
                     href={item.href}
-                    class={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition ${
+                    class={`flex items-center gap-3 rounded-lg border-l-2 px-3 py-2 font-mono text-[0.8rem] font-medium tracking-wide transition ${
                         active
-                            ? 'bg-amber-50 text-amber-900 dark:bg-amber-500/10 dark:text-amber-400'
-                            : 'text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800'
+                            ? 'border-amber-500 bg-amber-50 text-amber-900 dark:border-amber-400 dark:bg-amber-500/10 dark:text-amber-400'
+                            : 'border-transparent text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800'
                     }`}
                 >
                     <span class="w-5 text-center text-base">{item.icon}</span>
@@ -149,7 +149,7 @@
                     <span class="text-base">🗒</span>
                     {#if noteCount > 0}
                         <span
-                            class="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-500 px-1 text-[10px] leading-none font-semibold text-white"
+                            class="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-500 px-1 text-[10px] leading-none font-semibold text-white dark:text-neutral-950"
                             >{noteCount}</span
                         >
                     {/if}

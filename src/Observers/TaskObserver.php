@@ -113,14 +113,4 @@ class TaskObserver
             );
         }
     }
-
-    public function deleted(Task $item): void
-    {
-        ProjectActivityRecorder::record(
-            taskId: $item->id,
-            subject: $item,
-            action: ProjectActivity::ACTION_DELETED,
-            description: 'Plan #'.$item->item_number.' deleted',
-        );
-    }
 }

@@ -95,7 +95,7 @@
             <button
                 type="submit"
                 disabled={form.processing || !form.title.trim()}
-                class="rounded-md bg-amber-500 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-50"
+                class="rounded-md bg-amber-500 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-950"
                 >Add</button
             >
         </div>

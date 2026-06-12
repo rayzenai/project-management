@@ -57,7 +57,10 @@ class TaskResource extends JsonResource
             'responsible_ministry' => $this->responsible_ministry,
             'title_np' => $this->title_np,
             'description_np' => $this->description_np,
-            'assignments' => AssignmentResource::collection($this->whenLoaded('assignments')),
+            'assignments' => $this->whenLoaded(
+                'assignments',
+                fn () => AssignmentResource::collection($this->assignments)->resolve(),
+            ),
             'assignments_count' => $this->whenCounted('assignments'),
             'notes_count' => $this->whenCounted('notes'),
             'contacts_count' => $this->whenCounted('contacts'),
