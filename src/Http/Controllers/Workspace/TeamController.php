@@ -2,7 +2,6 @@
 
 namespace RayzenAI\ProjectManagement\Http\Controllers\Workspace;
 
-use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller;
 use Inertia\Inertia;
@@ -21,14 +20,9 @@ class TeamController extends Controller
         $teams = Team::query()->withCount('members')->with('members:id')->orderBy('name')->get();
         $members = Member::query()->with('teams:id')->orderBy('name')->get();
 
-        $users = config('project-management.user_model', User::class)::query()
-            ->orderBy('name')
-            ->get(['id', 'name', 'email']);
-
         return Inertia::render('Team/Index', [
             'teams' => TeamResource::collection($teams)->resolve(),
             'members' => MemberResource::collection($members)->resolve(),
-            'users' => $users->map(fn ($u): array => ['id' => $u->id, 'name' => $u->name, 'email' => $u->email])->all(),
         ]);
     }
 

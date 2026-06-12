@@ -2,9 +2,9 @@
     import { router, useForm } from '@inertiajs/svelte';
     import AppShell from '../../components/AppShell.svelte';
     import { initials } from '../../lib/format';
-    import type { Member, Team, User } from '../../lib/types';
+    import type { Member, Team } from '../../lib/types';
 
-    let { teams, members, users }: { teams: Team[]; members: Member[]; users: User[] } = $props();
+    let { teams, members }: { teams: Team[]; members: Member[] } = $props();
 
     // ---- Teams panel ----
     let creatingTeam = $state(false);
@@ -52,8 +52,8 @@
     let addingMember = $state(false);
     let editingMemberId = $state<number | null>(null);
 
-    const memberForm = useForm({ name: '', email: '', title: '', user_id: null as number | null });
-    const memberEditForm = useForm({ name: '', email: '', title: '', user_id: null as number | null });
+    const memberForm = useForm({ name: '', email: '', password: '', title: '' });
+    const memberEditForm = useForm({ name: '', email: '', password: '', title: '' });
 
     function addMember(e: SubmitEvent) {
         e.preventDefault();
@@ -71,8 +71,8 @@
         editingMemberId = member.id;
         memberEditForm.name = member.name;
         memberEditForm.email = member.email ?? '';
+        memberEditForm.password = '';
         memberEditForm.title = member.title ?? '';
-        memberEditForm.user_id = member.user_id ?? null;
     }
 
     function saveMember(member: Member) {
@@ -87,14 +87,9 @@
     }
 
     function deleteMember(member: Member) {
-        if (!confirm(`Remove ${member.name} entirely? Their task assignments are deleted too. Prefer "Deactivate" to keep history.`)) return;
+        if (!confirm(`Remove ${member.name} entirely? Their task assignments${member.user_id ? ' and login' : ''} are deleted too. Prefer "Deactivate" to keep history.`)) return;
         router.delete(`/workspace/members/${member.id}`, { preserveScroll: true });
     }
-
-    const linkableUsers = $derived((member: Member | null) => {
-        const taken = new Set(members.filter((m) => m.user_id !== null && m.id !== member?.id).map((m) => m.user_id));
-        return users.filter((u) => !taken.has(u.id));
-    });
 
     const memberTeamNames = $derived((member: Member) => teams.filter((t) => (member.team_ids ?? []).includes(t.id)).map((t) => t.name));
 
@@ -232,9 +227,28 @@
                         </div>
                         <div>
                             <label class="mb-1 block text-xs font-medium text-neutral-600 dark:text-neutral-400" for="member-email"
-                                >Email (optional)</label
+                                >Email {memberForm.password ? '' : '(optional)'}</label
                             >
-                            <input id="member-email" type="email" bind:value={memberForm.email} class={inputClass} />
+                            <input
+                                id="member-email"
+                                type="email"
+                                bind:value={memberForm.email}
+                                required={!!memberForm.password}
+                                class={inputClass}
+                            />
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-xs font-medium text-neutral-600 dark:text-neutral-400" for="member-password"
+                                >Password (optional)</label
+                            >
+                            <input
+                                id="member-password"
+                                type="password"
+                                bind:value={memberForm.password}
+                                minlength="8"
+                                autocomplete="new-password"
+                                class={inputClass}
+                            />
                         </div>
                         <div>
                             <label class="mb-1 block text-xs font-medium text-neutral-600 dark:text-neutral-400" for="member-title"
@@ -242,18 +256,10 @@
                             >
                             <input id="member-title" type="text" bind:value={memberForm.title} class={inputClass} />
                         </div>
-                        <div>
-                            <label class="mb-1 block text-xs font-medium text-neutral-600 dark:text-neutral-400" for="member-user"
-                                >Link to login (optional)</label
-                            >
-                            <select id="member-user" bind:value={memberForm.user_id} class={inputClass}>
-                                <option value={null}>No login — managed person</option>
-                                {#each linkableUsers(null) as user (user.id)}
-                                    <option value={user.id}>{user.name} ({user.email})</option>
-                                {/each}
-                            </select>
-                        </div>
                     </div>
+                    <p class="mt-2 text-xs text-neutral-500 dark:text-neutral-400">
+                        Set a password to give them a login right away — or leave it blank and upgrade them later from Edit.
+                    </p>
                     <div class="mt-3 flex justify-end">
                         <button
                             type="submit"
@@ -263,7 +269,8 @@
                         >
                     </div>
                     {#if memberForm.errors.name}<p class="mt-2 text-xs text-red-600 dark:text-red-400">{memberForm.errors.name}</p>{/if}
-                    {#if memberForm.errors.user_id}<p class="mt-2 text-xs text-red-600 dark:text-red-400">{memberForm.errors.user_id}</p>{/if}
+                    {#if memberForm.errors.email}<p class="mt-2 text-xs text-red-600 dark:text-red-400">{memberForm.errors.email}</p>{/if}
+                    {#if memberForm.errors.password}<p class="mt-2 text-xs text-red-600 dark:text-red-400">{memberForm.errors.password}</p>{/if}
                 </form>
             {/if}
 
@@ -271,7 +278,7 @@
                 <div
                     class="rounded-xl border border-dashed border-neutral-300 bg-white p-8 text-center text-sm text-neutral-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-400"
                 >
-                    No members yet. Logins become members automatically the first time they use the workspace; add managed people here.
+                    No members yet. Add anyone you assign work to — give them a password now or upgrade them to a login later.
                 </div>
             {/if}
 
@@ -289,15 +296,20 @@
                                 <input type="text" bind:value={memberEditForm.name} required class={inputClass} placeholder="Name" />
                                 <input type="email" bind:value={memberEditForm.email} class={inputClass} placeholder="Email" />
                                 <input type="text" bind:value={memberEditForm.title} class={inputClass} placeholder="Title" />
-                                <select bind:value={memberEditForm.user_id} class={inputClass}>
-                                    <option value={null}>No login — managed person</option>
-                                    {#each linkableUsers(member) as user (user.id)}
-                                        <option value={user.id}>{user.name} ({user.email})</option>
-                                    {/each}
-                                </select>
+                                <input
+                                    type="password"
+                                    bind:value={memberEditForm.password}
+                                    minlength="8"
+                                    autocomplete="new-password"
+                                    class={inputClass}
+                                    placeholder={member.user_id ? 'New password (leave blank to keep)' : 'Set a password to enable login'}
+                                />
                             </div>
-                            {#if memberEditForm.errors.user_id}<p class="mt-2 text-xs text-red-600 dark:text-red-400">
-                                    {memberEditForm.errors.user_id}
+                            {#if memberEditForm.errors.email}<p class="mt-2 text-xs text-red-600 dark:text-red-400">
+                                    {memberEditForm.errors.email}
+                                </p>{/if}
+                            {#if memberEditForm.errors.password}<p class="mt-2 text-xs text-red-600 dark:text-red-400">
+                                    {memberEditForm.errors.password}
                                 </p>{/if}
                             <div class="mt-3 flex items-center justify-end gap-2">
                                 <button
@@ -322,10 +334,10 @@
                                 <div class="min-w-0 flex-1">
                                     <div class="flex items-center gap-2">
                                         <span class="truncate text-sm font-semibold">{member.name}</span>
-                                        {#if member.user_id}
+                                        {#if !member.user_id}
                                             <span
-                                                class="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400"
-                                                title="Linked to a login">login</span
+                                                class="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:bg-amber-500/15 dark:text-amber-400"
+                                                title="Edit and set a password to enable login">no login</span
                                             >
                                         {/if}
                                         {#if member.is_active === false}
