@@ -30,7 +30,7 @@ class PlanTrackerController extends Controller
             'project' => (new ProjectResource($project))->resolve(),
             'tasks' => TaskResource::collection($tasks)->resolve(),
             'categories' => config('government.categories', []),
-            'statuses' => config('project-management.statuses', []),
+            'statusMap' => config('project-management.statuses', []),
             'deadlineTypes' => config('government.deadline_types', []),
         ]);
     }

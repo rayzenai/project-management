@@ -100,4 +100,43 @@
             56px 56px;
         background-attachment: fixed;
     }
+
+    /* Quick-add token highlighting (TokenInput mirror layer) */
+    .qa-tok {
+        border-radius: 3px;
+        padding: 0 1px;
+        margin: 0 -1px;
+    }
+    .qa-tok-project {
+        background: rgba(245, 158, 11, 0.18);
+        color: #b45309;
+    }
+    .qa-tok-assignee {
+        background: rgba(14, 165, 233, 0.15);
+        color: #0369a1;
+    }
+    .qa-tok-priority {
+        background: rgba(239, 68, 68, 0.15);
+        color: #b91c1c;
+    }
+    .qa-tok-date {
+        background: rgba(139, 92, 246, 0.15);
+        color: #6d28d9;
+    }
+    .dark .qa-tok-project {
+        background: rgba(182, 255, 58, 0.14);
+        color: #b6ff3a;
+    }
+    .dark .qa-tok-assignee {
+        background: rgba(56, 189, 248, 0.12);
+        color: #7dd3fc;
+    }
+    .dark .qa-tok-priority {
+        background: rgba(248, 113, 113, 0.12);
+        color: #fca5a5;
+    }
+    .dark .qa-tok-date {
+        background: rgba(167, 139, 250, 0.12);
+        color: #c4b5fd;
+    }
 }

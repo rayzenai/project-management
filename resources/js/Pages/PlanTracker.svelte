@@ -7,12 +7,12 @@
         project,
         tasks,
         categories,
-        statuses,
+        statusMap,
     }: {
         project: Project;
         tasks: Task[];
         categories: Record<string, { label: string; color: string }>;
-        statuses: Record<string, { label: string; color: string }>;
+        statusMap: Record<string, { label: string; color: string }>;
         deadlineTypes: Record<string, { label: string; days?: number }>;
     } = $props();
 
@@ -74,7 +74,7 @@
             class="rounded-md border border-neutral-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
         >
             <option value={null}>All statuses</option>
-            {#each Object.entries(statuses) as [slug, info] (slug)}
+            {#each Object.entries(statusMap) as [slug, info] (slug)}
                 <option value={slug}>{info.label}</option>
             {/each}
         </select>

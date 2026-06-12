@@ -71,7 +71,7 @@
         {#each statCards as card (card.label)}
             <div class="rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
                 <div class="text-2xl font-bold {card.tone}">{card.value}</div>
-                <div class="mt-1 text-xs font-medium tracking-wider text-neutral-500 uppercase dark:text-neutral-400">
+                <div class="ws-eyebrow mt-1 text-neutral-500 dark:text-neutral-400">
                     {card.label}
                 </div>
             </div>
@@ -79,7 +79,7 @@
     </div>
 
     <section class="mb-6 rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
-        <h2 class="mb-3 text-xs font-semibold tracking-wider text-neutral-500 uppercase dark:text-neutral-400">Status breakdown</h2>
+        <h2 class="ws-eyebrow mb-3 text-neutral-500 dark:text-neutral-400">Status breakdown</h2>
         {#if nonZero(status_breakdown).length > 0}
             <div class="flex h-3 w-full overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800">
                 {#each nonZero(status_breakdown) as slice (slice.value)}
@@ -105,7 +105,7 @@
 
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <section class="lg:col-span-2">
-            <h2 class="mb-3 text-xs font-semibold tracking-wider text-neutral-500 uppercase dark:text-neutral-400">Projects</h2>
+            <h2 class="ws-eyebrow mb-3 text-neutral-500 dark:text-neutral-400">Projects</h2>
             <div class="overflow-hidden rounded-xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
                 {#each projects as project (project.slug)}
                     <a
@@ -142,7 +142,7 @@
         </section>
 
         <aside>
-            <h2 class="mb-3 text-xs font-semibold tracking-wider text-neutral-500 uppercase dark:text-neutral-400">Recent activity</h2>
+            <h2 class="ws-eyebrow mb-3 text-neutral-500 dark:text-neutral-400">Recent activity</h2>
             <div class="rounded-xl border border-neutral-200 bg-white p-2 dark:border-neutral-800 dark:bg-neutral-900">
                 {#each recent_activity as item (item.id)}
                     <div class="border-b border-neutral-100 px-2 py-2.5 last:border-0 dark:border-neutral-800">
@@ -150,7 +150,7 @@
                         <div class="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400">
                             {#if item.user_name}<span>{item.user_name}</span>{/if}
                             {#if item.task_title && item.task_slug && item.project_slug}
-                                · <a href={`/workspace/projects/${item.project_slug}/tasks/${item.task_slug}`} class="truncate hover:underline"
+                                · <a href={`/workspace/projects/${item.project_slug}?task=${item.task_slug}`} class="truncate hover:underline"
                                     >{item.task_title}</a
                                 >
                             {/if}

@@ -2,8 +2,13 @@
     import { page, router } from '@inertiajs/svelte';
     import { initials } from '../lib/format';
     import { notesBoard } from '../lib/notesBoard.svelte';
+    import { palette } from '../lib/palette.svelte';
+    import { peek } from '../lib/peek.svelte';
+    import { quickAdd } from '../lib/quickAdd.svelte';
     import { toast } from '../lib/toast.svelte';
     import type { SharedProps } from '../lib/types';
+    import CommandPalette from './CommandPalette.svelte';
+    import QuickAddOverlay from './QuickAddOverlay.svelte';
     import TaskPeek from './TaskPeek.svelte';
     import Toasts from './Toasts.svelte';
     import WorkspaceNotesBoard from './WorkspaceNotesBoard.svelte';
@@ -48,18 +53,66 @@
         { label: 'Overview', href: '/workspace', icon: '▦' },
         { label: 'My Workspace', href: '/workspace/my', icon: '✦' },
         { label: 'Projects', href: '/workspace/projects', icon: '▤' },
-        { label: '100-Point Tracker', href: '/workspace/100-point-tracker', icon: '◉' },
     ];
 
     function isActive(href: string) {
-        if (href === '/workspace/projects') {
-            return path.startsWith('/workspace/projects') && !path.startsWith('/workspace/projects/100-day-plan');
-        }
         return path === href || (href !== '/workspace' && path.startsWith(href + '/'));
     }
 
     function logout() {
         router.post('/logout');
+    }
+
+    function isEditable(target: EventTarget | null): boolean {
+        const el = target as HTMLElement | null;
+        if (!el) return false;
+        const tag = el.tagName;
+        return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable;
+    }
+
+    const overlayOpen = $derived(quickAdd.isOpen || palette.isOpen || notesBoard.open || peek.target !== null);
+
+    function onGlobalKey(e: KeyboardEvent) {
+        if (e.defaultPrevented) return;
+
+        // Esc fallback — the overlays handle Esc themselves when focused; this
+        // catches the case where focus drifted back to the document.
+        if (e.key === 'Escape') {
+            if (palette.isOpen) {
+                e.preventDefault();
+                palette.close();
+            } else if (quickAdd.isOpen) {
+                e.preventDefault();
+                quickAdd.close();
+            }
+            return;
+        }
+
+        // ⌘K / Ctrl+K toggles the palette even from inside an input.
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+            e.preventDefault();
+            if (palette.isOpen) {
+                palette.close();
+            } else if (!quickAdd.isOpen && !notesBoard.open) {
+                palette.open();
+            }
+            return;
+        }
+
+        // Bare-key shortcuts only when nothing editable is focused, no overlay
+        // is open, and no modifier is held.
+        if (isEditable(e.target) || overlayOpen) return;
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+        if (e.key === 'q' || e.key === 'Q') {
+            e.preventDefault();
+            quickAdd.open();
+            return;
+        }
+        if (e.key === '/') {
+            e.preventDefault();
+            palette.open();
+        }
     }
 </script>
 
@@ -171,5 +224,9 @@
 
     <WorkspaceNotesBoard open={notesBoard.open} onClose={() => notesBoard.hide()} />
     <TaskPeek />
+    <QuickAddOverlay />
+    <CommandPalette />
     <Toasts />
 </div>
+
+<svelte:window onkeydown={onGlobalKey} />

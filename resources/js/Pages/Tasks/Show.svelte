@@ -54,6 +54,7 @@
         title: task.title,
         description: task.description ?? '',
         status: task.status,
+        priority: task.priority ?? 'medium',
         task_progress: task.progress,
         deadline_at: task.deadline_at ?? '',
         status_note: task.status_note ?? '',
@@ -68,7 +69,6 @@
     const contactForm = useForm({ name: '', role: '', email: '', phone: '', organization: '', notes: '' });
     const assignForm = useForm({
         user_id: 0,
-        priority: 'medium' as 'low' | 'medium' | 'high' | 'urgent',
         role: '',
     });
 
@@ -305,6 +305,18 @@
                             </div>
                         </div>
                         <div>
+                            <span class="mb-1 block text-xs font-medium text-neutral-600 dark:text-neutral-400">Priority</span>
+                            <PillGroup
+                                bind:value={editForm.priority}
+                                options={[
+                                    { value: 'low', label: 'Low' },
+                                    { value: 'medium', label: 'Medium' },
+                                    { value: 'high', label: 'High' },
+                                    { value: 'urgent', label: 'Urgent' },
+                                ]}
+                            />
+                        </div>
+                        <div>
                             <label class="mb-1 block text-xs font-medium text-neutral-600 dark:text-neutral-400">Status note</label>
                             <textarea
                                 bind:value={editForm.status_note}
@@ -539,7 +551,7 @@
                             <div class="min-w-0 flex-1">
                                 <div class="truncate text-sm font-medium">{a.user?.name}</div>
                                 <div class="truncate text-xs text-neutral-500 dark:text-neutral-400">
-                                    {a.priority} · {a.personal_progress}%
+                                    {a.personal_progress}%
                                 </div>
                             </div>
                             <button type="button" onclick={() => unassign(a)} class="text-neutral-400 hover:text-red-500" title="Unassign">×</button>
@@ -550,18 +562,6 @@
                 </div>
                 <div class="mt-3 border-t border-neutral-200 pt-3 dark:border-neutral-800">
                     <AssigneePicker {team} bind:selectedIds={pickerSelected} placeholder="Add assignee..." />
-                    <div class="mt-2">
-                        <PillGroup
-                            bind:value={assignForm.priority}
-                            options={[
-                                { value: 'low', label: 'Low', tone: 'neutral' },
-                                { value: 'medium', label: 'Medium', tone: 'amber' },
-                                { value: 'high', label: 'High', tone: 'orange' },
-                                { value: 'urgent', label: 'Urgent', tone: 'red' },
-                            ]}
-                            size="sm"
-                        />
-                    </div>
                 </div>
             </section>
 
