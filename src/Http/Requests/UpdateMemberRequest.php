@@ -13,8 +13,17 @@ class UpdateMemberRequest extends FormRequest
     {
         $member = $this->route('member');
 
-        return $member instanceof Member
-            && WorkspaceAccess::canManageMember($this->user(), $member);
+        if (! $member instanceof Member || ! WorkspaceAccess::canManageMember($this->user(), $member)) {
+            return false;
+        }
+
+        // Team membership for leaders is managed through the team-scoped roster
+        // endpoints; only super-admins may bulk-reassign teams via member update.
+        if ($this->has('team_ids') && ! WorkspaceAccess::isSuperAdmin($this->user())) {
+            return false;
+        }
+
+        return true;
     }
 
     /**

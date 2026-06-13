@@ -190,7 +190,7 @@
                                     }}
                                 />
                             {:else}
-                                {#if canManageTeam(team)}
+                                {#if isSuperAdmin}
                                     <button
                                         type="button"
                                         class="min-w-0 flex-1 truncate text-left text-base font-semibold hover:text-amber-700 dark:hover:text-amber-400"
