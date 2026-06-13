@@ -27,6 +27,11 @@ class TeamResource extends JsonResource
             'color' => $this->color,
             'members_count' => $this->whenCounted('members'),
             'member_ids' => $this->whenLoaded('members', fn () => $this->members->map(fn (Member $m): int => $m->id)->all()),
+            'leader_ids' => $this->whenLoaded('members', fn () => $this->members
+                ->filter(fn (Member $m) => ($m->pivot->role ?? 'member') === 'leader')
+                ->map(fn (Member $m): int => $m->id)
+                ->values()
+                ->all()),
         ];
     }
 }

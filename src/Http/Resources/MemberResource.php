@@ -27,6 +27,11 @@ class MemberResource extends JsonResource
             'user_id' => $this->user_id,
             'is_active' => (bool) $this->is_active,
             'team_ids' => $this->whenLoaded('teams', fn () => $this->teams->map(fn (Team $t): int => $t->id)->all()),
+            'led_team_ids' => $this->whenLoaded('teams', fn () => $this->teams
+                ->filter(fn (Team $t) => ($t->pivot->role ?? 'member') === 'leader')
+                ->map(fn (Team $t): int => $t->id)
+                ->values()
+                ->all()),
         ];
     }
 }

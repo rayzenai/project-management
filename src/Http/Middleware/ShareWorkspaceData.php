@@ -9,6 +9,7 @@ use RayzenAI\ProjectManagement\Http\Resources\WorkspaceNoteResource;
 use RayzenAI\ProjectManagement\Models\Member;
 use RayzenAI\ProjectManagement\Models\Project;
 use RayzenAI\ProjectManagement\Models\WorkspaceNote;
+use RayzenAI\ProjectManagement\Support\WorkspaceAccess;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -68,6 +69,13 @@ class ShareWorkspaceData
                     ->get()
             )->resolve();
         });
+
+        Inertia::share('isSuperAdmin', fn (): bool => $request->user() !== null
+            && WorkspaceAccess::isSuperAdmin($request->user()));
+
+        Inertia::share('ledTeamIds', fn (): array => $request->user() !== null
+            ? WorkspaceAccess::ledTeamIds($request->user())
+            : []);
 
         return $next($request);
     }
