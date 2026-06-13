@@ -195,6 +195,18 @@ class Task extends Model
     }
 
     /**
+     * Restrict to tasks whose project is not archived. Used by every active-work
+     * surface (My Workspace, dashboard, search) so archived projects go dormant.
+     *
+     * @param  Builder<Task>  $query
+     * @return Builder<Task>
+     */
+    public function scopeForActiveProjects(Builder $query): Builder
+    {
+        return $query->whereHas('project', fn (Builder $q) => $q->whereNull('archived_at'));
+    }
+
+    /**
      * @param  Builder<Task>  $query
      * @return Builder<Task>
      */
