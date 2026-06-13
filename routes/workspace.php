@@ -16,6 +16,7 @@ use RayzenAI\ProjectManagement\Http\Controllers\Workspace\TaskPreviewController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\TaskReorderController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\TaskSearchController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\TeamController;
+use RayzenAI\ProjectManagement\Http\Controllers\Workspace\TeamMemberController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\WorkspaceNoteController;
 use RayzenAI\ProjectManagement\Http\Middleware\ShareWorkspaceData;
 
@@ -33,6 +34,9 @@ Route::middleware([...config('project-management.middleware', ['web', 'auth']), 
         Route::post('/teams', [TeamController::class, 'store'])->name('teams.store');
         Route::patch('/teams/{team}', [TeamController::class, 'update'])->name('teams.update');
         Route::delete('/teams/{team}', [TeamController::class, 'destroy'])->name('teams.destroy');
+        Route::post('/teams/{team}/members', [TeamMemberController::class, 'store'])->name('teams.members.store');
+        Route::delete('/teams/{team}/members/{member}', [TeamMemberController::class, 'destroy'])->name('teams.members.destroy');
+        Route::patch('/teams/{team}/members/{member}', [TeamMemberController::class, 'updateRole'])->name('teams.members.role');
 
         Route::post('/members', [MemberController::class, 'store'])->name('members.store');
         Route::patch('/members/{member}', [MemberController::class, 'update'])->name('members.update');
