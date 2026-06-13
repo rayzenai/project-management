@@ -46,6 +46,8 @@ Route::middleware([...config('project-management.middleware', ['web', 'auth']), 
         Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
         Route::get('/projects/{project:slug}', [ProjectController::class, 'show'])->name('projects.show');
         Route::patch('/projects/{project:slug}', [ProjectController::class, 'update'])->name('projects.update');
+        Route::patch('/projects/{project:slug}/archive', [ProjectController::class, 'archive'])->name('projects.archive');
+        Route::patch('/projects/{project:slug}/restore', [ProjectController::class, 'restore'])->name('projects.restore');
 
         Route::post('/projects/{project:slug}/tasks/reorder', TaskReorderController::class)
             ->name('tasks.reorder');
