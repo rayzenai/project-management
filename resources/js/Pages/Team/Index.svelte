@@ -14,6 +14,10 @@
         return isSuperAdmin || ledTeamIds.includes(team.id);
     }
 
+    function canEditMember(member: Member): boolean {
+        return isSuperAdmin || (member.team_ids ?? []).some((id) => ledTeamIds.includes(id));
+    }
+
     // ---- Teams panel ----
     let creatingTeam = $state(false);
     let editingTeamId = $state<number | null>(null);
@@ -413,12 +417,12 @@
                                         {/if}
                                     </div>
                                 </div>
-                                <button
-                                    type="button"
-                                    class="shrink-0 text-xs text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
-                                    onclick={() => startEditMember(member)}>Edit</button
-                                >
-                                {#if isSuperAdmin}
+                                {#if canEditMember(member)}
+                                    <button
+                                        type="button"
+                                        class="shrink-0 text-xs text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+                                        onclick={() => startEditMember(member)}>Edit</button
+                                    >
                                     {#if member.is_active === false}
                                         <button
                                             type="button"
@@ -432,6 +436,8 @@
                                             onclick={() => setMemberActive(member, false)}>Deactivate</button
                                         >
                                     {/if}
+                                {/if}
+                                {#if isSuperAdmin}
                                     <button
                                         type="button"
                                         aria-label={`Delete ${member.name}`}
