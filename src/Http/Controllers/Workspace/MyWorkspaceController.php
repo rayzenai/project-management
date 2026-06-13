@@ -41,6 +41,7 @@ class MyWorkspaceController extends Controller
         $snoozedCount = ProjectAssignment::query()
             ->where('member_id', $member->id)
             ->where('snoozed_until', '>', $now)
+            ->whereHas('task', fn ($q) => $q->forActiveProjects())
             ->count();
 
         $openTaskIds = $assignments
@@ -77,6 +78,7 @@ class MyWorkspaceController extends Controller
             ->with(['task.project'])
             ->where('user_id', $user->id)
             ->where('is_done', false)
+            ->whereHas('task', fn ($q) => $q->forActiveProjects())
             ->orderByRaw('due_at IS NULL ASC')
             ->orderBy('due_at')
             ->orderBy('position')
