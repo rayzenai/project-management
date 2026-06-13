@@ -16,6 +16,16 @@ use RayzenAI\ProjectManagement\Models\Team;
  */
 class WorkspaceAccess
 {
+    /**
+     * Memoizes by the user instance so a project-list serialization that asks
+     * `canArchiveProject` per project does not re-query leadership each time.
+     * A WeakMap keeps this request-scoped — entries vanish with the user object,
+     * so there is no cross-request or stale-id leakage.
+     *
+     * @var \WeakMap<Authenticatable, list<int>>
+     */
+    private static ?\WeakMap $ledTeamIdsMemo = null;
+
     public static function isSuperAdmin(?Authenticatable $user): bool
     {
         return $user !== null && Gate::forUser($user)->allows('manage-workspace');
@@ -98,6 +108,9 @@ class WorkspaceAccess
      * The team ids the user's linked member leads. Does not create a member as
      * a side effect (unlike Member::forUser), so it is safe in authorization.
      *
+     * Memoized per user instance for the lifetime of the request to prevent
+     * N+1 queries when called repeatedly (e.g. once per project in a list).
+     *
      * @return list<int>
      */
     public static function ledTeamIds(?Authenticatable $user): array
@@ -106,12 +119,18 @@ class WorkspaceAccess
             return [];
         }
 
-        $member = Member::query()->where('user_id', $user->getAuthIdentifier())->first();
+        self::$ledTeamIdsMemo ??= new \WeakMap;
 
-        if ($member === null) {
-            return [];
+        if (isset(self::$ledTeamIdsMemo[$user])) {
+            return self::$ledTeamIdsMemo[$user];
         }
 
-        return $member->ledTeams()->pluck('teams.id')->map(fn ($id): int => (int) $id)->all();
+        $member = Member::query()->where('user_id', $user->getAuthIdentifier())->first();
+
+        $ids = $member === null
+            ? []
+            : $member->ledTeams()->pluck('teams.id')->map(fn ($id): int => (int) $id)->all();
+
+        return self::$ledTeamIdsMemo[$user] = $ids;
     }
 }
