@@ -41,6 +41,7 @@ class ProjectManagementServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
 
         $this->loadRoutesFrom(__DIR__.'/../routes/workspace.php');
+        $this->loadRoutesFrom(__DIR__.'/../routes/api.php');
 
         $this->publishes([
             __DIR__.'/../config/project-management.php' => config_path('project-management.php'),
@@ -49,7 +50,13 @@ class ProjectManagementServiceProvider extends ServiceProvider
         // Morph map for the project-management entities. enforceMorphMap()
         // merges with whatever has already been registered, so this is safe
         // alongside the host-app's own morph map registrations.
+        //
+        // enforceMorphMap makes the map STRICT app-wide: any model used as a
+        // morph target must have an entry. The configured user model is itself a
+        // morph target (Sanctum's personal_access_tokens.tokenable), so it must
+        // be mapped here or `createToken()` throws ClassMorphViolationException.
         Relation::enforceMorphMap([
+            'user' => config('project-management.user_model'),
             'task' => Task::class,
             'project-note' => ProjectNote::class,
             'project-contact' => ProjectContact::class,

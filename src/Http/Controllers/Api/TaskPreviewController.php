@@ -1,6 +1,6 @@
 <?php
 
-namespace RayzenAI\ProjectManagement\Http\Controllers\Workspace;
+namespace RayzenAI\ProjectManagement\Http\Controllers\Api;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
@@ -9,10 +9,9 @@ use RayzenAI\ProjectManagement\Queries\TaskPreviewQuery;
 use RayzenAI\ProjectManagement\Support\ApiResponser;
 
 /**
- * JSON-only endpoint backing the Task Peek slide-over. Returns the full
- * editable context for one task — fields, assignments (with ids so the Peek
- * can unassign), subtasks, notes, contacts, recent activity, and the assignee
- * candidate list — without a full-page Inertia visit.
+ * JSON sibling of the Workspace\TaskPreviewController. Both endpoints are
+ * JSON-only and share the same TaskPreviewQuery — the API mirrors the web
+ * response envelope exactly.
  */
 class TaskPreviewController extends Controller
 {
