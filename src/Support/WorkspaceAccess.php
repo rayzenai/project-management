@@ -47,6 +47,10 @@ class WorkspaceAccess
      * True when the user may create a member and attach it to the given teams:
      * super-admins anywhere, leaders only for teams they all lead.
      *
+     * Non-super-admins cannot create a member with NO team attachments — an
+     * empty `$teamIds` returns false for leaders. Only super-admins may create
+     * unattached members.
+     *
      * @param  list<int>  $teamIds
      */
     public static function canCreateMemberForTeams(?Authenticatable $user, array $teamIds): bool
@@ -70,6 +74,14 @@ class WorkspaceAccess
         return true;
     }
 
+    /**
+     * True when the user may edit this member's attributes (name, email,
+     * password, active flag) — NOT whether they may change the member's team
+     * affiliations. Returns true if the member shares ANY team the user leads.
+     *
+     * Team roster add/remove decisions must go through
+     * `canManageRosterOf($user, $team)` for the specific team.
+     */
     public static function canManageMember(?Authenticatable $user, Member $member): bool
     {
         if (self::isSuperAdmin($user)) {
