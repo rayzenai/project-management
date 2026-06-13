@@ -85,6 +85,15 @@
         filters = { assigneeIds: [], overdueOnly: false, category: null };
     }
 
+    function archiveProject() {
+        if (!confirm(`Archive "${project.title}"? It will go dormant until restored.`)) return;
+        router.patch(`/workspace/projects/${project.slug}/archive`, {}, { preserveScroll: true });
+    }
+
+    function restoreProject() {
+        router.patch(`/workspace/projects/${project.slug}/restore`, {}, { preserveScroll: true });
+    }
+
     onMount(() => {
         peek.openFromUrl(tasks.map((t) => ({ id: t.id, slug: t.slug })));
     });
@@ -93,13 +102,27 @@
 <svelte:head><title>{project.title} · Workspace</title></svelte:head>
 
 <AppShell>
+    {#if project.is_archived}
+        <div class="mb-4 flex items-center justify-between rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-800 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-300">
+            <span>This project is archived — hidden from My Workspace, the dashboard, and quick-add.</span>
+            {#if project.can_archive}
+                <button type="button" class="rounded-md bg-amber-500 px-2.5 py-1 text-xs font-semibold text-white hover:bg-amber-600" onclick={restoreProject}>Restore</button>
+            {/if}
+        </div>
+    {/if}
+
     <header class="mb-6">
         <nav class="mb-2 text-xs text-neutral-500 dark:text-neutral-400">
             <a href="/workspace/projects" class="hover:underline">Projects</a> /
             <span>{project.title}</span>
         </nav>
         <div>
-            <h1 class="text-2xl font-bold tracking-tight">{project.title}</h1>
+            <div class="flex items-center gap-3">
+                <h1 class="text-2xl font-bold tracking-tight">{project.title}</h1>
+                {#if project.can_archive && !project.is_archived}
+                    <button type="button" class="rounded-md border border-neutral-300 px-3 py-1.5 text-sm font-medium text-neutral-600 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800" onclick={archiveProject}>Archive project</button>
+                {/if}
+            </div>
             {#if project.title_np}
                 <div class="mt-1 text-base text-neutral-600 dark:text-neutral-400">{project.title_np}</div>
             {/if}
