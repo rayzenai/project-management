@@ -6,124 +6,28 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\Concerns\RedirectsWithServiceResult;
 use RayzenAI\ProjectManagement\Http\Requests\QuickAddTaskRequest;
-use RayzenAI\ProjectManagement\Models\Member;
-use RayzenAI\ProjectManagement\Models\Project;
-use RayzenAI\ProjectManagement\Services\Workspace\QuickAddTaskService;
-use RayzenAI\ProjectManagement\Support\QuickAddParser;
+use RayzenAI\ProjectManagement\Services\Workspace\QuickAddDispatcher;
 
 /**
- * Creates a task from a single line of natural language. The title is parsed
- * for #project / @assignee / !priority / date tokens; explicit picker fields
- * win over parsed values, resolved tokens are stripped from the title, and
- * unresolvable tokens stay in it so nothing typed is silently lost.
- *
- * `@name` resolves against the project's assignable members (its teams'
- * members, or every active member when no teams are attached), so the project
- * must be resolved first.
+ * Creates a task from a single line of natural language. All parsing/resolution
+ * lives in {@see QuickAddDispatcher}, shared with the API controller; this
+ * controller only adapts the request to the dispatcher and the result to a redirect.
  */
 class QuickAddController extends Controller
 {
     use RedirectsWithServiceResult;
 
-    public function __invoke(QuickAddTaskRequest $request, QuickAddTaskService $service): RedirectResponse
+    public function __invoke(QuickAddTaskRequest $request, QuickAddDispatcher $dispatcher): RedirectResponse
     {
-        $rawTitle = $request->string('title')->toString();
-        $tokens = QuickAddParser::parse($rawTitle);
-        $consumed = [];
-
-        $project = $this->resolveProject($tokens, $consumed)
-            ?? Project::query()->active()->findOrFail($request->integer('project_id'));
-
-        $assignees = array_map('intval', (array) ($request->input('assignee_member_ids') ?: []));
-        if ($assignees === []) {
-            $assignees = $this->resolveAssignees($project, $tokens, $consumed);
-        }
-        if ($assignees === []) {
-            $assignees = [Member::forUser($request->user())->id];
-        }
-
-        $priority = $request->input('priority');
-        $deadline = $request->date('deadline_at')?->toDateString();
-
-        foreach ($tokens as $token) {
-            if ($token['type'] === 'priority') {
-                $priority ??= $token['value'];
-                $consumed[] = $token;
-            }
-
-            if ($token['type'] === 'date') {
-                $deadline ??= $token['value'];
-                $consumed[] = $token;
-            }
-        }
-
-        $result = $service->execute(
-            project: $project,
-            title: QuickAddParser::strip($rawTitle, $consumed),
-            assigneeMemberIds: $assignees,
-            deadline: $deadline,
-            priority: $priority ?? 'medium',
-            authorUserId: $request->user()->id,
+        $result = $dispatcher->dispatch(
+            rawTitle: $request->string('title')->toString(),
+            projectId: $request->integer('project_id'),
+            explicitAssigneeIds: array_map('intval', (array) ($request->input('assignee_member_ids') ?: [])),
+            priority: $request->input('priority'),
+            deadline: $request->date('deadline_at')?->toDateString(),
+            user: $request->user(),
         );
 
         return $this->redirectWithResult($result);
-    }
-
-    /**
-     * @param  list<array{type: string, raw: string, value: string, offset: int}>  $tokens
-     * @param  list<array{type: string, raw: string, value: string, offset: int}>  $consumed
-     */
-    private function resolveProject(array $tokens, array &$consumed): ?Project
-    {
-        foreach ($tokens as $token) {
-            if ($token['type'] !== 'project') {
-                continue;
-            }
-
-            $needle = mb_strtolower($token['value']);
-
-            $project = Project::query()->active()->whereRaw('LOWER(slug) = ?', [$needle])->first()
-                ?? Project::query()->active()->whereRaw('LOWER(slug) LIKE ?', [$needle.'%'])->orderBy('title')->first()
-                ?? Project::query()->active()->whereRaw('LOWER(title) LIKE ?', [$needle.'%'])->orderBy('title')->first()
-                ?? Project::query()->active()->whereRaw('LOWER(slug) LIKE ?', ['%'.$needle.'%'])->orderBy('title')->first()
-                ?? Project::query()->active()->whereRaw('LOWER(title) LIKE ?', ['%'.$needle.'%'])->orderBy('title')->first();
-
-            if ($project) {
-                $consumed[] = $token;
-
-                return $project;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * @param  list<array{type: string, raw: string, value: string, offset: int}>  $tokens
-     * @param  list<array{type: string, raw: string, value: string, offset: int}>  $consumed
-     * @return list<int>
-     */
-    private function resolveAssignees(Project $project, array $tokens, array &$consumed): array
-    {
-        $ids = [];
-
-        foreach ($tokens as $token) {
-            if ($token['type'] !== 'assignee') {
-                continue;
-            }
-
-            $needle = mb_strtolower($token['value']);
-
-            $member = Member::assignableFor($project)
-                ->whereRaw('LOWER(name) LIKE ?', [$needle.'%'])
-                ->first();
-
-            if ($member) {
-                $ids[] = (int) $member->getKey();
-                $consumed[] = $token;
-            }
-        }
-
-        return array_values(array_unique($ids));
     }
 }

@@ -10,11 +10,9 @@ use Inertia\Response;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\Concerns\RedirectsWithServiceResult;
 use RayzenAI\ProjectManagement\Http\Requests\StoreProjectRequest;
 use RayzenAI\ProjectManagement\Http\Requests\UpdateProjectRequest;
-use RayzenAI\ProjectManagement\Http\Resources\ProjectResource;
-use RayzenAI\ProjectManagement\Http\Resources\TaskResource;
-use RayzenAI\ProjectManagement\Http\Resources\TeamResource;
 use RayzenAI\ProjectManagement\Models\Project;
-use RayzenAI\ProjectManagement\Models\Team;
+use RayzenAI\ProjectManagement\Queries\ProjectIndexQuery;
+use RayzenAI\ProjectManagement\Queries\ProjectShowQuery;
 use RayzenAI\ProjectManagement\Services\Workspace\CreateProjectService;
 use RayzenAI\ProjectManagement\Services\Workspace\UpdateProjectService;
 use RayzenAI\ProjectManagement\Support\WorkspaceAccess;
@@ -23,32 +21,14 @@ class ProjectController extends Controller
 {
     use RedirectsWithServiceResult;
 
-    public function index(Request $request): Response
+    public function index(Request $request, ProjectIndexQuery $query): Response
     {
-        $archivedView = $request->boolean('archived');
-
-        $projects = Project::query()
-            ->when($archivedView, fn ($q) => $q->archived(), fn ($q) => $q->active())
-            ->withCount('tasks')
-            ->orderBy('title')
-            ->get();
-
-        return Inertia::render('Projects/Index', [
-            'projects' => ProjectResource::collection($projects)->resolve(),
-            'archivedView' => $archivedView,
-            'archivedCount' => Project::query()->archived()->count(),
-        ]);
+        return Inertia::render('Projects/Index', $query->data($request));
     }
 
-    public function show(Project $project): Response
+    public function show(Project $project, ProjectShowQuery $query): Response
     {
-        $project->load(['teams:id', 'tasks' => fn ($q) => $q->with('assignments.member')->withCount(['notes', 'contacts'])]);
-
-        return Inertia::render('Projects/Show', [
-            'project' => (new ProjectResource($project))->resolve(),
-            'tasks' => TaskResource::collection($project->tasks)->resolve(),
-            'teams' => TeamResource::collection(Team::query()->orderBy('name')->get())->resolve(),
-        ]);
+        return Inertia::render('Projects/Show', $query->data($project));
     }
 
     public function store(StoreProjectRequest $request, CreateProjectService $service): RedirectResponse

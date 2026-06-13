@@ -9,23 +9,15 @@ use Inertia\Inertia;
 use Inertia\Response;
 use RayzenAI\ProjectManagement\Http\Requests\StoreTeamRequest;
 use RayzenAI\ProjectManagement\Http\Requests\UpdateTeamRequest;
-use RayzenAI\ProjectManagement\Http\Resources\MemberResource;
-use RayzenAI\ProjectManagement\Http\Resources\TeamResource;
-use RayzenAI\ProjectManagement\Models\Member;
 use RayzenAI\ProjectManagement\Models\Team;
+use RayzenAI\ProjectManagement\Queries\TeamIndexQuery;
 use RayzenAI\ProjectManagement\Support\WorkspaceAccess;
 
 class TeamController extends Controller
 {
-    public function index(): Response
+    public function index(TeamIndexQuery $query): Response
     {
-        $teams = Team::query()->withCount('members')->with('members:id')->orderBy('name')->get();
-        $members = Member::query()->with('teams:id')->orderBy('name')->get();
-
-        return Inertia::render('Team/Index', [
-            'teams' => TeamResource::collection($teams)->resolve(),
-            'members' => MemberResource::collection($members)->resolve(),
-        ]);
+        return Inertia::render('Team/Index', $query->data());
     }
 
     public function store(StoreTeamRequest $request): RedirectResponse
