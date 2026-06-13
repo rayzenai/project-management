@@ -18,6 +18,7 @@ return new class extends Migration
             $table->boolean('is_public')->default(false)->index();
             $table->date('starts_at')->nullable();
             $table->date('ends_at')->nullable();
+            $table->timestamp('archived_at')->nullable()->index();
             $table->timestamps();
         });
     }

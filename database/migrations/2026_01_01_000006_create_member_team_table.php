@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('member_id')->constrained()->cascadeOnDelete();
             $table->foreignId('team_id')->constrained()->cascadeOnDelete();
+            $table->string('role')->default('member');
             $table->timestamps();
 
             $table->unique(['member_id', 'team_id']);
