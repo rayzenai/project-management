@@ -4,12 +4,27 @@ namespace RayzenAI\ProjectManagement\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use RayzenAI\ProjectManagement\Http\Requests\Concerns\AuthorizesMemberManagement;
 use RayzenAI\ProjectManagement\Models\Member;
+use RayzenAI\ProjectManagement\Support\WorkspaceAccess;
 
 class UpdateMemberRequest extends FormRequest
 {
-    use AuthorizesMemberManagement;
+    public function authorize(): bool
+    {
+        $member = $this->route('member');
+
+        if (! $member instanceof Member || ! WorkspaceAccess::canManageMember($this->user(), $member)) {
+            return false;
+        }
+
+        // Team membership for leaders is managed through the team-scoped roster
+        // endpoints; only super-admins may bulk-reassign teams via member update.
+        if ($this->has('team_ids') && ! WorkspaceAccess::isSuperAdmin($this->user())) {
+            return false;
+        }
+
+        return true;
+    }
 
     /**
      * Name/email changes sync to the linked login; a password value resets it

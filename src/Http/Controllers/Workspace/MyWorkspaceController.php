@@ -30,7 +30,7 @@ class MyWorkspaceController extends Controller
         $assignments = ProjectAssignment::query()
             ->with(['task.project', 'task.assignments.member', 'member'])
             ->where('member_id', $member->id)
-            ->whereHas('task', fn ($q) => $q->incomplete())
+            ->whereHas('task', fn ($q) => $q->incomplete()->forActiveProjects())
             ->where(function ($q) use ($now) {
                 $q->whereNull('snoozed_until')->orWhere('snoozed_until', '<=', $now);
             })
@@ -41,6 +41,7 @@ class MyWorkspaceController extends Controller
         $snoozedCount = ProjectAssignment::query()
             ->where('member_id', $member->id)
             ->where('snoozed_until', '>', $now)
+            ->whereHas('task', fn ($q) => $q->forActiveProjects())
             ->count();
 
         $openTaskIds = $assignments
@@ -69,7 +70,7 @@ class MyWorkspaceController extends Controller
                 ->get()
             : collect();
 
-        $projects = Project::query()->orderBy('title')->get(['id', 'slug', 'title']);
+        $projects = Project::query()->active()->orderBy('title')->get(['id', 'slug', 'title']);
 
         $teamMembers = Member::query()->active()->orderBy('name')->get(['id', 'name', 'email', 'user_id']);
 
@@ -77,6 +78,7 @@ class MyWorkspaceController extends Controller
             ->with(['task.project'])
             ->where('user_id', $user->id)
             ->where('is_done', false)
+            ->whereHas('task', fn ($q) => $q->forActiveProjects())
             ->orderByRaw('due_at IS NULL ASC')
             ->orderBy('due_at')
             ->orderBy('position')

@@ -37,6 +37,7 @@ class Project extends Model
             'is_public' => 'boolean',
             'starts_at' => 'date',
             'ends_at' => 'date',
+            'archived_at' => 'datetime',
         ];
     }
 
@@ -68,6 +69,46 @@ class Project extends Model
     public function scopePublic(Builder $query): Builder
     {
         return $query->where('is_public', true);
+    }
+
+    /**
+     * @param  Builder<Project>  $query
+     * @return Builder<Project>
+     */
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->whereNull('archived_at');
+    }
+
+    /**
+     * @param  Builder<Project>  $query
+     * @return Builder<Project>
+     */
+    public function scopeArchived(Builder $query): Builder
+    {
+        return $query->whereNotNull('archived_at');
+    }
+
+    /**
+     * @return Attribute<bool, never>
+     */
+    protected function isArchived(): Attribute
+    {
+        return Attribute::get(fn (): bool => $this->archived_at !== null);
+    }
+
+    public function archive(): void
+    {
+        if ($this->archived_at === null) {
+            $this->forceFill(['archived_at' => now()])->save();
+        }
+    }
+
+    public function restore(): void
+    {
+        if ($this->archived_at !== null) {
+            $this->forceFill(['archived_at' => null])->save();
+        }
     }
 
     /**

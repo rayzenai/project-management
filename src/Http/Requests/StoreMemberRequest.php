@@ -3,11 +3,16 @@
 namespace RayzenAI\ProjectManagement\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use RayzenAI\ProjectManagement\Http\Requests\Concerns\AuthorizesMemberManagement;
+use RayzenAI\ProjectManagement\Support\WorkspaceAccess;
 
 class StoreMemberRequest extends FormRequest
 {
-    use AuthorizesMemberManagement;
+    public function authorize(): bool
+    {
+        $teamIds = array_map('intval', (array) $this->input('team_ids', []));
+
+        return WorkspaceAccess::canCreateMemberForTeams($this->user(), $teamIds);
+    }
 
     /**
      * A password provisions a login (host users row) for the member, in which

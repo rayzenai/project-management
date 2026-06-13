@@ -1,9 +1,13 @@
 <script lang="ts">
-    import { useForm } from '@inertiajs/svelte';
+    import { router, useForm } from '@inertiajs/svelte';
     import AppShell from '../../components/AppShell.svelte';
     import type { Project } from '../../lib/types';
 
-    let { projects }: { projects: Project[] } = $props();
+    let {
+        projects,
+        archivedView = false,
+        archivedCount = 0,
+    }: { projects: Project[]; archivedView?: boolean; archivedCount?: number } = $props();
 
     let creating = $state(false);
     const form = useForm({ title: '', title_np: '', description: '', is_public: false });
@@ -17,6 +21,15 @@
                 creating = false;
             },
         });
+    }
+
+    function archive(project: Project) {
+        if (!confirm(`Archive "${project.title}"? It will disappear from My Workspace, the dashboard, and quick-add until restored.`)) return;
+        router.patch(`/workspace/projects/${project.slug}/archive`, {}, { preserveScroll: true });
+    }
+
+    function restore(project: Project) {
+        router.patch(`/workspace/projects/${project.slug}/restore`, {}, { preserveScroll: true });
     }
 </script>
 
@@ -33,6 +46,17 @@
             class="rounded-md bg-amber-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-amber-600 dark:text-neutral-950"
             onclick={() => (creating = !creating)}>{creating ? 'Cancel' : '+ New project'}</button
         >
+    </div>
+
+    <div class="mb-4 flex items-center gap-4 text-sm">
+        <a
+            href="/workspace/projects"
+            class={archivedView ? 'text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200' : 'font-semibold text-amber-600'}
+        >Active</a>
+        <a
+            href="/workspace/projects?archived=1"
+            class={archivedView ? 'font-semibold text-amber-600' : 'text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200'}
+        >Archived{archivedCount ? ` (${archivedCount})` : ''}</a>
     </div>
 
     {#if creating}
@@ -112,8 +136,25 @@
                 {#if project.description}
                     <p class="mt-2 line-clamp-2 text-sm text-neutral-600 dark:text-neutral-400">{project.description}</p>
                 {/if}
-                <div class="mt-3 text-xs text-neutral-500 dark:text-neutral-400">
-                    {project.tasks_count ?? 0} task{(project.tasks_count ?? 0) === 1 ? '' : 's'}
+                <div class="mt-3 flex items-center justify-between">
+                    <span class="text-xs text-neutral-500 dark:text-neutral-400">
+                        {project.tasks_count ?? 0} task{(project.tasks_count ?? 0) === 1 ? '' : 's'}
+                    </span>
+                    {#if project.can_archive}
+                        {#if project.is_archived}
+                            <button
+                                type="button"
+                                class="rounded-md border border-neutral-300 px-2 py-1 text-xs font-medium text-neutral-600 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                                onclick={(e) => { e.stopPropagation(); e.preventDefault(); restore(project); }}
+                            >Restore</button>
+                        {:else}
+                            <button
+                                type="button"
+                                class="rounded-md border border-neutral-300 px-2 py-1 text-xs font-medium text-neutral-600 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                                onclick={(e) => { e.stopPropagation(); e.preventDefault(); archive(project); }}
+                            >Archive</button>
+                        {/if}
+                    {/if}
                 </div>
             </a>
         {/each}

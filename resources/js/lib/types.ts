@@ -14,6 +14,7 @@ export interface Member {
     user_id?: Id | null;
     is_active?: boolean;
     team_ids?: Id[];
+    led_team_ids?: Id[];
 }
 
 export interface Team {
@@ -24,6 +25,7 @@ export interface Team {
     color?: string | null;
     members_count?: number;
     member_ids?: Id[];
+    leader_ids?: Id[];
 }
 
 export interface ProjectSummary {
@@ -38,6 +40,9 @@ export interface Project extends ProjectSummary {
     description?: string | null;
     description_np?: string | null;
     is_public?: boolean;
+    is_archived?: boolean;
+    archived_at?: string | null;
+    can_archive?: boolean;
     tasks_count?: number;
     created_at?: string;
     updated_at?: string;
@@ -212,5 +217,7 @@ export interface SharedProps {
     statuses?: Status[];
     completeStatus?: string;
     quickAddContext?: QuickAddContext | null;
+    isSuperAdmin?: boolean;
+    ledTeamIds?: Id[];
     [key: string]: unknown;
 }

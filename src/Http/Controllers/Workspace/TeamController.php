@@ -3,6 +3,7 @@
 namespace RayzenAI\ProjectManagement\Http\Controllers\Workspace;
 
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -12,6 +13,7 @@ use RayzenAI\ProjectManagement\Http\Resources\MemberResource;
 use RayzenAI\ProjectManagement\Http\Resources\TeamResource;
 use RayzenAI\ProjectManagement\Models\Member;
 use RayzenAI\ProjectManagement\Models\Team;
+use RayzenAI\ProjectManagement\Support\WorkspaceAccess;
 
 class TeamController extends Controller
 {
@@ -46,8 +48,10 @@ class TeamController extends Controller
         return back()->with('workspace_flash', ['success' => true, 'message' => 'Team updated.']);
     }
 
-    public function destroy(Team $team): RedirectResponse
+    public function destroy(Request $request, Team $team): RedirectResponse
     {
+        abort_unless(WorkspaceAccess::isSuperAdmin($request->user()), 403);
+
         $team->delete();
 
         return back()->with('workspace_flash', ['success' => true, 'message' => 'Team deleted.']);

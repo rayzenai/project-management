@@ -3,6 +3,7 @@
 namespace RayzenAI\ProjectManagement;
 
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use RayzenAI\ProjectManagement\Console\Commands\SendProjectWeeklyDigest;
 use RayzenAI\ProjectManagement\Models\Member;
@@ -27,6 +28,16 @@ class ProjectManagementServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if (! Gate::has('manage-workspace')) {
+            Gate::define('manage-workspace', function ($user): bool {
+                return in_array(
+                    $user->email,
+                    (array) config('project-management.super_admins', []),
+                    true,
+                );
+            });
+        }
+
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
 
         $this->loadRoutesFrom(__DIR__.'/../routes/workspace.php');

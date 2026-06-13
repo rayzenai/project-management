@@ -3,13 +3,14 @@
 namespace RayzenAI\ProjectManagement\Http\Controllers\Workspace;
 
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use RayzenAI\ProjectManagement\Http\Requests\StoreMemberRequest;
 use RayzenAI\ProjectManagement\Http\Requests\UpdateMemberRequest;
 use RayzenAI\ProjectManagement\Models\Member;
+use RayzenAI\ProjectManagement\Support\WorkspaceAccess;
 
 /**
  * A member optionally carries a login: providing a password (on create or
@@ -92,11 +93,9 @@ class MemberController extends Controller
         return back()->with('workspace_flash', ['success' => true, 'message' => 'Member updated.']);
     }
 
-    public function destroy(Member $member): RedirectResponse
+    public function destroy(Request $request, Member $member): RedirectResponse
     {
-        if (Gate::has('manage-workspace-members')) {
-            Gate::authorize('manage-workspace-members');
-        }
+        abort_unless(WorkspaceAccess::isSuperAdmin($request->user()), 403);
 
         DB::transaction(function () use ($member): void {
             $user = $member->user;

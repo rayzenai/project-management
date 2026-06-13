@@ -65,7 +65,17 @@ class Member extends Model
      */
     public function teams(): BelongsToMany
     {
-        return $this->belongsToMany(Team::class)->withTimestamps();
+        return $this->belongsToMany(Team::class)->withPivot('role')->withTimestamps();
+    }
+
+    /**
+     * Teams this member leads (pivot role = leader).
+     *
+     * @return BelongsToMany<Team, $this>
+     */
+    public function ledTeams(): BelongsToMany
+    {
+        return $this->teams()->wherePivot('role', 'leader');
     }
 
     /**

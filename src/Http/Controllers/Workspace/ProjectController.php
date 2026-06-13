@@ -17,6 +17,7 @@ use RayzenAI\ProjectManagement\Models\Project;
 use RayzenAI\ProjectManagement\Models\Team;
 use RayzenAI\ProjectManagement\Services\Workspace\CreateProjectService;
 use RayzenAI\ProjectManagement\Services\Workspace\UpdateProjectService;
+use RayzenAI\ProjectManagement\Support\WorkspaceAccess;
 
 class ProjectController extends Controller
 {
@@ -24,13 +25,18 @@ class ProjectController extends Controller
 
     public function index(Request $request): Response
     {
+        $archivedView = $request->boolean('archived');
+
         $projects = Project::query()
+            ->when($archivedView, fn ($q) => $q->archived(), fn ($q) => $q->active())
             ->withCount('tasks')
             ->orderBy('title')
             ->get();
 
         return Inertia::render('Projects/Index', [
             'projects' => ProjectResource::collection($projects)->resolve(),
+            'archivedView' => $archivedView,
+            'archivedCount' => Project::query()->archived()->count(),
         ]);
     }
 
@@ -63,5 +69,23 @@ class ProjectController extends Controller
         $result = $service->execute($project, $request->validated());
 
         return $this->redirectWithResult($result);
+    }
+
+    public function archive(Request $request, Project $project): RedirectResponse
+    {
+        abort_unless(WorkspaceAccess::canArchiveProject($request->user(), $project), 403);
+
+        $project->archive();
+
+        return back()->with('workspace_flash', ['success' => true, 'message' => 'Project archived.']);
+    }
+
+    public function restore(Request $request, Project $project): RedirectResponse
+    {
+        abort_unless(WorkspaceAccess::canArchiveProject($request->user(), $project), 403);
+
+        $project->restore();
+
+        return back()->with('workspace_flash', ['success' => true, 'message' => 'Project restored.']);
     }
 }

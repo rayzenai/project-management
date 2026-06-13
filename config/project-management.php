@@ -67,4 +67,28 @@ return [
 
     'complete_status' => 'done',
 
+    /*
+    |--------------------------------------------------------------------------
+    | Super-admins
+    |--------------------------------------------------------------------------
+    |
+    | Emails of users who hold the `manage-workspace` ability — they create and
+    | delete teams, manage every member, and archive any project. The package
+    | registers a `manage-workspace` Gate from this list unless the host app has
+    | already defined its own. Comma-separated via the PM_SUPER_ADMINS env var.
+    |
+    */
+
+    'super_admins' => array_values(array_filter(array_map(
+        'trim',
+        explode(',', (string) env('PM_SUPER_ADMINS', '')),
+    ))),
+
+    /*
+    | Password used by WorkspaceSuperadminSeeder when provisioning the seeded
+    | super-admin login on a fresh database.
+    */
+
+    'super_admin_default_password' => env('PM_SUPER_ADMIN_PASSWORD', 'password'),
+
 ];

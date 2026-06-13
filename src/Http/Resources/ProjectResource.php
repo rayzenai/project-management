@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use RayzenAI\ProjectManagement\Models\Project;
 use RayzenAI\ProjectManagement\Models\Team;
+use RayzenAI\ProjectManagement\Support\WorkspaceAccess;
 
 /**
  * @mixin Project
@@ -27,6 +28,9 @@ class ProjectResource extends JsonResource
             'description' => $this->description,
             'description_np' => $this->description_np,
             'is_public' => (bool) $this->is_public,
+            'is_archived' => $this->archived_at !== null,
+            'archived_at' => $this->archived_at?->toIso8601String(),
+            'can_archive' => WorkspaceAccess::canArchiveProject($request->user(), $this->resource),
             'tasks_count' => $this->whenCounted('tasks'),
             'team_ids' => $this->whenLoaded('teams', fn () => $this->teams->map(fn (Team $t): int => $t->id)->all()),
             'created_at' => $this->created_at?->toIso8601String(),
