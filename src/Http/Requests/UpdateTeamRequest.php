@@ -3,12 +3,13 @@
 namespace RayzenAI\ProjectManagement\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use RayzenAI\ProjectManagement\Support\WorkspaceAccess;
 
 class UpdateTeamRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return (bool) $this->user();
+        return WorkspaceAccess::isSuperAdmin($this->user());
     }
 
     /**
