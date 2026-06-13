@@ -38,6 +38,7 @@ class TaskSearchController extends Controller
         $likeOp = $pgsql ? 'ILIKE' : 'LIKE';
 
         $tasks = Task::query()
+            ->forActiveProjects()
             ->with('project:id,slug,title')
             ->where(function ($query) use ($like, $likeOp, $q) {
                 $query->where('title', $likeOp, $like)
@@ -55,6 +56,7 @@ class TaskSearchController extends Controller
             ->get();
 
         $matchedProjects = Project::query()
+            ->active()
             ->withCount('tasks')
             ->where(function ($query) use ($likeOp, $like) {
                 $query->where('title', $likeOp, $like)->orWhere('slug', $likeOp, $like);

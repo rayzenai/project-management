@@ -20,8 +20,8 @@ class DashboardController extends Controller
         $weekEnd = $today->copy()->addDays(7);
         $stalledBefore = now()->subDays(14);
 
-        $tasks = Task::query()->get(['id', 'project_id', 'status', 'progress', 'status_updated_at', 'deadline_at']);
-        $projects = Project::query()->orderBy('title')->get(['id', 'slug', 'title']);
+        $tasks = Task::query()->forActiveProjects()->get(['id', 'project_id', 'status', 'progress', 'status_updated_at', 'deadline_at']);
+        $projects = Project::query()->active()->orderBy('title')->get(['id', 'slug', 'title']);
         $byProject = $tasks->groupBy('project_id');
 
         $isComplete = fn (Task $t): bool => $t->isComplete();

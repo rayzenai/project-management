@@ -25,13 +25,18 @@ class ProjectController extends Controller
 
     public function index(Request $request): Response
     {
+        $archivedView = $request->boolean('archived');
+
         $projects = Project::query()
+            ->when($archivedView, fn ($q) => $q->archived(), fn ($q) => $q->active())
             ->withCount('tasks')
             ->orderBy('title')
             ->get();
 
         return Inertia::render('Projects/Index', [
             'projects' => ProjectResource::collection($projects)->resolve(),
+            'archivedView' => $archivedView,
+            'archivedCount' => Project::query()->archived()->count(),
         ]);
     }
 

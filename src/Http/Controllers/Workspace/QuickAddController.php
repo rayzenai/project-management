@@ -32,7 +32,7 @@ class QuickAddController extends Controller
         $consumed = [];
 
         $project = $this->resolveProject($tokens, $consumed)
-            ?? Project::query()->findOrFail($request->integer('project_id'));
+            ?? Project::query()->active()->findOrFail($request->integer('project_id'));
 
         $assignees = array_map('intval', (array) ($request->input('assignee_member_ids') ?: []));
         if ($assignees === []) {
@@ -82,11 +82,11 @@ class QuickAddController extends Controller
 
             $needle = mb_strtolower($token['value']);
 
-            $project = Project::query()->whereRaw('LOWER(slug) = ?', [$needle])->first()
-                ?? Project::query()->whereRaw('LOWER(slug) LIKE ?', [$needle.'%'])->orderBy('title')->first()
-                ?? Project::query()->whereRaw('LOWER(title) LIKE ?', [$needle.'%'])->orderBy('title')->first()
-                ?? Project::query()->whereRaw('LOWER(slug) LIKE ?', ['%'.$needle.'%'])->orderBy('title')->first()
-                ?? Project::query()->whereRaw('LOWER(title) LIKE ?', ['%'.$needle.'%'])->orderBy('title')->first();
+            $project = Project::query()->active()->whereRaw('LOWER(slug) = ?', [$needle])->first()
+                ?? Project::query()->active()->whereRaw('LOWER(slug) LIKE ?', [$needle.'%'])->orderBy('title')->first()
+                ?? Project::query()->active()->whereRaw('LOWER(title) LIKE ?', [$needle.'%'])->orderBy('title')->first()
+                ?? Project::query()->active()->whereRaw('LOWER(slug) LIKE ?', ['%'.$needle.'%'])->orderBy('title')->first()
+                ?? Project::query()->active()->whereRaw('LOWER(title) LIKE ?', ['%'.$needle.'%'])->orderBy('title')->first();
 
             if ($project) {
                 $consumed[] = $token;
