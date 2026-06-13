@@ -89,6 +89,10 @@ class WorkspaceAccess
      * password, active flag) — NOT whether they may change the member's team
      * affiliations. Returns true if the member shares ANY team the user leads.
      *
+     * A non-super-admin may never manage a member whose linked login is itself
+     * a super-admin — this blocks the attach-then-password-reset takeover vector
+     * even when a super-admin legitimately shares a team with the leader.
+     *
      * Team roster add/remove decisions must go through
      * `canManageRosterOf($user, $team)` for the specific team.
      */
@@ -96,6 +100,12 @@ class WorkspaceAccess
     {
         if (self::isSuperAdmin($user)) {
             return true;
+        }
+
+        // A non-super-admin may never manage a member whose linked login is
+        // itself a super-admin — blocks attach-then-password-reset takeover.
+        if ($member->user_id !== null && $member->user !== null && self::isSuperAdmin($member->user)) {
+            return false;
         }
 
         $ledTeamIds = self::ledTeamIds($user);

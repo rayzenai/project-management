@@ -3,6 +3,7 @@
 namespace RayzenAI\ProjectManagement\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use RayzenAI\ProjectManagement\Models\Member;
 use RayzenAI\ProjectManagement\Models\Team;
 use RayzenAI\ProjectManagement\Support\WorkspaceAccess;
 
@@ -16,8 +17,26 @@ class StoreTeamMemberRequest extends FormRequest
     {
         $team = $this->route('team');
 
-        return $team instanceof Team
-            && WorkspaceAccess::canManageRosterOf($this->user(), $team);
+        if (! $team instanceof Team || ! WorkspaceAccess::canManageRosterOf($this->user(), $team)) {
+            return false;
+        }
+
+        $memberId = (int) $this->input('member_id');
+
+        if ($memberId > 0 && ! WorkspaceAccess::isSuperAdmin($this->user())) {
+            $member = Member::find($memberId);
+
+            // Unknown id: let the `exists` validation rule report it.
+            if ($member !== null && $member->user_id !== null) {
+                $ledTeamIds = WorkspaceAccess::ledTeamIds($this->user());
+
+                if (! $member->teams()->whereIn('teams.id', $ledTeamIds)->exists()) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     /**
