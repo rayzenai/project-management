@@ -1,10 +1,18 @@
 <script lang="ts">
-    import { router, useForm } from '@inertiajs/svelte';
+    import { page, router, useForm } from '@inertiajs/svelte';
     import AppShell from '../../components/AppShell.svelte';
     import { initials } from '../../lib/format';
     import type { Member, Team } from '../../lib/types';
 
     let { teams, members }: { teams: Team[]; members: Member[] } = $props();
+
+    // ---- Role capabilities ----
+    const isSuperAdmin = $derived<boolean>((page.props as any).isSuperAdmin ?? false);
+    const ledTeamIds = $derived<number[]>((page.props as any).ledTeamIds ?? []);
+
+    function canManageTeam(team: Team): boolean {
+        return isSuperAdmin || ledTeamIds.includes(team.id);
+    }
 
     // ---- Teams panel ----
     let creatingTeam = $state(false);
@@ -42,10 +50,21 @@
         router.delete(`/workspace/teams/${team.id}`, { preserveScroll: true });
     }
 
-    function toggleTeamMember(team: Team, member: Member) {
-        const current = team.member_ids ?? [];
-        const next = current.includes(member.id) ? current.filter((id) => id !== member.id) : [...current, member.id];
-        router.patch(`/workspace/teams/${team.id}`, { member_ids: next }, { preserveScroll: true });
+    // ---- Team-scoped roster helpers ----
+    function addMemberToTeam(team: Team, member: Member) {
+        router.post(`/workspace/teams/${team.id}/members`, { member_id: member.id }, { preserveScroll: true });
+    }
+
+    function removeMemberFromTeam(team: Team, member: Member) {
+        router.delete(`/workspace/teams/${team.id}/members/${member.id}`, { preserveScroll: true });
+    }
+
+    function setTeamRole(team: Team, member: Member, role: 'member' | 'leader') {
+        router.patch(`/workspace/teams/${team.id}/members/${member.id}`, { role }, { preserveScroll: true });
+    }
+
+    function isLeaderOf(team: Team, member: Member): boolean {
+        return (team.leader_ids ?? []).includes(member.id);
     }
 
     // ---- Members panel ----
@@ -93,6 +112,8 @@
 
     const memberTeamNames = $derived((member: Member) => teams.filter((t) => (member.team_ids ?? []).includes(t.id)).map((t) => t.name));
 
+    const visibleTeams = $derived(isSuperAdmin ? teams : teams.filter((t) => canManageTeam(t)));
+
     const inputClass =
         'w-full rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100';
 </script>
@@ -112,14 +133,16 @@
         <section class="xl:col-span-2">
             <div class="mb-3 flex items-center justify-between">
                 <h2 class="ws-eyebrow text-neutral-500 dark:text-neutral-400">Teams · {teams.length}</h2>
-                <button
-                    type="button"
-                    class="rounded-md bg-amber-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-amber-600 dark:text-neutral-950"
-                    onclick={() => (creatingTeam = !creatingTeam)}>{creatingTeam ? 'Cancel' : '+ New team'}</button
-                >
+                {#if isSuperAdmin}
+                    <button
+                        type="button"
+                        class="rounded-md bg-amber-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-amber-600 dark:text-neutral-950"
+                        onclick={() => (creatingTeam = !creatingTeam)}>{creatingTeam ? 'Cancel' : '+ New team'}</button
+                    >
+                {/if}
             </div>
 
-            {#if creatingTeam}
+            {#if isSuperAdmin && creatingTeam}
                 <form onsubmit={createTeam} class="mb-3 rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
                     <label class="mb-1 block text-xs font-medium text-neutral-600 dark:text-neutral-400" for="team-name">Name</label>
                     <input id="team-name" type="text" bind:value={teamForm.name} required class={inputClass} />
@@ -139,7 +162,7 @@
                 </form>
             {/if}
 
-            {#if teams.length === 0 && !creatingTeam}
+            {#if visibleTeams.length === 0 && !creatingTeam}
                 <div
                     class="rounded-xl border border-dashed border-neutral-300 bg-white p-8 text-center text-sm text-neutral-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-400"
                 >
@@ -148,7 +171,7 @@
             {/if}
 
             <div class="space-y-3">
-                {#each teams as team (team.id)}
+                {#each visibleTeams as team (team.id)}
                     <div class="rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
                         <div class="flex items-center gap-2">
                             {#if editingTeamId === team.id}
@@ -163,42 +186,76 @@
                                     }}
                                 />
                             {:else}
-                                <button
-                                    type="button"
-                                    class="min-w-0 flex-1 truncate text-left text-base font-semibold hover:text-amber-700 dark:hover:text-amber-400"
-                                    title="Rename"
-                                    onclick={() => startRename(team)}>{team.name}</button
-                                >
+                                {#if canManageTeam(team)}
+                                    <button
+                                        type="button"
+                                        class="min-w-0 flex-1 truncate text-left text-base font-semibold hover:text-amber-700 dark:hover:text-amber-400"
+                                        title="Rename"
+                                        onclick={() => startRename(team)}>{team.name}</button
+                                    >
+                                {:else}
+                                    <span class="min-w-0 flex-1 truncate text-base font-semibold">{team.name}</span>
+                                {/if}
                                 <span class="ws-eyebrow shrink-0 text-neutral-500 dark:text-neutral-400">
                                     {team.member_ids?.length ?? 0} member{(team.member_ids?.length ?? 0) === 1 ? '' : 's'}
                                 </span>
-                                <button
-                                    type="button"
-                                    aria-label={`Delete ${team.name}`}
-                                    class="shrink-0 rounded p-1 text-neutral-400 hover:text-red-500"
-                                    onclick={() => deleteTeam(team)}>✕</button
-                                >
+                                {#if isSuperAdmin}
+                                    <button
+                                        type="button"
+                                        aria-label={`Delete ${team.name}`}
+                                        class="shrink-0 rounded p-1 text-neutral-400 hover:text-red-500"
+                                        onclick={() => deleteTeam(team)}>✕</button
+                                    >
+                                {/if}
                             {/if}
                         </div>
                         {#if team.description}
                             <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">{team.description}</p>
                         {/if}
-                        {#if members.length > 0}
-                            <div class="mt-3 flex flex-wrap gap-1.5">
+                        {#if canManageTeam(team) && members.length > 0}
+                            <div class="mt-3 space-y-1.5">
                                 {#each members.filter((m) => m.is_active !== false) as member (member.id)}
-                                    {@const inTeam = (team.member_ids ?? []).includes(member.id)}
-                                    <button
-                                        type="button"
-                                        aria-pressed={inTeam}
-                                        class={`rounded-full px-2.5 py-1 text-xs font-medium transition ${
-                                            inTeam
-                                                ? 'bg-amber-100 text-amber-900 ring-1 ring-amber-400 dark:bg-amber-500/20 dark:text-amber-200 dark:ring-amber-500/60'
-                                                : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700'
-                                        }`}
-                                        onclick={() => toggleTeamMember(team, member)}
+                                    <div class="flex items-center justify-between gap-2">
+                                        <span class="truncate text-sm">{member.name}</span>
+                                        <div class="flex shrink-0 items-center gap-2">
+                                            {#if (team.member_ids ?? []).includes(member.id)}
+                                                {#if isLeaderOf(team, member)}
+                                                    <button
+                                                        type="button"
+                                                        class="text-xs text-amber-600 hover:underline dark:text-amber-400"
+                                                        onclick={() => setTeamRole(team, member, 'member')}>Leader ✓</button
+                                                    >
+                                                {:else}
+                                                    <button
+                                                        type="button"
+                                                        class="text-xs text-neutral-500 hover:text-amber-600 dark:text-neutral-400 dark:hover:text-amber-400"
+                                                        onclick={() => setTeamRole(team, member, 'leader')}>Make leader</button
+                                                    >
+                                                {/if}
+                                                <button
+                                                    type="button"
+                                                    class="text-xs text-neutral-500 hover:text-red-600 dark:text-neutral-400 dark:hover:text-red-400"
+                                                    onclick={() => removeMemberFromTeam(team, member)}>Remove</button
+                                                >
+                                            {:else}
+                                                <button
+                                                    type="button"
+                                                    class="text-xs text-neutral-500 hover:text-amber-600 dark:text-neutral-400 dark:hover:text-amber-400"
+                                                    onclick={() => addMemberToTeam(team, member)}>Add</button
+                                                >
+                                            {/if}
+                                        </div>
+                                    </div>
+                                {/each}
+                            </div>
+                        {:else if members.length > 0}
+                            <div class="mt-3 flex flex-wrap gap-1.5">
+                                {#each members.filter((m) => (team.member_ids ?? []).includes(m.id)) as member (member.id)}
+                                    <span
+                                        class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-900 ring-1 ring-amber-400 dark:bg-amber-500/20 dark:text-amber-200 dark:ring-amber-500/60"
                                     >
                                         {member.name}
-                                    </button>
+                                    </span>
                                 {/each}
                             </div>
                         {/if}
@@ -211,14 +268,16 @@
         <section class="xl:col-span-3">
             <div class="mb-3 flex items-center justify-between">
                 <h2 class="ws-eyebrow text-neutral-500 dark:text-neutral-400">Members · {members.length}</h2>
-                <button
-                    type="button"
-                    class="rounded-md bg-amber-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-amber-600 dark:text-neutral-950"
-                    onclick={() => (addingMember = !addingMember)}>{addingMember ? 'Cancel' : '+ Add person'}</button
-                >
+                {#if isSuperAdmin}
+                    <button
+                        type="button"
+                        class="rounded-md bg-amber-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-amber-600 dark:text-neutral-950"
+                        onclick={() => (addingMember = !addingMember)}>{addingMember ? 'Cancel' : '+ Add person'}</button
+                    >
+                {/if}
             </div>
 
-            {#if addingMember}
+            {#if isSuperAdmin && addingMember}
                 <form onsubmit={addMember} class="mb-3 rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
                     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <div>
@@ -359,25 +418,27 @@
                                     class="shrink-0 text-xs text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
                                     onclick={() => startEditMember(member)}>Edit</button
                                 >
-                                {#if member.is_active === false}
+                                {#if isSuperAdmin}
+                                    {#if member.is_active === false}
+                                        <button
+                                            type="button"
+                                            class="shrink-0 text-xs text-emerald-600 hover:underline dark:text-emerald-400"
+                                            onclick={() => setMemberActive(member, true)}>Reactivate</button
+                                        >
+                                    {:else}
+                                        <button
+                                            type="button"
+                                            class="shrink-0 text-xs text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+                                            onclick={() => setMemberActive(member, false)}>Deactivate</button
+                                        >
+                                    {/if}
                                     <button
                                         type="button"
-                                        class="shrink-0 text-xs text-emerald-600 hover:underline dark:text-emerald-400"
-                                        onclick={() => setMemberActive(member, true)}>Reactivate</button
-                                    >
-                                {:else}
-                                    <button
-                                        type="button"
-                                        class="shrink-0 text-xs text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
-                                        onclick={() => setMemberActive(member, false)}>Deactivate</button
+                                        aria-label={`Delete ${member.name}`}
+                                        class="shrink-0 rounded p-1 text-neutral-400 hover:text-red-500"
+                                        onclick={() => deleteMember(member)}>✕</button
                                     >
                                 {/if}
-                                <button
-                                    type="button"
-                                    aria-label={`Delete ${member.name}`}
-                                    class="shrink-0 rounded p-1 text-neutral-400 hover:text-red-500"
-                                    onclick={() => deleteMember(member)}>✕</button
-                                >
                             </div>
                         {/if}
                     </div>
