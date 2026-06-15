@@ -1,5 +1,6 @@
 <script lang="ts">
     import { page, router } from '@inertiajs/svelte';
+    import { untrack } from 'svelte';
     import { SvelteMap } from 'svelte/reactivity';
     import { formatDate } from '../lib/format';
     import { peek } from '../lib/peek.svelte';
@@ -71,16 +72,23 @@
         if (target) void load(target.id, { background: true });
     }
 
+    // Re-runs only when the open target changes — NOT when `cache` mutates.
+    // Reading `cache.get()` here would subscribe the effect to the cache key
+    // that `load()` writes to, creating an infinite refetch loop that also
+    // wiped transient UI state (open drafts, expanded history) on every cycle.
     $effect(() => {
-        if (!target) return;
+        const opened = target;
+        if (!opened) return;
 
-        openPathname = window.location.pathname;
-        const cached = cache.get(target.id) ?? null;
-        preview = cached;
-        progressDraft = cached?.task.progress ?? 0;
-        editingTitle = editingDescription = showContactForm = showHistory = false;
-        subtaskDraft = noteDraft = '';
-        void load(target.id, { background: cached !== null });
+        untrack(() => {
+            openPathname = window.location.pathname;
+            const cached = cache.get(opened.id) ?? null;
+            preview = cached;
+            progressDraft = cached?.task.progress ?? 0;
+            editingTitle = editingDescription = showContactForm = showHistory = false;
+            subtaskDraft = noteDraft = '';
+            void load(opened.id, { background: cached !== null });
+        });
 
         const previousOverflow = document.body.style.overflow;
         document.body.style.overflow = 'hidden';
@@ -335,6 +343,7 @@
                             task={{ id: task.id, slug: task.slug, assignments: preview?.assignments ?? [] }}
                             team={preview?.team ?? []}
                             max={6}
+                            align="left"
                             onUpdated={revalidate}
                         />
                     </div>

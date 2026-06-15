@@ -9,12 +9,14 @@
         team,
         max = 3,
         size = 'md',
+        align = 'right',
         onUpdated,
     }: {
         task: Pick<Task, 'id' | 'slug'> & { assignments?: Assignment[] };
         team: Member[];
         max?: number;
         size?: 'sm' | 'md';
+        align?: 'left' | 'right';
         onUpdated?: () => void;
     } = $props();
 
@@ -63,7 +65,7 @@
     }
 </script>
 
-<Popover bind:open role="dialog" align="right" triggerLabel="Assignees" panelClass="w-64">
+<Popover bind:open role="dialog" {align} triggerLabel="Assignees" panelClass="w-64">
     {#snippet trigger()}
         <span class="flex items-center -space-x-1.5">
             {#each visible as assignment (assignment.id)}
