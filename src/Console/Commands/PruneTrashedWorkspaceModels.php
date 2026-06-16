@@ -9,6 +9,7 @@ use RayzenAI\ProjectManagement\Models\ProjectContact;
 use RayzenAI\ProjectManagement\Models\ProjectNote;
 use RayzenAI\ProjectManagement\Models\Subtask;
 use RayzenAI\ProjectManagement\Models\Task;
+use RayzenAI\ProjectManagement\Models\TaskComment;
 use RayzenAI\ProjectManagement\Models\Team;
 use RayzenAI\ProjectManagement\Models\WorkspaceNote;
 
@@ -22,6 +23,7 @@ class PruneTrashedWorkspaceModels extends Command
     private array $models = [
         Task::class, Subtask::class, ProjectNote::class, ProjectContact::class,
         ProjectAssignment::class, WorkspaceNote::class, Team::class, Member::class,
+        TaskComment::class,
     ];
 
     public function handle(): int
