@@ -2,6 +2,7 @@
 
 namespace RayzenAI\ProjectManagement\Http\Middleware;
 
+use App\Services\ResolveThemeTokens;
 use Closure;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -68,6 +69,18 @@ class ShareWorkspaceData
                     ->orderByDesc('updated_at')
                     ->get()
             )->resolve();
+        });
+
+        Inertia::share('appearance', function () use ($request): array {
+            $theme = $request->user()?->appearance()['theme'] ?? config('themes.default', 'system');
+            $fontOverride = $request->user()?->appearance()['font_override'] ?? null;
+            $themes = (array) config('themes.themes');
+
+            return [
+                'theme' => $theme,
+                'mode' => $themes[$theme]['mode'] ?? null,
+                'tokens' => app(ResolveThemeTokens::class)->resolved($theme, $fontOverride),
+            ];
         });
 
         Inertia::share('unreadNotifications', fn (): int => $request->user()?->unreadNotifications()->count() ?? 0);
