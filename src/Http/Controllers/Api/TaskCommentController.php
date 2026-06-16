@@ -31,7 +31,7 @@ class TaskCommentController extends Controller
 
         TaskCommentResource::preload($comments->getCollection());
 
-        return TaskCommentResource::collection($comments)->additional(['message' => 'ok']);
+        return TaskCommentResource::collection($comments)->additional(['message' => 'Comments retrieved.']);
     }
 
     public function store(StoreTaskCommentRequest $request, Task $task, CreateTaskCommentService $service): JsonResponse
