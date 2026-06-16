@@ -4,19 +4,17 @@ namespace RayzenAI\ProjectManagement\Http\Controllers\Api;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Routing\Controller;
 use RayzenAI\ProjectManagement\Http\Resources\NotificationResource;
 
 class NotificationController extends Controller
 {
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): AnonymousResourceCollection
     {
-        $items = $request->user()->notifications()->paginate(20);
-
-        return response()->json([
-            'message' => 'ok',
-            'data' => NotificationResource::collection($items),
-        ]);
+        return NotificationResource::collection(
+            $request->user()->notifications()->paginate(20)
+        )->additional(['message' => 'ok']);
     }
 
     public function unreadCount(Request $request): JsonResponse
