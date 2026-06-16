@@ -103,7 +103,7 @@ class QuickAddTaskService
 
         $slug = $base;
         $i = 2;
-        while (Task::query()->where('slug', $slug)->exists()) {
+        while (Task::withTrashed()->where('slug', $slug)->exists()) {
             $slug = $base.'-'.$i;
             $i++;
         }
