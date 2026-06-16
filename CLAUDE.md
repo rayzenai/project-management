@@ -28,10 +28,27 @@ package-specific layer, not a replacement.
 - `Relation::enforceMorphMap([...])` for `task`, `project-note`, `project-contact`,
   `subtask`, `project-assignment`, `team`, `member` (merges with the host's map).
 - Registers 5 observers: `Task`, `ProjectNote`, `ProjectContact`, `Subtask`,
-  `ProjectAssignment` (these write the `ProjectActivity` audit log).
+  `ProjectAssignment` (these write the `ProjectActivity` audit log, and dispatch the
+  in-app notifications below).
 - Registers the `digest:send-weekly` console command (`SendProjectWeeklyDigest`) and
   the `workspace:prune-trashed` command (`PruneTrashedWorkspaceModels`, scheduled daily).
 - Publishes the config under tag `project-management-config`.
+
+### In-app notifications (`src/Notifications/`)
+
+- Laravel notifications, **`database` channel only** (v1 is in-app; email + FCM push are
+  deferred — `via()` returns `['database']`, classes are **synchronous** (no `ShouldQueue`)
+  so delivery needs no queue worker). Re-add `ShouldQueue` when email/push are introduced.
+- Four classes sharing `Concerns\BuildsWorkspaceNotification` (the `via()` + `taskRef`/`taskUrl`
+  helpers): `TaskAssigned`, `TaskStatusChanged`, `MentionedInComment`, `TaskDeadlineDue`. Each
+  `toArray()` emits the stable `data` payload `{kind, title, body, task, actor, url}` — the
+  Flutter contract (see `docs/api/workspace-api.md` § Notifications).
+- Dispatched from observers (side effects belong there): `ProjectAssignmentObserver::created`
+  → `TaskAssigned`; `TaskObserver::updated` → `TaskStatusChanged` when status enters
+  `{done, done_late, late, failed}` (actor excluded, login-less members skipped).
+  `MentionedInComment`/`TaskDeadlineDue` are dispatched by the comments/reminders features.
+- Surfaced via `Api\NotificationController` (`/api/v1/notifications…`) + `Workspace\NotificationController`
+  (web inbox page + bell, with `unreadNotifications` shared by `ShareWorkspaceData`).
 
 ## Commands
 
