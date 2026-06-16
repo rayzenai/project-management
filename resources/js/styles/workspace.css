@@ -9,6 +9,45 @@
     --font-display: 'Syne', ui-sans-serif, system-ui, sans-serif;
     --font-sans: 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif;
     --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+    /* ------------------------------------------------------------------ *
+     * Semantic color layer. Each Tailwind color utility name resolves
+     * (via this indirection) to a runtime `--ws-*` variable that the
+     * theme applier (applyTheme.ts) writes per the active token theme.
+     * This generates `bg-bg`, `bg-surface`, `text-fg`, `border-line`,
+     * `text-accent`, etc. — utilities the component sweep will adopt.
+     * ------------------------------------------------------------------ */
+    --color-bg: var(--ws-bg);
+    --color-surface: var(--ws-surface);
+    --color-surface-alt: var(--ws-surface-alt);
+    --color-line: var(--ws-line);
+    --color-line-soft: var(--ws-line-soft);
+    --color-fg: var(--ws-text);
+    --color-fg-muted: var(--ws-text-muted);
+    --color-fg-faint: var(--ws-text-faint);
+    --color-accent: var(--ws-accent);
+    --color-accent-dim: var(--ws-accent-dim);
+    --color-warn: var(--ws-warn);
+    --color-danger: var(--ws-danger);
+    --color-success: var(--ws-success);
+}
+
+/* Terminal-noir defaults so first paint / SSR / pre-JS render the current
+   dark look; applyTheme overrides these post-hydration per the active theme. */
+:root {
+    --ws-bg: #08090a;
+    --ws-surface: #111417;
+    --ws-surface-alt: #161a1e;
+    --ws-line: #20262b;
+    --ws-line-soft: #181d21;
+    --ws-text: #e9e7e2;
+    --ws-text-muted: #9aa1a8;
+    --ws-text-faint: #5c646b;
+    --ws-accent: #b6ff3a;
+    --ws-accent-dim: #8bc91f;
+    --ws-warn: #f4b740;
+    --ws-danger: #ff5c5c;
+    --ws-success: #b6ff3a;
 }
 
 /* ------------------------------------------------------------------ *

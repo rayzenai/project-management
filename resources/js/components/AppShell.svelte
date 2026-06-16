@@ -22,25 +22,8 @@
     const noteCount = $derived(shared.workspaceNotes?.length ?? 0);
     const unreadNotifications = $derived(shared.unreadNotifications ?? 0);
 
-    let isDark = $state(false);
     let mobileOpen = $state(false);
     let lastFlash = $state<string | null>(null);
-
-    $effect(() => {
-        if (typeof window === 'undefined') return;
-        const stored = window.localStorage.getItem('workspace.theme');
-        const prefersDark = stored ? stored === 'dark' : true;
-        isDark = prefersDark;
-        document.documentElement.classList.toggle('dark', prefersDark);
-    });
-
-    function toggleTheme() {
-        isDark = !isDark;
-        document.documentElement.classList.toggle('dark', isDark);
-        if (typeof window !== 'undefined') {
-            window.localStorage.setItem('workspace.theme', isDark ? 'dark' : 'light');
-        }
-    }
 
     $effect(() => {
         const message = flash?.message ?? null;
@@ -242,13 +225,6 @@
                         >
                     {/if}
                 </button>
-                <button
-                    type="button"
-                    onclick={toggleTheme}
-                    aria-label="Toggle theme"
-                    class="rounded-md p-2 text-neutral-600 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
-                    >{isDark ? '☀' : '☾'}</button
-                >
             </div>
         </header>
 
