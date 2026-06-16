@@ -25,6 +25,8 @@ class ProjectActivity extends Model
 
     public const ACTION_REOPENED = 'reopened';
 
+    public const ACTION_COMMENTED = 'commented';
+
     protected $table = 'project_activities';
 
     protected $fillable = [

@@ -21,6 +21,7 @@ use RayzenAI\ProjectManagement\Observers\ProjectAssignmentObserver;
 use RayzenAI\ProjectManagement\Observers\ProjectContactObserver;
 use RayzenAI\ProjectManagement\Observers\ProjectNoteObserver;
 use RayzenAI\ProjectManagement\Observers\SubtaskObserver;
+use RayzenAI\ProjectManagement\Observers\TaskCommentObserver;
 use RayzenAI\ProjectManagement\Observers\TaskObserver;
 
 class ProjectManagementServiceProvider extends ServiceProvider
@@ -80,6 +81,7 @@ class ProjectManagementServiceProvider extends ServiceProvider
         ProjectContact::observe(ProjectContactObserver::class);
         Subtask::observe(SubtaskObserver::class);
         ProjectAssignment::observe(ProjectAssignmentObserver::class);
+        TaskComment::observe(TaskCommentObserver::class);
 
         if ($this->app->runningInConsole()) {
             $this->commands([
