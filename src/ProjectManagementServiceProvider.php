@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use RayzenAI\ProjectManagement\Console\Commands\PruneTrashedWorkspaceModels;
+use RayzenAI\ProjectManagement\Console\Commands\SendProjectDeadlineReminders;
 use RayzenAI\ProjectManagement\Console\Commands\SendProjectWeeklyDigest;
 use RayzenAI\ProjectManagement\Models\Member;
 use RayzenAI\ProjectManagement\Models\ProjectAssignment;
@@ -82,6 +83,7 @@ class ProjectManagementServiceProvider extends ServiceProvider
             $this->commands([
                 SendProjectWeeklyDigest::class,
                 PruneTrashedWorkspaceModels::class,
+                SendProjectDeadlineReminders::class,
             ]);
         }
 
