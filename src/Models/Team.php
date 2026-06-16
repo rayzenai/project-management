@@ -30,7 +30,7 @@ class Team extends Model
                 $base = Str::slug($team->name) ?: 'team';
                 $slug = $base;
                 $i = 2;
-                while (self::query()->where('slug', $slug)->whereKeyNot($team->getKey())->exists()) {
+                while (static::withTrashed()->where('slug', $slug)->whereKeyNot($team->getKey())->exists()) {
                     $slug = $base.'-'.$i;
                     $i++;
                 }
