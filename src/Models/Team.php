@@ -5,13 +5,14 @@ namespace RayzenAI\ProjectManagement\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use RayzenAI\ProjectManagement\Database\Factories\TeamFactory;
 
 class Team extends Model
 {
     /** @use HasFactory<TeamFactory> */
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'teams';
 
@@ -29,7 +30,7 @@ class Team extends Model
                 $base = Str::slug($team->name) ?: 'team';
                 $slug = $base;
                 $i = 2;
-                while (self::query()->where('slug', $slug)->whereKeyNot($team->getKey())->exists()) {
+                while (static::withTrashed()->where('slug', $slug)->whereKeyNot($team->getKey())->exists()) {
                     $slug = $base.'-'.$i;
                     $i++;
                 }

@@ -7,10 +7,12 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use RayzenAI\ProjectManagement\Http\Controllers\Api\Concerns\RespondsWithServiceResult;
 use RayzenAI\ProjectManagement\Http\Requests\StoreMemberRequest;
 use RayzenAI\ProjectManagement\Http\Requests\UpdateMemberRequest;
 use RayzenAI\ProjectManagement\Http\Resources\MemberResource;
 use RayzenAI\ProjectManagement\Models\Member;
+use RayzenAI\ProjectManagement\Services\Workspace\RestoreWorkspaceModel;
 use RayzenAI\ProjectManagement\Support\WorkspaceAccess;
 
 /**
@@ -24,6 +26,8 @@ use RayzenAI\ProjectManagement\Support\WorkspaceAccess;
  */
 class MemberController extends Controller
 {
+    use RespondsWithServiceResult;
+
     public function store(StoreMemberRequest $request): JsonResponse
     {
         $withLogin = $request->filled('password');
@@ -117,5 +121,17 @@ class MemberController extends Controller
         });
 
         return response()->json(['message' => 'Member and their login removed.']);
+    }
+
+    public function restore(Request $request, Member $member, RestoreWorkspaceModel $service): JsonResponse
+    {
+        abort_unless(WorkspaceAccess::isSuperAdmin($request->user()), 403);
+
+        $result = $service->execute($member);
+
+        return $this->respondWithResult(
+            $result,
+            $result->data instanceof Member ? new MemberResource($result->data->load('teams:id')) : null,
+        );
     }
 }

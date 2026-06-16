@@ -28,9 +28,29 @@ package-specific layer, not a replacement.
 - `Relation::enforceMorphMap([...])` for `task`, `project-note`, `project-contact`,
   `subtask`, `project-assignment`, `team`, `member` (merges with the host's map).
 - Registers 5 observers: `Task`, `ProjectNote`, `ProjectContact`, `Subtask`,
-  `ProjectAssignment` (these write the `ProjectActivity` audit log).
-- Registers the `digest:send-weekly` console command (`SendProjectWeeklyDigest`).
+  `ProjectAssignment` (these write the `ProjectActivity` audit log, and dispatch the
+  in-app notifications below).
+- Registers the `digest:send-weekly` console command (`SendProjectWeeklyDigest`),
+  the `workspace:prune-trashed` command (`PruneTrashedWorkspaceModels`, scheduled daily),
+  and the `workspace:send-deadline-reminders` command (`SendProjectDeadlineReminders`,
+  scheduled daily at `reminders.run_at`).
 - Publishes the config under tag `project-management-config`.
+
+### In-app notifications (`src/Notifications/`)
+
+- Laravel notifications, **`database` channel only** (v1 is in-app; email + FCM push are
+  deferred — `via()` returns `['database']`, classes are **synchronous** (no `ShouldQueue`)
+  so delivery needs no queue worker). Re-add `ShouldQueue` when email/push are introduced.
+- Four classes sharing `Concerns\BuildsWorkspaceNotification` (the `via()` + `taskRef`/`taskUrl`
+  helpers): `TaskAssigned`, `TaskStatusChanged`, `MentionedInComment`, `TaskDeadlineDue`. Each
+  `toArray()` emits the stable `data` payload `{kind, title, body, task, actor, url}` — the
+  Flutter contract (see `docs/api/workspace-api.md` § Notifications).
+- Dispatched from observers (side effects belong there): `ProjectAssignmentObserver::created`
+  → `TaskAssigned`; `TaskObserver::updated` → `TaskStatusChanged` when status enters
+  `{done, done_late, late, failed}` (actor excluded, login-less members skipped).
+  `MentionedInComment`/`TaskDeadlineDue` are dispatched by the comments/reminders features.
+- Surfaced via `Api\NotificationController` (`/api/v1/notifications…`) + `Workspace\NotificationController`
+  (web inbox page + bell, with `unreadNotifications` shared by `ShareWorkspaceData`).
 
 ## Commands
 
@@ -46,6 +66,8 @@ php artisan test --compact tests/Feature/Workspace
 php artisan test --compact --filter=TeamPermissions
 php artisan migrate                         # package migrations load automatically
 php artisan digest:send-weekly --pretend    # dry-run the weekly digest
+php artisan workspace:prune-trashed --pretend  # dry-run the soft-delete prune (force-deletes rows past trash_ttl_days)
+php artisan workspace:send-deadline-reminders --pretend  # dry-run deadline reminders (heads-up/due-today/overdue → in-app notifications)
 ```
 
 ## Configuration (`config/project-management.php`)
@@ -212,6 +234,36 @@ needs no extra fetch: `statuses` (config workflow), `completeStatus`,
 `quickAddContext` (active projects + active members + `currentMemberId`),
 `workspaceNotes` (the user's notes), `isSuperAdmin`, `ledTeamIds`. When adding
 cross-cutting web context, add it here; for the API, add it to `Api\AuthController::userPayload`.
+
+## Semantic theming layer (web UI) — USE THE SEMANTIC UTILITIES
+
+The workspace web UI is **fully themeable at runtime** through a semantic
+CSS-variable layer. Components must never hardcode raw palette colors; they style
+against semantic utilities that resolve to the active theme's tokens.
+
+- **`resources/js/styles/workspace.css`** defines the `--ws-*` custom properties and
+  a Tailwind v4 `@theme` block that maps each color utility to one of them:
+  `--color-bg/surface/surface-alt/line/line-soft/fg/fg-muted/fg-faint/accent/accent-dim/warn/danger/success`
+  → `var(--ws-*)` (note: the `fg*` utility names map to the `--ws-text*` vars). So
+  `bg-surface`, `bg-bg`, `text-fg`, `text-fg-muted`, `text-fg-faint`, `border-line`,
+  `border-line-soft`, `text-accent`, `text-warn`/`text-danger`/`text-success`, and
+  `text-bg` all resolve to whatever theme is active at runtime.
+- **`lib/applyTheme.ts` (`applyAppearance`)** is the SINGLE source of mode. It writes
+  the chosen theme's tokens onto `--ws-*` (plus `--font-display`/`--font-sans`/`--font-mono`)
+  and sets the document mode (`colorScheme` + `data-theme`). For `system` it follows
+  the OS scheme via one shared listener. Do **not** reintroduce ad-hoc `.dark`
+  localStorage toggles or component-local theme state — the `.dark` class it still
+  toggles is a compatibility shim, not an entry point.
+- **Workspace components MUST use the semantic utilities — NOT raw `neutral-*`/`amber-*`
+  or `dark:` variants** — or they won't theme. The ONLY sanctioned exceptions are:
+  - **data-driven colors** keyed off domain data (status/priority/category palettes):
+    `StatusBadge`, `PriorityFlag`, `PillGroup`.
+  - **paper-bound sticky notes**: `NoteSticky` and the `WorkspaceNotesBoard` card internals.
+- **Themes are defined in the host's `config/themes.php`** — the token table is the
+  single source of truth for **both** web and Flutter. Served via `GET /api/v1/themes`.
+  Per-user choice persists via `/api/v1/user/preferences` (carrying `theme`,
+  `font_override`, `email_notifications`, and `configured`). Email delivery is deferred
+  (in-app notifications only for now); `email_notifications` is stored for when it lands.
 
 ## Conventions
 

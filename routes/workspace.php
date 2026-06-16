@@ -7,10 +7,13 @@ use RayzenAI\ProjectManagement\Http\Controllers\Workspace\DashboardController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\MemberController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\MyWorkspaceController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\NoteController;
+use RayzenAI\ProjectManagement\Http\Controllers\Workspace\NotificationController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\PlanTrackerController;
+use RayzenAI\ProjectManagement\Http\Controllers\Workspace\PreferenceController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\ProjectController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\QuickAddController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\SubtaskController;
+use RayzenAI\ProjectManagement\Http\Controllers\Workspace\TaskCommentController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\TaskController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\TaskPreviewController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\TaskReorderController;
@@ -34,6 +37,7 @@ Route::middleware([...config('project-management.middleware', ['web', 'auth']), 
         Route::post('/teams', [TeamController::class, 'store'])->name('teams.store');
         Route::patch('/teams/{team}', [TeamController::class, 'update'])->name('teams.update');
         Route::delete('/teams/{team}', [TeamController::class, 'destroy'])->name('teams.destroy');
+        Route::post('/teams/{team}/restore', [TeamController::class, 'restore'])->name('teams.restore')->withTrashed();
         Route::post('/teams/{team}/members', [TeamMemberController::class, 'store'])->name('teams.members.store');
         Route::delete('/teams/{team}/members/{member}', [TeamMemberController::class, 'destroy'])->name('teams.members.destroy');
         Route::patch('/teams/{team}/members/{member}', [TeamMemberController::class, 'updateRole'])->name('teams.members.role');
@@ -41,6 +45,7 @@ Route::middleware([...config('project-management.middleware', ['web', 'auth']), 
         Route::post('/members', [MemberController::class, 'store'])->name('members.store');
         Route::patch('/members/{member}', [MemberController::class, 'update'])->name('members.update');
         Route::delete('/members/{member}', [MemberController::class, 'destroy'])->name('members.destroy');
+        Route::post('/members/{member}/restore', [MemberController::class, 'restore'])->name('members.restore')->withTrashed();
 
         Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
         Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
@@ -67,24 +72,44 @@ Route::middleware([...config('project-management.middleware', ['web', 'auth']), 
         Route::delete('/projects/{project:slug}/tasks/{task:slug}', [TaskController::class, 'destroy'])
             ->scopeBindings()
             ->name('tasks.destroy');
+        Route::post('/projects/{project:slug}/tasks/{task:slug}/restore', [TaskController::class, 'restore'])
+            ->scopeBindings()
+            ->withTrashed()
+            ->name('tasks.restore');
 
         Route::post('/tasks/{task}/assignments', [AssignmentController::class, 'store'])->name('assignments.store');
         Route::patch('/assignments/{assignment}', [AssignmentController::class, 'update'])->name('assignments.update');
         Route::delete('/assignments/{assignment}', [AssignmentController::class, 'destroy'])->name('assignments.destroy');
+        Route::post('/assignments/{assignment}/restore', [AssignmentController::class, 'restore'])->name('assignments.restore')->withTrashed();
 
         Route::post('/tasks/{task}/notes', [NoteController::class, 'store'])->name('notes.store');
         Route::delete('/notes/{note}', [NoteController::class, 'destroy'])->name('notes.destroy');
+        Route::post('/notes/{note}/restore', [NoteController::class, 'restore'])->name('notes.restore')->withTrashed();
 
         Route::post('/my-notes', [WorkspaceNoteController::class, 'store'])->name('my-notes.store');
         Route::patch('/my-notes/{workspaceNote}', [WorkspaceNoteController::class, 'update'])->name('my-notes.update');
         Route::patch('/my-notes/{workspaceNote}/placement', [WorkspaceNoteController::class, 'placement'])->name('my-notes.placement');
         Route::delete('/my-notes/{workspaceNote}', [WorkspaceNoteController::class, 'destroy'])->name('my-notes.destroy');
+        Route::post('/my-notes/{workspaceNote}/restore', [WorkspaceNoteController::class, 'restore'])->name('my-notes.restore')->withTrashed();
 
         Route::post('/tasks/{task}/contacts', [ContactController::class, 'store'])->name('contacts.store');
+
+        Route::get('/tasks/{task}/comments', [TaskCommentController::class, 'index'])->name('tasks.comments.index');
+        Route::post('/tasks/{task}/comments', [TaskCommentController::class, 'store'])->name('tasks.comments.store');
+        Route::patch('/comments/{comment}', [TaskCommentController::class, 'update'])->name('comments.update');
+        Route::delete('/comments/{comment}', [TaskCommentController::class, 'destroy'])->name('comments.destroy');
+        Route::post('/comments/{comment}/restore', [TaskCommentController::class, 'restore'])->name('comments.restore')->withTrashed();
 
         Route::post('/tasks/{task}/subtasks', [SubtaskController::class, 'store'])->name('subtasks.store');
         Route::patch('/subtasks/{subtask}', [SubtaskController::class, 'update'])->name('subtasks.update');
         Route::delete('/subtasks/{subtask}', [SubtaskController::class, 'destroy'])->name('subtasks.destroy');
+        Route::post('/subtasks/{subtask}/restore', [SubtaskController::class, 'restore'])->name('subtasks.restore')->withTrashed();
+
+        Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
+        Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
+        Route::post('/notifications/{id}/read', [NotificationController::class, 'read'])->name('notifications.read');
 
         Route::get('/100-point-tracker', PlanTrackerController::class)->name('plan-tracker');
+
+        Route::patch('/preferences', [PreferenceController::class, 'update'])->name('preferences.update');
     });

@@ -6,7 +6,7 @@
     function classFor(opt: Option, active: boolean): string {
         const base = size === 'sm' ? 'px-2 py-0.5 text-xs' : 'px-2.5 py-1 text-xs';
         if (!active) {
-            return `${base} rounded-full ring-1 ring-inset ring-neutral-200 bg-white text-neutral-600 hover:bg-neutral-100 dark:ring-neutral-700 dark:bg-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800`;
+            return `${base} rounded-full ring-1 ring-inset ring-line bg-surface text-fg-muted hover:bg-surface-alt`;
         }
         switch (opt.tone) {
             case 'red':

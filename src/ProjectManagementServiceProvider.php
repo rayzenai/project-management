@@ -2,9 +2,12 @@
 
 namespace RayzenAI\ProjectManagement;
 
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use RayzenAI\ProjectManagement\Console\Commands\PruneTrashedWorkspaceModels;
+use RayzenAI\ProjectManagement\Console\Commands\SendProjectDeadlineReminders;
 use RayzenAI\ProjectManagement\Console\Commands\SendProjectWeeklyDigest;
 use RayzenAI\ProjectManagement\Models\Member;
 use RayzenAI\ProjectManagement\Models\ProjectAssignment;
@@ -12,11 +15,13 @@ use RayzenAI\ProjectManagement\Models\ProjectContact;
 use RayzenAI\ProjectManagement\Models\ProjectNote;
 use RayzenAI\ProjectManagement\Models\Subtask;
 use RayzenAI\ProjectManagement\Models\Task;
+use RayzenAI\ProjectManagement\Models\TaskComment;
 use RayzenAI\ProjectManagement\Models\Team;
 use RayzenAI\ProjectManagement\Observers\ProjectAssignmentObserver;
 use RayzenAI\ProjectManagement\Observers\ProjectContactObserver;
 use RayzenAI\ProjectManagement\Observers\ProjectNoteObserver;
 use RayzenAI\ProjectManagement\Observers\SubtaskObserver;
+use RayzenAI\ProjectManagement\Observers\TaskCommentObserver;
 use RayzenAI\ProjectManagement\Observers\TaskObserver;
 
 class ProjectManagementServiceProvider extends ServiceProvider
@@ -62,6 +67,7 @@ class ProjectManagementServiceProvider extends ServiceProvider
         Relation::enforceMorphMap([
             'user' => config('project-management.user_model'),
             'task' => Task::class,
+            'task-comment' => TaskComment::class,
             'project-note' => ProjectNote::class,
             'project-contact' => ProjectContact::class,
             'subtask' => Subtask::class,
@@ -75,11 +81,22 @@ class ProjectManagementServiceProvider extends ServiceProvider
         ProjectContact::observe(ProjectContactObserver::class);
         Subtask::observe(SubtaskObserver::class);
         ProjectAssignment::observe(ProjectAssignmentObserver::class);
+        TaskComment::observe(TaskCommentObserver::class);
 
         if ($this->app->runningInConsole()) {
             $this->commands([
                 SendProjectWeeklyDigest::class,
+                PruneTrashedWorkspaceModels::class,
+                SendProjectDeadlineReminders::class,
             ]);
         }
+
+        $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
+            $schedule->command('workspace:prune-trashed')->daily()->withoutOverlapping();
+
+            $schedule->command('workspace:send-deadline-reminders')
+                ->dailyAt((string) config('project-management.reminders.run_at', '08:00'))
+                ->withoutOverlapping();
+        });
     }
 }

@@ -58,7 +58,7 @@
         <span
             class={`inline-flex items-center gap-1 rounded-full font-medium whitespace-nowrap ring-1 ring-inset ${
                 size === 'sm' ? 'px-1.5 py-px text-[10px]' : 'px-2 py-0.5 text-xs'
-            } ${failed ? 'ring-2 ring-red-400' : ''}`}
+            } ${failed ? 'ring-2 ring-danger' : ''}`}
             style={`background-color:${color}1a; color:${color}; --tw-ring-color:${color}40;`}
         >
             <span class="h-1.5 w-1.5 rounded-full" style={`background:${color}`}></span>
@@ -72,12 +72,12 @@
             data-popover-item
             role="option"
             aria-selected={s.value === shown}
-            class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-neutral-700 hover:bg-neutral-100 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-fg-muted hover:bg-surface-alt"
             onclick={() => setStatus(s.value)}
         >
             <span class="h-2 w-2 shrink-0 rounded-full" style={`background:${s.color}`}></span>
             <span class="flex-1">{s.label}</span>
-            {#if s.value === shown}<span class="text-amber-600 dark:text-amber-400">✓</span>{/if}
+            {#if s.value === shown}<span class="text-accent">✓</span>{/if}
         </button>
     {/each}
 </Popover>

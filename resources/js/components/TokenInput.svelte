@@ -49,7 +49,7 @@
         type="text"
         {placeholder}
         {disabled}
-        class="relative w-full bg-transparent px-3 py-2 font-sans text-base text-transparent caret-neutral-900 outline-none placeholder:text-neutral-400 dark:caret-neutral-100 dark:placeholder:text-neutral-500"
+        class="relative w-full bg-transparent px-3 py-2 font-sans text-base text-transparent caret-fg outline-none placeholder:text-fg-faint"
         autocomplete="off"
         spellcheck="false"
         oninput={() => {

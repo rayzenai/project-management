@@ -14,6 +14,7 @@ use RayzenAI\ProjectManagement\Models\Task;
 use RayzenAI\ProjectManagement\Queries\TaskShowQuery;
 use RayzenAI\ProjectManagement\Services\Workspace\CreateTaskService;
 use RayzenAI\ProjectManagement\Services\Workspace\DeleteTaskService;
+use RayzenAI\ProjectManagement\Services\Workspace\RestoreWorkspaceModel;
 use RayzenAI\ProjectManagement\Services\Workspace\UpdateTaskService;
 
 /**
@@ -62,5 +63,17 @@ class TaskController extends Controller
         $result = $service->execute($task);
 
         return $this->respondWithResult($result);
+    }
+
+    public function restore(Project $project, Task $task, RestoreWorkspaceModel $service): JsonResponse
+    {
+        abort_unless($task->project_id === $project->id, 404);
+
+        $result = $service->execute($task);
+
+        return $this->respondWithResult(
+            $result,
+            $result->data instanceof Task ? new TaskResource($result->data) : null,
+        );
     }
 }

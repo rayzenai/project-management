@@ -48,7 +48,7 @@
 <AppShell>
     <header class="mb-6">
         <h1 class="text-2xl font-bold tracking-tight">100-Point Tracker</h1>
-        <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+        <p class="mt-1 text-sm text-fg-muted">
             The full Government 100-Day Plan, filterable by category, status, and ministry.
         </p>
     </header>
@@ -58,11 +58,11 @@
             type="text"
             bind:value={query}
             placeholder="Search tasks, ministries..."
-            class="w-full max-w-xs rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+            class="w-full max-w-xs rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
         />
         <select
             bind:value={categoryFilter}
-            class="rounded-md border border-neutral-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+            class="rounded-md border border-line bg-surface px-2 py-1.5 text-sm text-fg"
         >
             <option value={null}>All categories</option>
             {#each Object.entries(categories) as [slug, info] (slug)}
@@ -71,7 +71,7 @@
         </select>
         <select
             bind:value={statusFilter}
-            class="rounded-md border border-neutral-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+            class="rounded-md border border-line bg-surface px-2 py-1.5 text-sm text-fg"
         >
             <option value={null}>All statuses</option>
             {#each Object.entries(statusMap) as [slug, info] (slug)}
@@ -79,7 +79,7 @@
             {/each}
         </select>
         <div class="flex-1"></div>
-        <span class="text-xs text-neutral-500 dark:text-neutral-400">{filtered.length} / {tasks.length} tasks</span>
+        <span class="text-xs text-fg-muted">{filtered.length} / {tasks.length} tasks</span>
     </div>
 
     <div class="space-y-2">
@@ -87,7 +87,7 @@
             <TaskRow {task} {project} />
         {:else}
             <p
-                class="rounded-xl border border-dashed border-neutral-300 bg-white p-6 text-center text-sm text-neutral-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-400"
+                class="rounded-xl border border-dashed border-line bg-surface p-6 text-center text-sm text-fg-muted"
             >
                 No tasks match those filters.
             </p>

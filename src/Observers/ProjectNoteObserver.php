@@ -37,4 +37,14 @@ class ProjectNoteObserver
             description: 'Note deleted',
         );
     }
+
+    public function restored(ProjectNote $note): void
+    {
+        ProjectActivityRecorder::record(
+            taskId: $note->task_id,
+            subject: $note,
+            action: ProjectActivity::ACTION_RESTORED,
+            description: 'Note restored',
+        );
+    }
 }

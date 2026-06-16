@@ -43,30 +43,30 @@
 
 {#snippet sortArrow(key: SortKey)}
     {#if sort.key === key}
-        <span class="text-amber-600 dark:text-amber-400">{sort.dir === 'asc' ? '↑' : '↓'}</span>
+        <span class="text-accent">{sort.dir === 'asc' ? '↑' : '↓'}</span>
     {/if}
 {/snippet}
 
-<div class="overflow-x-auto rounded-xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
+<div class="overflow-x-auto rounded-xl border border-line bg-surface">
     <table class="w-full text-left">
         <thead>
-            <tr class="border-b border-neutral-200 dark:border-neutral-800">
+            <tr class="border-b border-line">
                 <th class="w-8 px-3 py-2"><span class="sr-only">Complete</span></th>
                 <th class="w-14 px-2 py-2">
                     <button
                         type="button"
-                        class="ws-eyebrow text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+                        class="ws-eyebrow text-fg-muted hover:text-fg"
                         onclick={() => toggleSort('item')}
                     >
                         # {@render sortArrow('item')}
                     </button>
                 </th>
-                <th class="px-2 py-2"><span class="ws-eyebrow text-neutral-500 dark:text-neutral-400">Title</span></th>
-                <th class="w-36 px-2 py-2"><span class="ws-eyebrow text-neutral-500 dark:text-neutral-400">Status</span></th>
+                <th class="px-2 py-2"><span class="ws-eyebrow text-fg-muted">Title</span></th>
+                <th class="w-36 px-2 py-2"><span class="ws-eyebrow text-fg-muted">Status</span></th>
                 <th class="w-10 px-2 py-2 text-center">
                     <button
                         type="button"
-                        class="ws-eyebrow text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+                        class="ws-eyebrow text-fg-muted hover:text-fg"
                         onclick={() => toggleSort('priority')}
                     >
                         ⚑ {@render sortArrow('priority')}
@@ -75,13 +75,13 @@
                 <th class="w-28 px-2 py-2">
                     <button
                         type="button"
-                        class="ws-eyebrow text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+                        class="ws-eyebrow text-fg-muted hover:text-fg"
                         onclick={() => toggleSort('deadline')}
                     >
                         Deadline {@render sortArrow('deadline')}
                     </button>
                 </th>
-                <th class="w-24 px-3 py-2"><span class="ws-eyebrow text-neutral-500 dark:text-neutral-400">Who</span></th>
+                <th class="w-24 px-3 py-2"><span class="ws-eyebrow text-fg-muted">Who</span></th>
             </tr>
         </thead>
         <tbody>

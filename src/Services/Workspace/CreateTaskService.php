@@ -73,7 +73,7 @@ class CreateTaskService
      */
     private function nextItemNumber(int $projectId): int
     {
-        $max = (int) (Task::query()
+        $max = (int) (Task::withTrashed()
             ->where('project_id', $projectId)
             ->max(DB::raw("CAST(metadata->>'item_number' AS INTEGER)")) ?? 0);
 
@@ -89,7 +89,7 @@ class CreateTaskService
 
         $slug = $base;
         $i = 2;
-        while (Task::query()->where('slug', $slug)->exists()) {
+        while (Task::withTrashed()->where('slug', $slug)->exists()) {
             $slug = $base.'-'.$i;
             $i++;
         }

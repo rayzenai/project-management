@@ -74,9 +74,9 @@
     aria-label={isComplete ? 'Mark not complete' : 'Mark complete'}
     class={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded border text-[11px] leading-none transition ${
         isComplete
-            ? 'border-emerald-500 bg-emerald-500 text-white dark:border-emerald-400 dark:bg-emerald-400 dark:text-neutral-950'
-            : 'border-neutral-300 bg-white text-transparent hover:border-emerald-400 hover:text-emerald-300 dark:border-neutral-600 dark:bg-neutral-900 dark:hover:border-emerald-400'
-    } ${failed ? 'ring-2 ring-red-400' : ''}`}
+            ? 'border-success bg-success text-bg'
+            : 'border-line bg-surface text-transparent hover:border-success hover:text-success'
+    } ${failed ? 'ring-2 ring-danger' : ''}`}
     onclick={toggle}
     onkeydown={(e) => e.stopPropagation()}
 >

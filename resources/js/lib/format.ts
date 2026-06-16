@@ -26,6 +26,24 @@ export function formatRelative(value: string | null | undefined): string {
     return `${Math.abs(diffDays)}d overdue`;
 }
 
+export function formatTimeAgo(value: string | null | undefined): string {
+    if (!value) return '';
+    const then = new Date(value).getTime();
+    const secs = Math.max(0, Math.round((Date.now() - then) / 1000));
+    if (secs < 60) return 'just now';
+    const mins = Math.round(secs / 60);
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.round(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.round(hrs / 24);
+    if (days < 7) return `${days}d ago`;
+    const weeks = Math.round(days / 7);
+    if (weeks < 5) return `${weeks}w ago`;
+    const months = Math.round(days / 30);
+    if (months < 12) return `${months}mo ago`;
+    return `${Math.round(days / 365)}y ago`;
+}
+
 export function initials(name: string | null | undefined): string {
     if (!name) return '?';
     return name

@@ -26,7 +26,7 @@
         type="button"
         onclick={() => notesBoard.show({ compose: true })}
         aria-label="New note"
-        class="flex h-20 w-32 flex-col items-center justify-center gap-0.5 rounded-md border border-dashed border-neutral-300 text-neutral-400 transition hover:-translate-y-0.5 hover:border-amber-400 hover:text-amber-500 dark:border-neutral-700 dark:hover:border-amber-500"
+        class="flex h-20 w-32 flex-col items-center justify-center gap-0.5 rounded-md border border-dashed border-line text-fg-faint transition hover:-translate-y-0.5 hover:border-accent hover:text-accent"
     >
         <span class="text-xl leading-none">+</span>
         <span class="text-[11px] font-medium">New note</span>
@@ -36,7 +36,7 @@
         <button
             type="button"
             onclick={() => notesBoard.show()}
-            class="h-20 rounded-md px-3 text-xs font-medium text-neutral-500 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
+            class="h-20 rounded-md px-3 text-xs font-medium text-fg-muted hover:bg-surface-alt"
             >+{freeformOverflow} more</button
         >
     {/if}

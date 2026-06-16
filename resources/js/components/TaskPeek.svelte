@@ -219,7 +219,7 @@
 </script>
 
 {#if target}
-    <div aria-hidden="true" class="fixed inset-0 z-40 bg-neutral-950/40 backdrop-blur-sm"></div>
+    <div aria-hidden="true" class="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"></div>
     <div
         bind:this={panel}
         role="dialog"
@@ -227,15 +227,15 @@
         aria-labelledby="peek-title"
         aria-busy={!preview && !loadFailed}
         tabindex="-1"
-        class="fixed inset-y-0 right-0 z-50 flex w-full max-w-[540px] flex-col border-l border-neutral-200 bg-white shadow-2xl outline-none dark:border-neutral-800 dark:bg-neutral-900"
+        class="fixed inset-y-0 right-0 z-50 flex w-full max-w-[540px] flex-col border-l border-line bg-surface shadow-2xl outline-none"
         onkeydown={onPanelKeydown}
     >
-        <header class="flex items-center gap-3 border-b border-neutral-200 px-5 py-3 dark:border-neutral-800">
-            <div class="ws-eyebrow min-w-0 flex-1 truncate text-neutral-500 dark:text-neutral-400">
+        <header class="flex items-center gap-3 border-b border-line px-5 py-3">
+            <div class="ws-eyebrow min-w-0 flex-1 truncate text-fg-muted">
                 {#if task}
                     {#if task.item_number}#{task.item_number} ·
                     {/if}
-                    <a href={`/workspace/projects/${projectSlug}`} class="hover:text-amber-600 dark:hover:text-amber-400">
+                    <a href={`/workspace/projects/${projectSlug}`} class="hover:text-accent">
                         {task.project?.title ?? 'Project'}
                     </a>
                 {:else}
@@ -245,7 +245,7 @@
             {#if task}
                 <a
                     href={`/workspace/projects/${projectSlug}/tasks/${task.slug}`}
-                    class="font-mono text-[11px] whitespace-nowrap text-neutral-500 hover:text-amber-600 dark:text-neutral-400 dark:hover:text-amber-400"
+                    class="font-mono text-[11px] whitespace-nowrap text-fg-muted hover:text-accent"
                 >
                     Open full page ↗
                 </a>
@@ -253,7 +253,7 @@
             <button
                 type="button"
                 aria-label="Close"
-                class="rounded-md p-1 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
+                class="rounded-md p-1 text-fg-muted hover:bg-surface-alt hover:text-fg"
                 onclick={() => peek.close()}
             >
                 ✕
@@ -263,10 +263,10 @@
         <div class="min-h-0 flex-1 overflow-y-auto px-5 py-4">
             {#if loadFailed}
                 <div class="flex flex-col items-center gap-3 py-16 text-center">
-                    <p class="text-sm text-neutral-500 dark:text-neutral-400">Couldn't load this task.</p>
+                    <p class="text-sm text-fg-muted">Couldn't load this task.</p>
                     <button
                         type="button"
-                        class="rounded-md border border-neutral-300 px-3 py-1.5 font-mono text-xs hover:border-amber-400 dark:border-neutral-700"
+                        class="rounded-md border border-line px-3 py-1.5 font-mono text-xs hover:border-accent"
                         onclick={() => target && load(target.id)}
                     >
                         Retry
@@ -274,10 +274,10 @@
                 </div>
             {:else if !task}
                 <div class="animate-pulse space-y-4 py-2">
-                    <div class="h-6 w-3/4 rounded bg-neutral-200 dark:bg-neutral-800"></div>
-                    <div class="h-4 w-1/2 rounded bg-neutral-200 dark:bg-neutral-800"></div>
-                    <div class="h-24 rounded bg-neutral-100 dark:bg-neutral-800/60"></div>
-                    <div class="h-16 rounded bg-neutral-100 dark:bg-neutral-800/60"></div>
+                    <div class="h-6 w-3/4 rounded bg-surface-alt"></div>
+                    <div class="h-4 w-1/2 rounded bg-surface-alt"></div>
+                    <div class="h-24 rounded bg-surface-alt"></div>
+                    <div class="h-16 rounded bg-surface-alt"></div>
                 </div>
             {:else}
                 <div class="space-y-5">
@@ -291,7 +291,7 @@
                                 type="text"
                                 bind:value={titleDraft}
                                 autofocus
-                                class="min-w-0 flex-1 border-0 border-b border-amber-300 bg-transparent p-0 font-display text-lg font-bold tracking-tight outline-none dark:border-amber-500/50"
+                                class="min-w-0 flex-1 border-0 border-b border-accent bg-transparent p-0 font-display text-lg font-bold tracking-tight outline-none"
                                 onblur={saveTitle}
                                 onkeydown={(e) => {
                                     if (e.key === 'Enter') saveTitle();
@@ -305,7 +305,7 @@
                             <button
                                 type="button"
                                 id="peek-title"
-                                class="min-w-0 flex-1 text-left font-display text-lg leading-snug font-bold tracking-tight hover:text-amber-700 dark:hover:text-amber-300"
+                                class="min-w-0 flex-1 text-left font-display text-lg leading-snug font-bold tracking-tight hover:text-accent"
                                 title="Click to rename"
                                 onclick={() => {
                                     titleDraft = task.title;
@@ -324,21 +324,21 @@
                     </div>
 
                     <div class="flex items-center gap-3">
-                        <span class="ws-eyebrow text-neutral-500 dark:text-neutral-400">Progress</span>
+                        <span class="ws-eyebrow text-fg-muted">Progress</span>
                         <input
                             type="range"
                             min="0"
                             max="100"
                             step="5"
                             bind:value={progressDraft}
-                            class="flex-1 accent-amber-500"
+                            class="flex-1 accent-accent"
                             onchange={saveProgress}
                         />
-                        <span class="w-10 text-right font-mono text-xs text-neutral-600 dark:text-neutral-300">{progressDraft}%</span>
+                        <span class="w-10 text-right font-mono text-xs text-fg-muted">{progressDraft}%</span>
                     </div>
 
                     <div>
-                        <h3 class="ws-eyebrow mb-2 text-neutral-500 dark:text-neutral-400">Assignees</h3>
+                        <h3 class="ws-eyebrow mb-2 text-fg-muted">Assignees</h3>
                         <AssigneeStack
                             task={{ id: task.id, slug: task.slug, assignments: preview?.assignments ?? [] }}
                             team={preview?.team ?? []}
@@ -355,7 +355,7 @@
                                 bind:value={descriptionDraft}
                                 rows="4"
                                 autofocus
-                                class="w-full rounded-md border border-neutral-300 bg-white px-2.5 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                                class="w-full rounded-md border border-line bg-surface px-2.5 py-2 text-sm"
                                 onblur={saveDescription}
                                 onkeydown={(e) => {
                                     if (e.key === 'Escape') {
@@ -367,7 +367,7 @@
                         {:else}
                             <button
                                 type="button"
-                                class="w-full text-left text-sm whitespace-pre-wrap text-neutral-700 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-neutral-100"
+                                class="w-full text-left text-sm whitespace-pre-wrap text-fg-muted hover:text-fg"
                                 onclick={() => {
                                     descriptionDraft = task.description ?? '';
                                     editingDescription = true;
@@ -376,14 +376,14 @@
                                 {#if task.description}
                                     {task.description}
                                 {:else}
-                                    <span class="text-neutral-400 italic dark:text-neutral-500">Click to add a description…</span>
+                                    <span class="text-fg-faint italic">Click to add a description…</span>
                                 {/if}
                             </button>
                         {/if}
                     </div>
 
-                    <section class="border-t border-neutral-100 pt-4 dark:border-neutral-800">
-                        <h3 class="ws-eyebrow mb-2 text-neutral-500 dark:text-neutral-400">
+                    <section class="border-t border-line-soft pt-4">
+                        <h3 class="ws-eyebrow mb-2 text-fg-muted">
                             Subtasks {#if preview && preview.subtasks.length > 0}({doneSubtasks}/{preview.subtasks.length}){/if}
                         </h3>
                         <ul class="space-y-1">
@@ -392,18 +392,18 @@
                                     <input
                                         type="checkbox"
                                         checked={subtask.is_done}
-                                        class="h-4 w-4 rounded accent-emerald-500"
+                                        class="h-4 w-4 rounded accent-success"
                                         onchange={(e) => toggleSubtask(subtask.id, (e.currentTarget as HTMLInputElement).checked)}
                                     />
                                     <span
-                                        class={`flex-1 text-sm ${subtask.is_done ? 'text-neutral-400 line-through dark:text-neutral-500' : 'text-neutral-700 dark:text-neutral-200'}`}
+                                        class={`flex-1 text-sm ${subtask.is_done ? 'text-fg-faint line-through' : 'text-fg-muted'}`}
                                     >
                                         {subtask.body}
                                     </span>
                                     <button
                                         type="button"
                                         aria-label="Delete subtask"
-                                        class="text-neutral-300 opacity-0 group-hover:opacity-100 hover:text-red-500 dark:text-neutral-600"
+                                        class="text-fg-faint opacity-0 group-hover:opacity-100 hover:text-danger"
                                         onclick={() => deleteSubtask(subtask.id)}
                                     >
                                         ×
@@ -415,34 +415,34 @@
                             type="text"
                             bind:value={subtaskDraft}
                             placeholder="+ Add a subtask… ⏎"
-                            class="mt-2 w-full rounded-md border border-dashed border-neutral-300 bg-transparent px-2.5 py-1.5 text-sm placeholder:text-neutral-400 focus:border-amber-400 focus:outline-none dark:border-neutral-700 dark:text-neutral-100"
+                            class="mt-2 w-full rounded-md border border-dashed border-line bg-transparent px-2.5 py-1.5 text-sm placeholder:text-fg-faint focus:border-accent focus:outline-none"
                             onkeydown={(e) => {
                                 if (e.key === 'Enter') addSubtask();
                             }}
                         />
                     </section>
 
-                    <section class="border-t border-neutral-100 pt-4 dark:border-neutral-800">
-                        <h3 class="ws-eyebrow mb-2 text-neutral-500 dark:text-neutral-400">
+                    <section class="border-t border-line-soft pt-4">
+                        <h3 class="ws-eyebrow mb-2 text-fg-muted">
                             Notes {#if preview && preview.notes.length > 0}({preview.notes.length}){/if}
                         </h3>
                         <div class="space-y-2">
                             {#each preview?.notes ?? [] as note (note.id)}
-                                <div class="group rounded-lg border border-neutral-200 px-3 py-2 dark:border-neutral-800">
-                                    <div class="flex items-center gap-2 font-mono text-[10px] text-neutral-500 dark:text-neutral-400">
+                                <div class="group rounded-lg border border-line px-3 py-2">
+                                    <div class="flex items-center gap-2 font-mono text-[10px] text-fg-muted">
                                         <span>{note.user?.name}</span>
                                         <span>· {note.type_label}</span>
                                         {#if note.happened_at}<span>· {formatDate(note.happened_at)}</span>{/if}
                                         <button
                                             type="button"
                                             aria-label="Delete note"
-                                            class="ml-auto text-neutral-300 opacity-0 group-hover:opacity-100 hover:text-red-500 dark:text-neutral-600"
+                                            class="ml-auto text-fg-faint opacity-0 group-hover:opacity-100 hover:text-danger"
                                             onclick={() => deleteNote(note.id)}
                                         >
                                             ×
                                         </button>
                                     </div>
-                                    <p class="mt-1 text-sm whitespace-pre-wrap text-neutral-700 dark:text-neutral-200">{note.body}</p>
+                                    <p class="mt-1 text-sm whitespace-pre-wrap text-fg-muted">{note.body}</p>
                                 </div>
                             {/each}
                         </div>
@@ -451,12 +451,12 @@
                                 bind:value={noteDraft}
                                 rows="2"
                                 placeholder="Add a note…"
-                                class="min-w-0 flex-1 rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                                class="min-w-0 flex-1 rounded-md border border-line bg-surface px-2.5 py-1.5 text-sm"
                             ></textarea>
                             <div class="flex flex-col gap-1.5">
                                 <select
                                     bind:value={noteType}
-                                    class="rounded-md border border-neutral-300 bg-white px-1.5 py-1 text-xs dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                                    class="rounded-md border border-line bg-surface px-1.5 py-1 text-xs"
                                 >
                                     {#each NOTE_TYPES as t (t.value)}
                                         <option value={t.value}>{t.label}</option>
@@ -464,7 +464,7 @@
                                 </select>
                                 <button
                                     type="button"
-                                    class="rounded-md bg-amber-500 px-2 py-1 text-xs font-semibold text-white disabled:opacity-40 dark:text-neutral-950"
+                                    class="rounded-md bg-accent px-2 py-1 text-xs font-semibold text-bg disabled:opacity-40"
                                     disabled={noteDraft.trim() === ''}
                                     onclick={addNote}
                                 >
@@ -474,14 +474,25 @@
                         </div>
                     </section>
 
-                    <section class="border-t border-neutral-100 pt-4 dark:border-neutral-800">
+                    {#if preview}
+                        <section class="border-t border-line-soft pt-4">
+                            <a
+                                href={`/workspace/projects/${projectSlug}/tasks/${task.slug}`}
+                                class="ws-eyebrow flex items-center gap-1 text-fg-muted hover:text-accent"
+                            >
+                                Comments ({preview.comments_count}) ↗
+                            </a>
+                        </section>
+                    {/if}
+
+                    <section class="border-t border-line-soft pt-4">
                         <div class="mb-2 flex items-center justify-between">
-                            <h3 class="ws-eyebrow text-neutral-500 dark:text-neutral-400">
+                            <h3 class="ws-eyebrow text-fg-muted">
                                 Contacts {#if preview && preview.contacts.length > 0}({preview.contacts.length}){/if}
                             </h3>
                             <button
                                 type="button"
-                                class="font-mono text-[11px] text-neutral-500 hover:text-amber-600 dark:hover:text-amber-400"
+                                class="font-mono text-[11px] text-fg-muted hover:text-accent"
                                 onclick={() => (showContactForm = !showContactForm)}
                             >
                                 {showContactForm ? 'cancel' : '+ add'}
@@ -490,11 +501,11 @@
                         <div class="flex flex-wrap gap-1.5">
                             {#each preview?.contacts ?? [] as contact (contact.id)}
                                 <span
-                                    class="inline-flex items-center gap-1.5 rounded-full bg-neutral-100 px-2.5 py-1 text-xs text-neutral-700 dark:bg-neutral-800 dark:text-neutral-200"
+                                    class="inline-flex items-center gap-1.5 rounded-full bg-surface-alt px-2.5 py-1 text-xs text-fg-muted"
                                     title={[contact.organization, contact.phone, contact.email].filter(Boolean).join(' · ')}
                                 >
                                     <span class="font-medium">{contact.name}</span>
-                                    {#if contact.role}<span class="text-neutral-500 dark:text-neutral-400">· {contact.role}</span>{/if}
+                                    {#if contact.role}<span class="text-fg-muted">· {contact.role}</span>{/if}
                                 </span>
                             {/each}
                         </div>
@@ -504,35 +515,35 @@
                                     type="text"
                                     bind:value={contactDraft.name}
                                     placeholder="Name *"
-                                    class="col-span-2 rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                                    class="col-span-2 rounded-md border border-line bg-surface px-2.5 py-1.5 text-sm"
                                 />
                                 <input
                                     type="text"
                                     bind:value={contactDraft.role}
                                     placeholder="Role"
-                                    class="rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                                    class="rounded-md border border-line bg-surface px-2.5 py-1.5 text-sm"
                                 />
                                 <input
                                     type="text"
                                     bind:value={contactDraft.organization}
                                     placeholder="Organization"
-                                    class="rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                                    class="rounded-md border border-line bg-surface px-2.5 py-1.5 text-sm"
                                 />
                                 <input
                                     type="text"
                                     bind:value={contactDraft.phone}
                                     placeholder="Phone"
-                                    class="rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                                    class="rounded-md border border-line bg-surface px-2.5 py-1.5 text-sm"
                                 />
                                 <input
                                     type="email"
                                     bind:value={contactDraft.email}
                                     placeholder="Email"
-                                    class="rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                                    class="rounded-md border border-line bg-surface px-2.5 py-1.5 text-sm"
                                 />
                                 <button
                                     type="button"
-                                    class="col-span-2 rounded-md bg-amber-500 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-40 dark:text-neutral-950"
+                                    class="col-span-2 rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-bg disabled:opacity-40"
                                     disabled={contactDraft.name.trim() === ''}
                                     onclick={addContact}
                                 >
@@ -542,11 +553,11 @@
                         {/if}
                     </section>
 
-                    <section class="border-t border-neutral-100 pt-4 pb-2 dark:border-neutral-800">
+                    <section class="border-t border-line-soft pt-4 pb-2">
                         <button
                             type="button"
                             aria-expanded={showHistory}
-                            class="ws-eyebrow flex items-center gap-1 text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200"
+                            class="ws-eyebrow flex items-center gap-1 text-fg-muted hover:text-fg"
                             onclick={() => (showHistory = !showHistory)}
                         >
                             <span class={`transition-transform ${showHistory ? 'rotate-90' : ''}`}>▸</span>
@@ -555,18 +566,18 @@
                         {#if showHistory}
                             <ul class="mt-2 space-y-1.5">
                                 {#each preview?.activity ?? [] as entry (entry.id)}
-                                    <li class="flex items-baseline gap-2 text-xs text-neutral-600 dark:text-neutral-400">
+                                    <li class="flex items-baseline gap-2 text-xs text-fg-muted">
                                         <span class="min-w-0 flex-1">
-                                            {#if entry.user}<span class="font-medium text-neutral-700 dark:text-neutral-300">{entry.user.name}</span
+                                            {#if entry.user}<span class="font-medium text-fg-muted">{entry.user.name}</span
                                                 >{/if}
                                             {entry.description}
                                         </span>
-                                        <span class="shrink-0 font-mono text-[10px] text-neutral-400 dark:text-neutral-500"
+                                        <span class="shrink-0 font-mono text-[10px] text-fg-faint"
                                             >{formatDate(entry.created_at)}</span
                                         >
                                     </li>
                                 {:else}
-                                    <li class="text-xs text-neutral-400">No recorded activity.</li>
+                                    <li class="text-xs text-fg-faint">No recorded activity.</li>
                                 {/each}
                             </ul>
                         {/if}

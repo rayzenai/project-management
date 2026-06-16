@@ -13,6 +13,7 @@ use RayzenAI\ProjectManagement\Models\Subtask;
 use RayzenAI\ProjectManagement\Models\Task;
 use RayzenAI\ProjectManagement\Services\Workspace\CreateSubtaskService;
 use RayzenAI\ProjectManagement\Services\Workspace\DeleteSubtaskService;
+use RayzenAI\ProjectManagement\Services\Workspace\RestoreWorkspaceModel;
 use RayzenAI\ProjectManagement\Services\Workspace\UpdateSubtaskService;
 
 /**
@@ -58,5 +59,17 @@ class SubtaskController extends Controller
         $result = $service->execute($subtask);
 
         return $this->respondWithResult($result);
+    }
+
+    public function restore(Subtask $subtask, RestoreWorkspaceModel $service, Request $request): JsonResponse
+    {
+        abort_unless($subtask->user_id === $request->user()->id, 403);
+
+        $result = $service->execute($subtask);
+
+        return $this->respondWithResult(
+            $result,
+            $result->data instanceof Subtask ? new SubtaskResource($result->data) : null,
+        );
     }
 }

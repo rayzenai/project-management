@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use RayzenAI\ProjectManagement\Database\Factories\MemberFactory;
 
 /**
@@ -18,7 +19,7 @@ use RayzenAI\ProjectManagement\Database\Factories\MemberFactory;
 class Member extends Model
 {
     /** @use HasFactory<MemberFactory> */
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'members';
 

@@ -71,15 +71,15 @@
                 openPeek();
             }
         }}
-        class={`group flex w-full cursor-pointer flex-wrap items-center gap-2 rounded-lg border bg-white px-2.5 py-2 text-left transition hover:border-amber-300 dark:bg-neutral-900 dark:hover:border-amber-500/40 ${
+        class={`group flex w-full cursor-pointer flex-wrap items-center gap-2 rounded-lg border bg-surface px-2.5 py-2 text-left transition hover:border-accent/40 ${
             overdue && lane === 'due'
-                ? 'border-l-2 border-neutral-200 border-l-red-500 dark:border-neutral-800 dark:border-l-red-400'
-                : 'border-neutral-200 dark:border-neutral-800'
+                ? 'border-l-2 border-line border-l-danger'
+                : 'border-line'
         }`}
     >
         <span
             aria-hidden="true"
-            class="hidden w-3 shrink-0 cursor-grab font-mono text-xs text-neutral-400 opacity-0 group-hover:opacity-100 sm:block dark:text-neutral-600"
+            class="hidden w-3 shrink-0 cursor-grab font-mono text-xs text-fg-faint opacity-0 group-hover:opacity-100 sm:block"
         >
             ⋮⋮
         </span>
@@ -89,21 +89,21 @@
 
         <span class="flex min-w-0 flex-1 items-baseline gap-1.5">
             {#if task.item_number}
-                <span class="shrink-0 font-mono text-xs text-neutral-500 dark:text-neutral-400">#{task.item_number}</span>
+                <span class="shrink-0 font-mono text-xs text-fg-muted">#{task.item_number}</span>
             {/if}
             <span
-                class="truncate text-sm font-medium text-neutral-900 group-hover:text-amber-700 dark:text-neutral-100 dark:group-hover:text-amber-400"
+                class="truncate text-sm font-medium text-fg group-hover:text-accent"
             >
                 {task.short_title || task.title}
             </span>
             {#if lane === 'due' && assignment.is_focused}
-                <span aria-label="Pinned" class="shrink-0 text-xs text-amber-500 dark:text-amber-400">★</span>
+                <span aria-label="Pinned" class="shrink-0 text-xs text-accent">★</span>
             {/if}
         </span>
 
         <span class="flex shrink-0 items-center gap-1.5 max-sm:basis-full max-sm:pl-10" onclick={(e) => e.stopPropagation()} role="none">
             {#if lane !== 'other' && task.project}
-                <span class="max-w-32 truncate font-mono text-[11px] text-neutral-500 dark:text-neutral-400">{task.project.title}</span>
+                <span class="max-w-32 truncate font-mono text-[11px] text-fg-muted">{task.project.title}</span>
             {/if}
             <StatusChip {task} {projectSlug} size="sm" />
             <DateChip {task} {projectSlug} size="sm" ghost />
@@ -121,8 +121,8 @@
                 type="button"
                 class={`rounded-full px-1 text-sm leading-none transition ${
                     assignment.is_focused
-                        ? 'text-amber-600 dark:text-amber-400'
-                        : 'text-neutral-400 hover:text-amber-500 dark:text-neutral-500 dark:hover:text-amber-400'
+                        ? 'text-accent'
+                        : 'text-fg-faint hover:text-accent'
                 }`}
                 title={assignment.is_focused ? 'Unpin from focus' : 'Pin to focus'}
                 aria-pressed={assignment.is_focused}
@@ -133,14 +133,12 @@
 
             <Popover bind:open={snoozeOpen} align="right" triggerLabel="Snooze">
                 {#snippet trigger()}
-                    <span class="text-sm leading-none text-neutral-400 transition hover:text-sky-600 dark:text-neutral-500 dark:hover:text-sky-400"
-                        >☾</span
-                    >
+                    <span class="text-sm leading-none text-fg-faint transition hover:text-accent">☾</span>
                 {/snippet}
                 <button
                     type="button"
                     data-popover-item
-                    class="block w-full px-3 py-1.5 text-left text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                    class="block w-full px-3 py-1.5 text-left text-sm hover:bg-surface-alt"
                     onclick={() => snooze(1)}
                 >
                     Until tomorrow
@@ -148,7 +146,7 @@
                 <button
                     type="button"
                     data-popover-item
-                    class="block w-full px-3 py-1.5 text-left text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                    class="block w-full px-3 py-1.5 text-left text-sm hover:bg-surface-alt"
                     onclick={() => snooze(3)}
                 >
                     3 days
@@ -156,7 +154,7 @@
                 <button
                     type="button"
                     data-popover-item
-                    class="block w-full px-3 py-1.5 text-left text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                    class="block w-full px-3 py-1.5 text-left text-sm hover:bg-surface-alt"
                     onclick={() => snooze(7)}
                 >
                     1 week
@@ -164,7 +162,7 @@
                 <button
                     type="button"
                     data-popover-item
-                    class="block w-full px-3 py-1.5 text-left text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                    class="block w-full px-3 py-1.5 text-left text-sm hover:bg-surface-alt"
                     onclick={() => snooze(30)}
                 >
                     1 month
@@ -173,7 +171,7 @@
                     <button
                         type="button"
                         data-popover-item
-                        class="block w-full border-t border-neutral-200 px-3 py-1.5 text-left text-sm text-amber-600 hover:bg-neutral-100 dark:border-neutral-700 dark:text-amber-400 dark:hover:bg-neutral-800"
+                        class="block w-full border-t border-line px-3 py-1.5 text-left text-sm text-accent hover:bg-surface-alt"
                         onclick={() => snooze(null)}
                     >
                         Unsnooze

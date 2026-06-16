@@ -43,18 +43,18 @@
 <div class="relative">
     <button
         type="button"
-        class="flex min-h-[32px] w-full flex-wrap items-center gap-1.5 rounded-md border border-neutral-300 bg-white px-2 py-1 text-left text-sm shadow-sm hover:border-neutral-400 focus:border-amber-400 focus:ring-2 focus:ring-amber-200 focus:outline-none dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-neutral-600 dark:focus:ring-amber-500/30"
+        class="flex min-h-[32px] w-full flex-wrap items-center gap-1.5 rounded-md border border-line bg-surface px-2 py-1 text-left text-sm shadow-sm hover:border-line focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
         onclick={() => (open = !open)}
     >
         {#if selected.length === 0}
-            <span class="text-neutral-400 dark:text-neutral-500">{placeholder}</span>
+            <span class="text-fg-faint">{placeholder}</span>
         {/if}
         {#each selected as user (user.id)}
             <span
-                class="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-900 dark:bg-amber-500/20 dark:text-amber-200"
+                class="inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-2 py-0.5 text-xs font-medium text-accent"
             >
                 <span
-                    class="flex h-4 w-4 items-center justify-center rounded-full bg-amber-200 text-[10px] font-semibold text-amber-900 dark:bg-amber-400/40 dark:text-amber-100"
+                    class="flex h-4 w-4 items-center justify-center rounded-full bg-accent/20 text-[10px] font-semibold text-accent"
                 >
                     {initials(user.name)}
                 </span>
@@ -62,7 +62,7 @@
                 <button
                     type="button"
                     aria-label="Remove"
-                    class="text-amber-700 hover:text-amber-900 dark:text-amber-300"
+                    class="text-accent hover:text-accent-dim"
                     onclick={(e) => {
                         e.stopPropagation();
                         remove(user.id);
@@ -74,13 +74,13 @@
 
     {#if open}
         <div
-            class="absolute right-0 left-0 z-30 mt-1 max-h-72 overflow-auto rounded-md border border-neutral-200 bg-white shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
+            class="absolute right-0 left-0 z-30 mt-1 max-h-72 overflow-auto rounded-md border border-line bg-surface shadow-lg"
         >
             <input
                 type="text"
                 bind:value={query}
                 placeholder="Search people..."
-                class="w-full border-b border-neutral-200 bg-transparent px-3 py-2 text-sm focus:outline-none dark:border-neutral-700"
+                class="w-full border-b border-line bg-transparent px-3 py-2 text-sm focus:outline-none"
             />
             <ul class="max-h-56 overflow-auto py-1">
                 {#each filtered as user (user.id)}
@@ -88,27 +88,27 @@
                     <li>
                         <button
                             type="button"
-                            class={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800 ${
-                                sel ? 'bg-amber-50 dark:bg-amber-500/10' : ''
+                            class={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-surface-alt ${
+                                sel ? 'bg-accent/10' : ''
                             }`}
                             onclick={() => toggle(user.id)}
                         >
                             <span
-                                class="flex h-7 w-7 items-center justify-center rounded-full bg-neutral-200 text-xs font-semibold text-neutral-700 dark:bg-neutral-700 dark:text-neutral-200"
+                                class="flex h-7 w-7 items-center justify-center rounded-full bg-surface-alt text-xs font-semibold text-fg-muted"
                             >
                                 {initials(user.name)}
                             </span>
                             <div class="min-w-0 flex-1">
                                 <div class="truncate font-medium">{user.name}</div>
-                                <div class="truncate text-xs text-neutral-500 dark:text-neutral-400">{user.email}</div>
+                                <div class="truncate text-xs text-fg-muted">{user.email}</div>
                             </div>
                             {#if selectedIds.includes(user.id)}
-                                <span class="text-amber-600 dark:text-amber-400">✓</span>
+                                <span class="text-accent">✓</span>
                             {/if}
                         </button>
                     </li>
                 {:else}
-                    <li class="px-3 py-3 text-sm text-neutral-500 dark:text-neutral-400">No matches.</li>
+                    <li class="px-3 py-3 text-sm text-fg-muted">No matches.</li>
                 {/each}
             </ul>
         </div>

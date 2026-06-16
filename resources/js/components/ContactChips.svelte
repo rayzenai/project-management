@@ -42,10 +42,10 @@
 <svelte:window onkeydown={onWindowKey} />
 
 <div class="flex flex-wrap items-center gap-2">
-    <span class="text-[11px] font-semibold tracking-wider text-neutral-400 uppercase dark:text-neutral-500">Contacts</span>
+    <span class="text-[11px] font-semibold tracking-wider text-fg-faint uppercase">Contacts</span>
 
     {#if contacts.length === 0}
-        <span class="text-xs text-neutral-400 dark:text-neutral-500"> Add a contact on any task and they'll surface here. </span>
+        <span class="text-xs text-fg-faint"> Add a contact on any task and they'll surface here. </span>
     {:else}
         {#each contacts as contact (contact.id)}
             {@const href = taskHref(contact)}
@@ -58,32 +58,32 @@
                     }}
                     aria-haspopup="dialog"
                     aria-expanded={openId === contact.id}
-                    class={`group inline-flex max-w-[16rem] items-center gap-1.5 rounded-full border bg-white py-1 pr-2.5 pl-1.5 text-xs transition hover:border-amber-300 hover:shadow-sm dark:bg-neutral-900 dark:hover:border-amber-500/40 ${
-                        openId === contact.id ? 'border-amber-300 shadow-sm dark:border-amber-500/40' : 'border-neutral-200 dark:border-neutral-800'
+                    class={`group inline-flex max-w-[16rem] items-center gap-1.5 rounded-full border bg-surface py-1 pr-2.5 pl-1.5 text-xs transition hover:border-accent/40 hover:shadow-sm ${
+                        openId === contact.id ? 'border-accent/40 shadow-sm' : 'border-line'
                     }`}
                 >
                     <span
-                        class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-neutral-200 text-[9px] font-semibold text-neutral-600 dark:bg-neutral-700 dark:text-neutral-200"
+                        class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-surface-alt text-[9px] font-semibold text-fg-muted"
                     >
                         {contact.name.slice(0, 1).toUpperCase()}
                     </span>
-                    <span class="truncate font-medium text-neutral-800 dark:text-neutral-100">{contact.name}</span>
+                    <span class="truncate font-medium text-fg">{contact.name}</span>
                     {#if subtitle(contact)}
-                        <span class="truncate text-neutral-400 dark:text-neutral-500">· {subtitle(contact)}</span>
+                        <span class="truncate text-fg-faint">· {subtitle(contact)}</span>
                     {/if}
                 </button>
 
                 {#if openId === contact.id}
                     <div
-                        class="absolute top-full left-0 z-30 mt-1.5 w-64 overflow-hidden rounded-xl border border-neutral-200 bg-white text-left shadow-xl dark:border-neutral-700 dark:bg-neutral-900"
+                        class="absolute top-full left-0 z-30 mt-1.5 w-64 overflow-hidden rounded-xl border border-line bg-surface text-left shadow-xl"
                         role="dialog"
                         aria-label={`Contact ${contact.name}`}
                         tabindex="-1"
                     >
-                        <div class="border-b border-neutral-100 px-3 py-2.5 dark:border-neutral-800">
-                            <div class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">{contact.name}</div>
+                        <div class="border-b border-line-soft px-3 py-2.5">
+                            <div class="text-sm font-semibold text-fg">{contact.name}</div>
                             {#if subtitle(contact)}
-                                <div class="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">{subtitle(contact)}</div>
+                                <div class="mt-0.5 text-xs text-fg-muted">{subtitle(contact)}</div>
                             {/if}
                         </div>
 
@@ -91,24 +91,24 @@
                             {#if contact.email}
                                 <a
                                     href={`mailto:${contact.email}`}
-                                    class="flex items-center gap-2 text-neutral-700 hover:text-amber-600 dark:text-neutral-300 dark:hover:text-amber-400"
+                                    class="flex items-center gap-2 text-fg-muted hover:text-accent"
                                 >
-                                    <span class="text-neutral-400">✉</span><span class="truncate">{contact.email}</span>
+                                    <span class="text-fg-faint">✉</span><span class="truncate">{contact.email}</span>
                                 </a>
                             {/if}
                             {#if contact.phone}
                                 <a
                                     href={`tel:${contact.phone}`}
-                                    class="flex items-center gap-2 text-neutral-700 hover:text-amber-600 dark:text-neutral-300 dark:hover:text-amber-400"
+                                    class="flex items-center gap-2 text-fg-muted hover:text-accent"
                                 >
-                                    <span class="text-neutral-400">☎</span><span class="truncate">{contact.phone}</span>
+                                    <span class="text-fg-faint">☎</span><span class="truncate">{contact.phone}</span>
                                 </a>
                             {/if}
                             {#if contact.notes}
-                                <p class="text-neutral-600 dark:text-neutral-400">{contact.notes}</p>
+                                <p class="text-fg-muted">{contact.notes}</p>
                             {/if}
                             {#if !contact.email && !contact.phone && !contact.notes}
-                                <p class="text-neutral-400 dark:text-neutral-500">No contact details recorded.</p>
+                                <p class="text-fg-faint">No contact details recorded.</p>
                             {/if}
                         </div>
 
@@ -116,7 +116,7 @@
                             <button
                                 type="button"
                                 onclick={() => goToTask(contact)}
-                                class="block w-full truncate border-t border-neutral-100 px-3 py-2 text-left text-xs font-medium text-amber-600 hover:bg-amber-50 dark:border-neutral-800 dark:text-amber-400 dark:hover:bg-amber-500/10"
+                                class="block w-full truncate border-t border-line-soft px-3 py-2 text-left text-xs font-medium text-accent hover:bg-accent/10"
                             >
                                 on: {contact.task.short_title || contact.task.title} →
                             </button>

@@ -14,6 +14,7 @@ use RayzenAI\ProjectManagement\Models\Task;
 use RayzenAI\ProjectManagement\Queries\TaskShowQuery;
 use RayzenAI\ProjectManagement\Services\Workspace\CreateTaskService;
 use RayzenAI\ProjectManagement\Services\Workspace\DeleteTaskService;
+use RayzenAI\ProjectManagement\Services\Workspace\RestoreWorkspaceModel;
 use RayzenAI\ProjectManagement\Services\Workspace\UpdateTaskService;
 
 class TaskController extends Controller
@@ -58,9 +59,25 @@ class TaskController extends Controller
         if ($result->success) {
             return redirect()
                 ->route('workspace.projects.show', ['project' => $project->slug])
-                ->with('workspace_flash', ['success' => true, 'message' => $result->message]);
+                ->with('workspace_flash', [
+                    'success' => true,
+                    'message' => $result->message,
+                    'undo' => [
+                        'label' => 'Undo',
+                        'url' => route('workspace.tasks.restore', [$project, $task]),
+                    ],
+                ]);
         }
 
         return $this->redirectWithResult($result);
+    }
+
+    public function restore(Project $project, Task $task, RestoreWorkspaceModel $service): RedirectResponse
+    {
+        abort_unless($task->project_id === $project->id, 404);
+
+        $service->execute($task);
+
+        return back()->with('workspace_flash', ['success' => true, 'message' => 'Restored.']);
     }
 }

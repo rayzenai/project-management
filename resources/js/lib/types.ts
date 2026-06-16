@@ -1,3 +1,5 @@
+import type { FontAllowList, ThemeTokens } from './appearance';
+
 export type Id = number;
 
 export interface User {
@@ -103,6 +105,7 @@ export interface Task {
     assignments_count?: number;
     notes_count?: number;
     contacts_count?: number;
+    comments_count?: number;
     created_at?: string;
     updated_at?: string;
 }
@@ -124,6 +127,26 @@ export interface Subtask {
         project?: { slug: string; title: string } | null;
     };
     created_at?: string;
+}
+
+export interface CommentMention {
+    member_id: Id;
+    name: string;
+}
+
+export interface CommentAuthor {
+    member_id: Id | null;
+    name: string | null;
+}
+
+export interface Comment {
+    id: Id;
+    body: string;
+    mentions: CommentMention[];
+    author: CommentAuthor;
+    can_edit: boolean;
+    created_at?: string | null;
+    updated_at?: string | null;
 }
 
 export interface NoteTaskRef {
@@ -193,6 +216,7 @@ export interface TaskPreview {
     contacts: Contact[];
     activity: ActivityEntry[];
     team: Member[];
+    comments_count: number;
 }
 
 export interface QuickAddContext {
@@ -204,10 +228,17 @@ export interface QuickAddContext {
 export interface Flash {
     success?: boolean;
     message?: string | null;
+    undo?: { label: string; url: string };
 }
 
 export interface AuthUser extends User {
     role?: string;
+}
+
+/** The theme + font catalogue shared from `config/themes.php` (web only). */
+export interface ThemeCatalogue {
+    themes: Record<string, { label: string; mode: 'light' | 'dark' | null; tokens?: ThemeTokens }>;
+    fontAllowList: FontAllowList;
 }
 
 export interface SharedProps {
@@ -219,5 +250,7 @@ export interface SharedProps {
     quickAddContext?: QuickAddContext | null;
     isSuperAdmin?: boolean;
     ledTeamIds?: Id[];
+    unreadNotifications?: number;
+    themeCatalogue?: ThemeCatalogue;
     [key: string]: unknown;
 }

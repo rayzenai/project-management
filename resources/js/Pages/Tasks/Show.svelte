@@ -2,10 +2,11 @@
     import { router, useForm } from '@inertiajs/svelte';
     import AppShell from '../../components/AppShell.svelte';
     import AssigneePicker from '../../components/AssigneePicker.svelte';
+    import CommentThread from '../../components/CommentThread.svelte';
     import PillGroup from '../../components/PillGroup.svelte';
     import StatusBadge from '../../components/StatusBadge.svelte';
     import { initials, formatDate } from '../../lib/format';
-    import type { Assignment, Contact, Member, Note, Project, Subtask, Task } from '../../lib/types';
+    import type { Assignment, Comment, Contact, Member, Note, Project, Subtask, Task } from '../../lib/types';
 
     let {
         project,
@@ -13,6 +14,7 @@
         notes,
         contacts,
         subtasks,
+        comments,
         team,
         statuses,
     }: {
@@ -21,11 +23,12 @@
         notes: Note[];
         contacts: Contact[];
         subtasks: Subtask[];
+        comments: Comment[];
         team: Member[];
         statuses: { value: string; label: string }[];
     } = $props();
 
-    let activeTab: 'overview' | 'todos' | 'notes' | 'contacts' = $state('overview');
+    let activeTab: 'overview' | 'todos' | 'notes' | 'comments' | 'contacts' = $state('overview');
 
     const todoForm = useForm({ body: '', due_at: '' });
 
@@ -173,7 +176,7 @@
 <svelte:head><title>{task.title} · Workspace</title></svelte:head>
 
 <AppShell>
-    <nav class="mb-3 text-xs text-neutral-500 dark:text-neutral-400">
+    <nav class="mb-3 text-xs text-fg-muted">
         <a href="/workspace/projects" class="hover:underline">Projects</a> /
         <a href={`/workspace/projects/${project.slug}`} class="hover:underline">{project.title}</a> /
         <span>{task.short_title || task.title}</span>
@@ -184,27 +187,27 @@
             <div class="min-w-0 flex-1">
                 {#if task.item_number}
                     <div
-                        class="mb-1 inline-flex items-center rounded bg-neutral-100 px-2 py-0.5 font-mono text-xs text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400"
+                        class="mb-1 inline-flex items-center rounded bg-surface-alt px-2 py-0.5 font-mono text-xs text-fg-muted"
                     >
                         #{task.item_number}
                     </div>
                 {/if}
                 <h1 class="text-2xl font-bold tracking-tight">{task.title}</h1>
                 {#if task.title_np}
-                    <div class="mt-1 text-base text-neutral-600 dark:text-neutral-400">{task.title_np}</div>
+                    <div class="mt-1 text-base text-fg-muted">{task.title_np}</div>
                 {/if}
                 <div class="mt-3 flex flex-wrap items-center gap-2">
                     <StatusBadge status={task.status} label={task.status_label} />
                     {#if task.deadline_at}
-                        <span class="text-xs text-neutral-500 dark:text-neutral-400">
+                        <span class="text-xs text-fg-muted">
                             Due {formatDate(task.deadline_at)} · {task.days_relative_label}
                         </span>
                     {/if}
                     {#if task.progress > 0}
-                        <span class="text-xs text-neutral-500 dark:text-neutral-400">{task.progress}% complete</span>
+                        <span class="text-xs text-fg-muted">{task.progress}% complete</span>
                     {/if}
                     {#if task.responsible_ministry}
-                        <span class="text-xs text-neutral-500 dark:text-neutral-400">· {task.responsible_ministry}</span>
+                        <span class="text-xs text-fg-muted">· {task.responsible_ministry}</span>
                     {/if}
                 </div>
             </div>
@@ -212,7 +215,7 @@
                 <button
                     type="button"
                     onclick={deleteTask}
-                    class="rounded-md border border-red-200 bg-white px-3 py-1.5 text-sm text-red-700 hover:bg-red-50 dark:border-red-500/30 dark:bg-neutral-900 dark:text-red-400 dark:hover:bg-red-500/10"
+                    class="rounded-md border border-danger/30 bg-surface px-3 py-1.5 text-sm text-danger hover:bg-danger/10"
                     >Delete</button
                 >
             </div>
@@ -221,60 +224,58 @@
 
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div class="lg:col-span-2">
-            <div class="mb-4 flex gap-1 border-b border-neutral-200 dark:border-neutral-800">
-                {#each [['overview', 'Overview'], ['todos', `My todos (${subtasks.filter((s) => !s.is_done).length})`], ['notes', `Notes (${notes.length})`], ['contacts', `Contacts (${contacts.length})`]] as [key, label] (key)}
+            <div class="mb-4 flex gap-1 border-b border-line">
+                {#each [['overview', 'Overview'], ['todos', `My todos (${subtasks.filter((s) => !s.is_done).length})`], ['notes', `Notes (${notes.length})`], ['comments', `Comments (${comments.length})`], ['contacts', `Contacts (${contacts.length})`]] as [key, label] (key)}
                     <button
                         type="button"
                         class="border-b-2 px-3 py-2 text-sm font-medium transition"
-                        class:border-amber-500={activeTab === key}
-                        class:text-amber-700={activeTab === key}
-                        class:dark:text-amber-400={activeTab === key}
+                        class:border-accent={activeTab === key}
+                        class:text-accent={activeTab === key}
                         class:border-transparent={activeTab !== key}
-                        class:text-neutral-500={activeTab !== key}
-                        class:dark:text-neutral-400={activeTab !== key}
+                        class:text-fg-muted={activeTab !== key}
                         onclick={() => (activeTab = key as typeof activeTab)}>{label}</button
                     >
                 {/each}
             </div>
 
-            <p class="mb-3 text-xs text-neutral-400 dark:text-neutral-500">
+            <p class="mb-3 text-xs text-fg-faint">
                 Press
-                <kbd class="rounded border border-neutral-300 bg-neutral-100 px-1 font-sans dark:border-neutral-700 dark:bg-neutral-800">Ctrl</kbd
-                >/<kbd class="rounded border border-neutral-300 bg-neutral-100 px-1 font-sans dark:border-neutral-700 dark:bg-neutral-800">⌘</kbd>
+                <kbd class="rounded border border-line bg-surface-alt px-1 font-sans">Ctrl</kbd
+                >/<kbd class="rounded border border-line bg-surface-alt px-1 font-sans">⌘</kbd>
                 +
-                <kbd class="rounded border border-neutral-300 bg-neutral-100 px-1 font-sans dark:border-neutral-700 dark:bg-neutral-800">S</kbd>
+                <kbd class="rounded border border-line bg-surface-alt px-1 font-sans">S</kbd>
                 to quick save
             </p>
 
             {#if activeTab === 'overview'}
-                <form onsubmit={saveEdit} class="rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+                <form onsubmit={saveEdit} class="rounded-xl border border-line bg-surface p-4">
                     <div class="space-y-3">
                         <div>
-                            <label class="mb-1 block text-xs font-medium text-neutral-600 dark:text-neutral-400">Title</label>
+                            <label class="mb-1 block text-xs font-medium text-fg-muted">Title</label>
                             <input
                                 type="text"
                                 bind:value={editForm.title}
-                                class="w-full rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                                class="w-full rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
                             />
                         </div>
                         <div>
-                            <label class="mb-1 block text-xs font-medium text-neutral-600 dark:text-neutral-400">Description</label>
+                            <label class="mb-1 block text-xs font-medium text-fg-muted">Description</label>
                             <textarea
                                 bind:value={editForm.description}
                                 rows="4"
                                 placeholder="Add a description..."
-                                class="w-full rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                                class="w-full rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
                             ></textarea>
                             {#if task.description_np}
-                                <p class="mt-2 text-sm whitespace-pre-wrap text-neutral-600 dark:text-neutral-400">{task.description_np}</p>
+                                <p class="mt-2 text-sm whitespace-pre-wrap text-fg-muted">{task.description_np}</p>
                             {/if}
                         </div>
                         <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
                             <div>
-                                <label class="mb-1 block text-xs font-medium text-neutral-600 dark:text-neutral-400">Status</label>
+                                <label class="mb-1 block text-xs font-medium text-fg-muted">Status</label>
                                 <select
                                     bind:value={editForm.status}
-                                    class="w-full rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                                    class="w-full rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
                                 >
                                     {#each statuses as s (s.value)}
                                         <option value={s.value}>{s.label}</option>
@@ -282,9 +283,9 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="mb-1 flex items-center justify-between text-xs font-medium text-neutral-600 dark:text-neutral-400">
+                                <label class="mb-1 flex items-center justify-between text-xs font-medium text-fg-muted">
                                     <span>Progress</span>
-                                    <span class="font-semibold text-neutral-800 dark:text-neutral-200">{editForm.task_progress}%</span>
+                                    <span class="font-semibold text-fg">{editForm.task_progress}%</span>
                                 </label>
                                 <input
                                     type="range"
@@ -292,20 +293,20 @@
                                     max="100"
                                     step="5"
                                     bind:value={editForm.task_progress}
-                                    class="mt-2.5 w-full accent-amber-500"
+                                    class="mt-2.5 w-full accent-accent"
                                 />
                             </div>
                             <div>
-                                <label class="mb-1 block text-xs font-medium text-neutral-600 dark:text-neutral-400">Due date</label>
+                                <label class="mb-1 block text-xs font-medium text-fg-muted">Due date</label>
                                 <input
                                     type="date"
                                     bind:value={editForm.deadline_at}
-                                    class="w-full rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                                    class="w-full rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
                                 />
                             </div>
                         </div>
                         <div>
-                            <span class="mb-1 block text-xs font-medium text-neutral-600 dark:text-neutral-400">Priority</span>
+                            <span class="mb-1 block text-xs font-medium text-fg-muted">Priority</span>
                             <PillGroup
                                 bind:value={editForm.priority}
                                 options={[
@@ -317,31 +318,31 @@
                             />
                         </div>
                         <div>
-                            <label class="mb-1 block text-xs font-medium text-neutral-600 dark:text-neutral-400">Status note</label>
+                            <label class="mb-1 block text-xs font-medium text-fg-muted">Status note</label>
                             <textarea
                                 bind:value={editForm.status_note}
                                 rows="3"
                                 placeholder="What's the latest on this?"
-                                class="w-full rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                                class="w-full rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
                             ></textarea>
                         </div>
                         <div>
-                            <label class="mb-1 block text-xs font-medium text-neutral-600 dark:text-neutral-400">Source URL</label>
+                            <label class="mb-1 block text-xs font-medium text-fg-muted">Source URL</label>
                             <input
                                 type="url"
                                 bind:value={editForm.source_url}
                                 placeholder="https://..."
-                                class="w-full rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                                class="w-full rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
                             />
                         </div>
                     </div>
                     <div class="mt-4 flex items-center justify-end gap-2">
                         {#if editForm.isDirty}
-                            <span class="mr-auto text-xs text-neutral-500 dark:text-neutral-400">Unsaved changes</span>
+                            <span class="mr-auto text-xs text-fg-muted">Unsaved changes</span>
                             <button
                                 type="button"
                                 onclick={() => editForm.reset()}
-                                class="rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                                class="rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
                                 >Discard</button
                             >
                         {/if}
@@ -349,7 +350,7 @@
                             type="submit"
                             disabled={editForm.processing || !editForm.isDirty}
                             title="Save (⌘S / Ctrl+S)"
-                            class="rounded-md bg-amber-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-amber-600 disabled:opacity-50 dark:text-neutral-950"
+                            class="rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-bg hover:bg-accent-dim disabled:opacity-50"
                             >Save</button
                         >
                     </div>
@@ -357,72 +358,72 @@
             {/if}
 
             {#if activeTab === 'todos'}
-                <form onsubmit={addTodo} class="mb-4 rounded-xl border border-neutral-200 bg-white p-3 dark:border-neutral-800 dark:bg-neutral-900">
+                <form onsubmit={addTodo} class="mb-4 rounded-xl border border-line bg-surface p-3">
                     <div class="flex items-center gap-2">
                         <input
                             type="text"
                             bind:value={todoForm.body}
                             placeholder="Add a todo for yourself..."
-                            class="flex-1 rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                            class="flex-1 rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
                         />
                         <input
                             type="date"
                             bind:value={todoForm.due_at}
-                            class="rounded-md border border-neutral-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                            class="rounded-md border border-line bg-surface px-2 py-1.5 text-sm text-fg"
                         />
                         <button
                             type="submit"
                             disabled={todoForm.processing || !todoForm.body.trim()}
-                            class="rounded-md bg-amber-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-amber-600 disabled:opacity-50 dark:text-neutral-950"
+                            class="rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-bg hover:bg-accent-dim disabled:opacity-50"
                             >Add</button
                         >
                     </div>
-                    <p class="mt-1.5 text-xs text-neutral-500 dark:text-neutral-400">Todos are private to you. They show up in My Workspace too.</p>
+                    <p class="mt-1.5 text-xs text-fg-muted">Todos are private to you. They show up in My Workspace too.</p>
                 </form>
 
                 <ul class="space-y-2">
                     {#each subtasks as t (t.id)}
                         <li
-                            class="group flex items-start gap-3 rounded-xl border border-neutral-200 bg-white p-3 dark:border-neutral-800 dark:bg-neutral-900"
+                            class="group flex items-start gap-3 rounded-xl border border-line bg-surface p-3"
                         >
                             <button
                                 type="button"
-                                class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-neutral-300 text-xs text-white transition hover:border-emerald-500 dark:border-neutral-600"
-                                class:bg-emerald-500={t.is_done}
-                                class:border-emerald-500={t.is_done}
+                                class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-line text-xs text-bg transition hover:border-success"
+                                class:bg-success={t.is_done}
+                                class:border-success={t.is_done}
                                 onclick={() => toggleTodo(t)}>{t.is_done ? '✓' : ''}</button
                             >
                             <div class="min-w-0 flex-1 text-sm">
-                                <p class:line-through={t.is_done} class:text-neutral-400={t.is_done}>{t.body}</p>
+                                <p class:line-through={t.is_done} class:text-fg-faint={t.is_done}>{t.body}</p>
                                 {#if t.due_at}
-                                    <p class="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">due {formatDate(t.due_at)}</p>
+                                    <p class="mt-0.5 text-xs text-fg-muted">due {formatDate(t.due_at)}</p>
                                 {/if}
                             </div>
                             <button
                                 type="button"
-                                class="invisible text-neutral-400 group-hover:visible hover:text-red-500"
+                                class="invisible text-fg-faint group-hover:visible hover:text-danger"
                                 onclick={() => deleteTodo(t)}
                                 title="Delete">×</button
                             >
                         </li>
                     {:else}
-                        <p class="text-sm text-neutral-500 dark:text-neutral-400">No todos yet.</p>
+                        <p class="text-sm text-fg-muted">No todos yet.</p>
                     {/each}
                 </ul>
             {/if}
 
             {#if activeTab === 'notes'}
-                <form onsubmit={addNote} class="mb-4 rounded-xl border border-neutral-200 bg-white p-3 dark:border-neutral-800 dark:bg-neutral-900">
+                <form onsubmit={addNote} class="mb-4 rounded-xl border border-line bg-surface p-3">
                     <textarea
                         bind:value={noteForm.body}
                         rows="2"
                         placeholder="Add a note..."
-                        class="w-full resize-none rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                        class="w-full resize-none rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
                     ></textarea>
                     <div class="mt-2 flex items-center gap-2">
                         <select
                             bind:value={noteForm.type}
-                            class="rounded-md border border-neutral-300 bg-white px-2 py-1 text-xs dark:border-neutral-700 dark:bg-neutral-900"
+                            class="rounded-md border border-line bg-surface px-2 py-1 text-xs text-fg"
                         >
                             <option value="general">General</option>
                             <option value="action_taken">Action taken</option>
@@ -434,13 +435,13 @@
                         <input
                             type="date"
                             bind:value={noteForm.happened_at}
-                            class="rounded-md border border-neutral-300 bg-white px-2 py-1 text-xs dark:border-neutral-700 dark:bg-neutral-900"
+                            class="rounded-md border border-line bg-surface px-2 py-1 text-xs text-fg"
                         />
                         <div class="flex-1"></div>
                         <button
                             type="submit"
                             disabled={noteForm.processing || !noteForm.body.trim()}
-                            class="rounded-md bg-amber-500 px-3 py-1 text-xs font-semibold text-white hover:bg-amber-600 disabled:opacity-50 dark:text-neutral-950"
+                            class="rounded-md bg-accent px-3 py-1 text-xs font-semibold text-bg hover:bg-accent-dim disabled:opacity-50"
                             >Add note</button
                         >
                     </div>
@@ -448,28 +449,32 @@
 
                 <div class="space-y-2">
                     {#each notes as note (note.id)}
-                        <div class="rounded-xl border border-neutral-200 bg-white p-3 dark:border-neutral-800 dark:bg-neutral-900">
-                            <div class="mb-1 flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400">
-                                <span class="font-medium text-neutral-700 dark:text-neutral-300">{note.user?.name ?? 'Someone'}</span>
+                        <div class="rounded-xl border border-line bg-surface p-3">
+                            <div class="mb-1 flex items-center gap-2 text-xs text-fg-muted">
+                                <span class="font-medium text-fg">{note.user?.name ?? "Someone"}</span>
                                 <span>· {note.type_label}</span>
                                 {#if note.happened_at}<span>· {formatDate(note.happened_at)}</span>{/if}
                                 <div class="flex-1"></div>
-                                <button type="button" onclick={() => deleteNote(note)} class="text-neutral-400 hover:text-red-500" title="Delete note"
+                                <button type="button" onclick={() => deleteNote(note)} class="text-fg-faint hover:text-danger" title="Delete note"
                                     >×</button
                                 >
                             </div>
                             <p class="text-sm whitespace-pre-wrap">{note.body}</p>
                         </div>
                     {:else}
-                        <p class="text-sm text-neutral-500 dark:text-neutral-400">No notes yet.</p>
+                        <p class="text-sm text-fg-muted">No notes yet.</p>
                     {/each}
                 </div>
+            {/if}
+
+            {#if activeTab === 'comments'}
+                <CommentThread {comments} {task} members={team} />
             {/if}
 
             {#if activeTab === 'contacts'}
                 <form
                     onsubmit={addContact}
-                    class="mb-4 rounded-xl border border-neutral-200 bg-white p-3 dark:border-neutral-800 dark:bg-neutral-900"
+                    class="mb-4 rounded-xl border border-line bg-surface p-3"
                 >
                     <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
                         <input
@@ -477,38 +482,38 @@
                             placeholder="Name *"
                             bind:value={contactForm.name}
                             required
-                            class="rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                            class="rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
                         />
                         <input
                             type="text"
                             placeholder="Role"
                             bind:value={contactForm.role}
-                            class="rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                            class="rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
                         />
                         <input
                             type="text"
                             placeholder="Organization"
                             bind:value={contactForm.organization}
-                            class="rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                            class="rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
                         />
                         <input
                             type="email"
                             placeholder="Email"
                             bind:value={contactForm.email}
-                            class="rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                            class="rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
                         />
                         <input
                             type="tel"
                             placeholder="Phone"
                             bind:value={contactForm.phone}
-                            class="rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                            class="rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
                         />
                     </div>
                     <div class="mt-2 flex justify-end">
                         <button
                             type="submit"
                             disabled={contactForm.processing || !contactForm.name.trim()}
-                            class="rounded-md bg-amber-500 px-3 py-1 text-xs font-semibold text-white hover:bg-amber-600 disabled:opacity-50 dark:text-neutral-950"
+                            class="rounded-md bg-accent px-3 py-1 text-xs font-semibold text-bg hover:bg-accent-dim disabled:opacity-50"
                             >Add contact</button
                         >
                     </div>
@@ -516,62 +521,62 @@
 
                 <div class="space-y-2">
                     {#each contacts as contact (contact.id)}
-                        <div class="rounded-xl border border-neutral-200 bg-white p-3 dark:border-neutral-800 dark:bg-neutral-900">
+                        <div class="rounded-xl border border-line bg-surface p-3">
                             <div class="text-sm font-medium">{contact.name}</div>
                             {#if contact.role || contact.organization}
-                                <div class="text-xs text-neutral-500 dark:text-neutral-400">
+                                <div class="text-xs text-fg-muted">
                                     {[contact.role, contact.organization].filter(Boolean).join(' · ')}
                                 </div>
                             {/if}
-                            <div class="mt-1 flex flex-wrap gap-3 text-xs text-neutral-600 dark:text-neutral-400">
+                            <div class="mt-1 flex flex-wrap gap-3 text-xs text-fg-muted">
                                 {#if contact.email}<a href={`mailto:${contact.email}`} class="hover:underline">✉ {contact.email}</a>{/if}
                                 {#if contact.phone}<span>☎ {contact.phone}</span>{/if}
                             </div>
                         </div>
                     {:else}
-                        <p class="text-sm text-neutral-500 dark:text-neutral-400">No contacts yet.</p>
+                        <p class="text-sm text-fg-muted">No contacts yet.</p>
                     {/each}
                 </div>
             {/if}
         </div>
 
         <aside class="space-y-4">
-            <section class="rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
-                <h3 class="mb-3 text-xs font-semibold tracking-wider text-neutral-500 uppercase dark:text-neutral-400">
+            <section class="rounded-xl border border-line bg-surface p-4">
+                <h3 class="mb-3 text-xs font-semibold tracking-wider text-fg-muted uppercase">
                     Assignees ({task.assignments?.length ?? 0})
                 </h3>
                 <div class="space-y-2">
                     {#each task.assignments ?? [] as a (a.id)}
                         <div class="flex items-center gap-2">
                             <span
-                                class="flex h-7 w-7 items-center justify-center rounded-full bg-neutral-200 text-xs font-semibold text-neutral-700 dark:bg-neutral-700 dark:text-neutral-200"
+                                class="flex h-7 w-7 items-center justify-center rounded-full bg-surface-alt text-xs font-semibold text-fg-muted"
                             >
                                 {initials(a.member?.name)}
                             </span>
                             <div class="min-w-0 flex-1">
                                 <div class="truncate text-sm font-medium">{a.member?.name}</div>
-                                <div class="truncate text-xs text-neutral-500 dark:text-neutral-400">
+                                <div class="truncate text-xs text-fg-muted">
                                     {a.personal_progress}%
                                 </div>
                             </div>
-                            <button type="button" onclick={() => unassign(a)} class="text-neutral-400 hover:text-red-500" title="Unassign">×</button>
+                            <button type="button" onclick={() => unassign(a)} class="text-fg-faint hover:text-danger" title="Unassign">×</button>
                         </div>
                     {:else}
-                        <p class="text-sm italic text-neutral-500 dark:text-neutral-400">No one assigned yet.</p>
+                        <p class="text-sm italic text-fg-muted">No one assigned yet.</p>
                     {/each}
                 </div>
-                <div class="mt-3 border-t border-neutral-200 pt-3 dark:border-neutral-800">
+                <div class="mt-3 border-t border-line pt-3">
                     <AssigneePicker {team} bind:selectedIds={pickerSelected} placeholder="Add assignee..." />
                 </div>
             </section>
 
             {#if task.category_label || task.deadline_label || task.responsible_ministry}
-                <section class="rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
-                    <h3 class="mb-3 text-xs font-semibold tracking-wider text-neutral-500 uppercase dark:text-neutral-400">Plan metadata</h3>
+                <section class="rounded-xl border border-line bg-surface p-4">
+                    <h3 class="mb-3 text-xs font-semibold tracking-wider text-fg-muted uppercase">Plan metadata</h3>
                     <dl class="space-y-2 text-sm">
                         {#if task.category_label}
                             <div class="flex items-center justify-between">
-                                <dt class="text-neutral-500 dark:text-neutral-400">Category</dt>
+                                <dt class="text-fg-muted">Category</dt>
                                 <dd>
                                     <span
                                         class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset"
@@ -583,14 +588,14 @@
                         {/if}
                         {#if task.deadline_label}
                             <div class="flex items-center justify-between">
-                                <dt class="text-neutral-500 dark:text-neutral-400">Deadline type</dt>
-                                <dd class="text-neutral-800 dark:text-neutral-200">{task.deadline_label}</dd>
+                                <dt class="text-fg-muted">Deadline type</dt>
+                                <dd class="text-fg">{task.deadline_label}</dd>
                             </div>
                         {/if}
                         {#if task.responsible_ministry}
                             <div class="flex items-center justify-between">
-                                <dt class="text-neutral-500 dark:text-neutral-400">Ministry</dt>
-                                <dd class="text-neutral-800 dark:text-neutral-200">{task.responsible_ministry}</dd>
+                                <dt class="text-fg-muted">Ministry</dt>
+                                <dd class="text-fg">{task.responsible_ministry}</dd>
                             </div>
                         {/if}
                     </dl>

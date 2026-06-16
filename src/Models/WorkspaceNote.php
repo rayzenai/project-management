@@ -4,9 +4,12 @@ namespace RayzenAI\ProjectManagement\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class WorkspaceNote extends Model
 {
+    use SoftDeletes;
+
     public const COLORS = ['amber', 'rose', 'sky', 'emerald', 'violet'];
 
     protected $table = 'workspace_notes';

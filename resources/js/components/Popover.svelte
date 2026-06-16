@@ -91,7 +91,7 @@
             bind:this={panel}
             {role}
             tabindex="-1"
-            class={`absolute top-full z-30 mt-1 min-w-44 rounded-md border border-neutral-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-900 ${align === 'right' ? 'right-0' : 'left-0'} ${panelClass}`}
+            class={`absolute top-full z-30 mt-1 min-w-44 rounded-md border border-line bg-surface py-1 shadow-lg ${align === 'right' ? 'right-0' : 'left-0'} ${panelClass}`}
             onkeydown={onPanelKeydown}
             onclick={(e) => e.stopPropagation()}
         >

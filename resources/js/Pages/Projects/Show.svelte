@@ -103,16 +103,16 @@
 
 <AppShell>
     {#if project.is_archived}
-        <div class="mb-4 flex items-center justify-between rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-800 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-300">
+        <div class="mb-4 flex items-center justify-between rounded-lg border border-warn/40 bg-warn/10 px-4 py-2 text-sm text-warn">
             <span>This project is archived — hidden from My Workspace, the dashboard, and quick-add.</span>
             {#if project.can_archive}
-                <button type="button" class="rounded-md bg-amber-500 px-2.5 py-1 text-xs font-semibold text-white hover:bg-amber-600" onclick={restoreProject}>Restore</button>
+                <button type="button" class="rounded-md bg-accent px-2.5 py-1 text-xs font-semibold text-bg hover:bg-accent-dim" onclick={restoreProject}>Restore</button>
             {/if}
         </div>
     {/if}
 
     <header class="mb-6">
-        <nav class="mb-2 text-xs text-neutral-500 dark:text-neutral-400">
+        <nav class="mb-2 text-xs text-fg-muted">
             <a href="/workspace/projects" class="hover:underline">Projects</a> /
             <span>{project.title}</span>
         </nav>
@@ -120,18 +120,18 @@
             <div class="flex items-center gap-3">
                 <h1 class="text-2xl font-bold tracking-tight">{project.title}</h1>
                 {#if project.can_archive && !project.is_archived}
-                    <button type="button" class="rounded-md border border-neutral-300 px-3 py-1.5 text-sm font-medium text-neutral-600 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800" onclick={archiveProject}>Archive project</button>
+                    <button type="button" class="rounded-md border border-line px-3 py-1.5 text-sm font-medium text-fg-muted hover:bg-surface-alt" onclick={archiveProject}>Archive project</button>
                 {/if}
             </div>
             {#if project.title_np}
-                <div class="mt-1 text-base text-neutral-600 dark:text-neutral-400">{project.title_np}</div>
+                <div class="mt-1 text-base text-fg-muted">{project.title_np}</div>
             {/if}
             {#if project.description}
-                <p class="mt-2 max-w-2xl text-sm text-neutral-600 dark:text-neutral-400">{project.description}</p>
+                <p class="mt-2 max-w-2xl text-sm text-fg-muted">{project.description}</p>
             {/if}
             {#if teams.length > 0}
                 <div class="mt-3 flex flex-wrap items-center gap-1.5">
-                    <span class="ws-eyebrow text-neutral-500 dark:text-neutral-400">Teams</span>
+                    <span class="ws-eyebrow text-fg-muted">Teams</span>
                     {#each teams as team (team.id)}
                         {@const attached = (project.team_ids ?? []).includes(team.id)}
                         <button
@@ -140,8 +140,8 @@
                             title={attached ? `Detach ${team.name}` : `Attach ${team.name} — scopes the assignee picker to its members`}
                             class={`rounded-full px-2.5 py-1 text-xs font-medium transition ${
                                 attached
-                                    ? 'bg-amber-100 text-amber-900 ring-1 ring-amber-400 dark:bg-amber-500/20 dark:text-amber-200 dark:ring-amber-500/60'
-                                    : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700'
+                                    ? 'bg-accent/20 text-accent ring-1 ring-accent/60'
+                                    : 'bg-surface-alt text-fg-muted hover:bg-surface-alt'
                             }`}
                             onclick={() => toggleProjectTeam(team)}
                         >
@@ -149,7 +149,7 @@
                         </button>
                     {/each}
                     {#if (project.team_ids ?? []).length === 0}
-                        <span class="text-xs text-neutral-400 dark:text-neutral-500">none — everyone is assignable</span>
+                        <span class="text-xs text-fg-faint">none — everyone is assignable</span>
                     {/if}
                 </div>
             {/if}
@@ -157,12 +157,12 @@
     </header>
 
     {#if tasks.length === 0}
-        <div class="rounded-xl border border-dashed border-neutral-300 bg-white p-10 text-center dark:border-neutral-700 dark:bg-neutral-900">
+        <div class="rounded-xl border border-dashed border-line bg-surface p-10 text-center">
             <p class="text-base font-medium">No tasks yet.</p>
-            <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">Press <strong>q</strong> anywhere, or:</p>
+            <p class="mt-1 text-sm text-fg-muted">Press <strong>q</strong> anywhere, or:</p>
             <button
                 type="button"
-                class="mt-3 rounded-md bg-amber-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-amber-600 dark:text-neutral-950"
+                class="mt-3 rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-bg hover:bg-accent-dim"
                 onclick={() => quickAdd.open({ projectId: project.id })}
             >
                 + Add task
@@ -170,14 +170,14 @@
         </div>
     {:else}
         <div class="mb-4 flex items-center justify-between gap-2">
-            <div class="inline-flex overflow-hidden rounded-md border border-neutral-300 text-sm dark:border-neutral-700">
+            <div class="inline-flex overflow-hidden rounded-md border border-line text-sm">
                 {#each TABS as tab (tab.value)}
                     <button
                         type="button"
                         class={`px-3 py-1.5 transition ${
                             activeTab === tab.value
-                                ? 'bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900'
-                                : 'bg-white text-neutral-600 hover:bg-neutral-50 dark:bg-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800'
+                                ? 'bg-accent text-bg'
+                                : 'bg-surface text-fg-muted hover:bg-surface-alt'
                         }`}
                         onclick={() => (activeTab = tab.value)}
                         aria-pressed={activeTab === tab.value}
@@ -188,7 +188,7 @@
             </div>
             <button
                 type="button"
-                class="rounded-md bg-amber-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-amber-600 dark:text-neutral-950"
+                class="rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-bg hover:bg-accent-dim"
                 onclick={() => quickAdd.open({ projectId: project.id })}
             >
                 + Add task
@@ -199,11 +199,11 @@
         <ProjectFilters bind:filters {teammates} {categories} shownCount={filteredTasks.length} totalCount={tasks.length} />
 
         {#if filteredTasks.length === 0}
-            <div class="mb-4 rounded-xl border border-dashed border-neutral-300 bg-white p-8 text-center dark:border-neutral-700 dark:bg-neutral-900">
-                <p class="text-sm text-neutral-500 dark:text-neutral-400">No tasks match the current filters.</p>
+            <div class="mb-4 rounded-xl border border-dashed border-line bg-surface p-8 text-center">
+                <p class="text-sm text-fg-muted">No tasks match the current filters.</p>
                 <button
                     type="button"
-                    class="mt-3 rounded-md border border-amber-400 px-3 py-1.5 text-sm font-medium text-amber-700 transition hover:bg-amber-50 dark:border-amber-500/60 dark:text-amber-400 dark:hover:bg-amber-500/10"
+                    class="mt-3 rounded-md border border-accent px-3 py-1.5 text-sm font-medium text-accent transition hover:bg-accent/10"
                     onclick={clearFilters}
                 >
                     Clear filters

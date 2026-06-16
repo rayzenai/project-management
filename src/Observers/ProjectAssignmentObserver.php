@@ -4,6 +4,7 @@ namespace RayzenAI\ProjectManagement\Observers;
 
 use RayzenAI\ProjectManagement\Models\ProjectActivity;
 use RayzenAI\ProjectManagement\Models\ProjectAssignment;
+use RayzenAI\ProjectManagement\Notifications\TaskAssigned;
 use RayzenAI\ProjectManagement\Services\ProjectActivityRecorder;
 
 class ProjectAssignmentObserver
@@ -18,6 +19,13 @@ class ProjectAssignmentObserver
             action: ProjectActivity::ACTION_CREATED,
             description: 'Assigned to '.$name.' ('.((string) $assignment->role).')',
         );
+
+        $user = $assignment->member?->user;
+
+        if ($user !== null) {
+            $actor = auth()->user()?->name ?? 'Someone';
+            $user->notify(new TaskAssigned($assignment->task, $actor));
+        }
     }
 
     public function updated(ProjectAssignment $assignment): void
@@ -77,6 +85,18 @@ class ProjectAssignmentObserver
             subject: $assignment,
             action: ProjectActivity::ACTION_DELETED,
             description: 'Assignment removed',
+        );
+    }
+
+    public function restored(ProjectAssignment $assignment): void
+    {
+        $name = $assignment->member?->name ?? 'member #'.$assignment->member_id;
+
+        ProjectActivityRecorder::record(
+            taskId: $assignment->task_id,
+            subject: $assignment,
+            action: ProjectActivity::ACTION_RESTORED,
+            description: 'Assignment to '.$name.' restored',
         );
     }
 }

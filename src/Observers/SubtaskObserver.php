@@ -62,4 +62,14 @@ class SubtaskObserver
             description: 'Todo deleted',
         );
     }
+
+    public function restored(Subtask $todo): void
+    {
+        ProjectActivityRecorder::record(
+            taskId: $todo->task_id,
+            subject: $todo,
+            action: ProjectActivity::ACTION_RESTORED,
+            description: 'Todo restored',
+        );
+    }
 }

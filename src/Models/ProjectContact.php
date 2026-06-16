@@ -4,9 +4,12 @@ namespace RayzenAI\ProjectManagement\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ProjectContact extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'project_contacts';
 
     protected $fillable = [

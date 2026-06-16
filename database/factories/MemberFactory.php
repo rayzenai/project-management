@@ -2,6 +2,7 @@
 
 namespace RayzenAI\ProjectManagement\Database\Factories;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use RayzenAI\ProjectManagement\Models\Member;
 
@@ -30,6 +31,19 @@ class MemberFactory extends Factory
             'name' => $user->name,
             'email' => $user->email,
         ]);
+    }
+
+    public function withUser(): self
+    {
+        return $this->state(function (): array {
+            $user = User::factory()->create();
+
+            return [
+                'user_id' => $user->getKey(),
+                'name' => $user->name,
+                'email' => $user->email,
+            ];
+        });
     }
 
     public function inactive(): self
