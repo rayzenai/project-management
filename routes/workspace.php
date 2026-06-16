@@ -9,6 +9,7 @@ use RayzenAI\ProjectManagement\Http\Controllers\Workspace\MyWorkspaceController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\NoteController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\NotificationController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\PlanTrackerController;
+use RayzenAI\ProjectManagement\Http\Controllers\Workspace\PreferenceController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\ProjectController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\QuickAddController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\SubtaskController;
@@ -109,4 +110,6 @@ Route::middleware([...config('project-management.middleware', ['web', 'auth']), 
         Route::post('/notifications/{id}/read', [NotificationController::class, 'read'])->name('notifications.read');
 
         Route::get('/100-point-tracker', PlanTrackerController::class)->name('plan-tracker');
+
+        Route::patch('/preferences', [PreferenceController::class, 'update'])->name('preferences.update');
     });

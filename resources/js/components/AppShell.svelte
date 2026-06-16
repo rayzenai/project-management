@@ -7,6 +7,8 @@
     import { quickAdd } from '../lib/quickAdd.svelte';
     import { toast } from '../lib/toast.svelte';
     import type { SharedProps } from '../lib/types';
+    import type { AppearanceProps } from '../lib/appearance';
+    import AppearanceConfig from './AppearanceConfig.svelte';
     import CommandPalette from './CommandPalette.svelte';
     import QuickAddOverlay from './QuickAddOverlay.svelte';
     import TaskPeek from './TaskPeek.svelte';
@@ -21,9 +23,19 @@
     const path = $derived(page.url ?? '/workspace');
     const noteCount = $derived(shared.workspaceNotes?.length ?? 0);
     const unreadNotifications = $derived(shared.unreadNotifications ?? 0);
+    const appearance = $derived((shared.appearance ?? null) as AppearanceProps | null);
 
     let mobileOpen = $state(false);
     let lastFlash = $state<string | null>(null);
+
+    // First-run gate: blocks the workspace until the user saves preferences.
+    // Local flag lets us hide the overlay immediately on save; the next Inertia
+    // prop refresh carries `configured: true`.
+    let onboardingDismissed = $state(false);
+    const showOnboarding = $derived(appearance?.configured === false && !onboardingDismissed);
+
+    // Settings → Appearance, reachable any time from the header as a modal panel.
+    let settingsOpen = $state(false);
 
     $effect(() => {
         const message = flash?.message ?? null;
@@ -64,6 +76,19 @@
 
     function logout() {
         router.post('/logout');
+    }
+
+    function skipOnboarding() {
+        // Save the defaults so `configured` flips true — never trap the user.
+        router.patch(
+            '/workspace/preferences',
+            { theme: 'system', font_override: { display: null, body: null, mono: null }, email_notifications: true },
+            {
+                preserveScroll: true,
+                preserveState: true,
+                onSuccess: () => (onboardingDismissed = true),
+            },
+        );
     }
 
     function isEditable(target: EventTarget | null): boolean {
@@ -225,6 +250,15 @@
                         >
                     {/if}
                 </button>
+                <button
+                    type="button"
+                    onclick={() => (settingsOpen = true)}
+                    aria-label="Appearance settings"
+                    title="Appearance"
+                    class="rounded-md p-2 text-fg-muted hover:bg-surface-alt"
+                >
+                    <span class="text-base">⚙</span>
+                </button>
             </div>
         </header>
 
@@ -238,6 +272,50 @@
     <QuickAddOverlay />
     <CommandPalette />
     <Toasts />
+
+    <!-- Settings → Appearance: a modal panel reachable any time from the header -->
+    {#if settingsOpen && appearance}
+        <div class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4 backdrop-blur-sm">
+            <button type="button" aria-label="Close" class="fixed inset-0" onclick={() => (settingsOpen = false)}></button>
+            <div class="relative my-8 w-full max-w-2xl rounded-2xl border border-line bg-bg p-6 text-fg shadow-2xl">
+                <div class="mb-6 flex items-center justify-between">
+                    <h2 class="font-display text-xl font-bold tracking-tight">Appearance</h2>
+                    <button
+                        type="button"
+                        aria-label="Close"
+                        class="rounded-md p-1 text-fg-muted hover:bg-surface-alt hover:text-fg"
+                        onclick={() => (settingsOpen = false)}>✕</button
+                    >
+                </div>
+                <AppearanceConfig {appearance} onsaved={() => (settingsOpen = false)} />
+            </div>
+        </div>
+    {/if}
+
+    <!-- First-run gate: full-screen blocking overlay until the user configures -->
+    {#if showOnboarding && appearance}
+        <div class="fixed inset-0 z-50 overflow-y-auto bg-bg text-fg">
+            <div class="mx-auto w-full max-w-2xl px-4 py-12">
+                <div class="mb-8 text-center">
+                    <div class="ws-eyebrow text-accent">Welcome</div>
+                    <h1 class="font-display text-3xl font-bold tracking-tight">Make it yours</h1>
+                    <p class="mt-2 text-sm text-fg-muted">
+                        Choose a theme and fonts before you start. You can change these any time from the ⚙ menu.
+                    </p>
+                </div>
+                <AppearanceConfig {appearance} onsaved={() => (onboardingDismissed = true)} />
+                <div class="mt-6 text-center">
+                    <button
+                        type="button"
+                        onclick={skipOnboarding}
+                        class="text-sm text-fg-faint underline-offset-4 hover:text-fg-muted hover:underline"
+                    >
+                        Skip — use defaults
+                    </button>
+                </div>
+            </div>
+        </div>
+    {/if}
 </div>
 
 <svelte:window onkeydown={onGlobalKey} />
