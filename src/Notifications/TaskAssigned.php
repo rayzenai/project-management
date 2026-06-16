@@ -2,15 +2,14 @@
 
 namespace RayzenAI\ProjectManagement\Notifications;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 use RayzenAI\ProjectManagement\Models\Task;
 use RayzenAI\ProjectManagement\Notifications\Concerns\BuildsWorkspaceNotification;
 
-class TaskAssigned extends Notification implements ShouldQueue
+// in-app (database) only — synchronous; add ShouldQueue when email/push channels are introduced
+class TaskAssigned extends Notification
 {
-    use BuildsWorkspaceNotification, Queueable;
+    use BuildsWorkspaceNotification;
 
     public function __construct(public Task $task, public string $actorName) {}
 

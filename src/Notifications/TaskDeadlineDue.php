@@ -2,16 +2,15 @@
 
 namespace RayzenAI\ProjectManagement\Notifications;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Carbon;
 use RayzenAI\ProjectManagement\Models\Task;
 use RayzenAI\ProjectManagement\Notifications\Concerns\BuildsWorkspaceNotification;
 
-class TaskDeadlineDue extends Notification implements ShouldQueue
+// in-app (database) only — synchronous; add ShouldQueue when email/push channels are introduced
+class TaskDeadlineDue extends Notification
 {
-    use BuildsWorkspaceNotification, Queueable;
+    use BuildsWorkspaceNotification;
 
     /**
      * @param  'heads_up'|'due_today'|'overdue'  $window
