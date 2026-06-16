@@ -9,7 +9,7 @@ use RayzenAI\ProjectManagement\Support\MentionParser;
 use RayzenAI\ProjectManagement\Support\ServiceResult;
 use Throwable;
 
-class CreateTaskComment
+class CreateTaskCommentService
 {
     use NotifiesMentions;
 

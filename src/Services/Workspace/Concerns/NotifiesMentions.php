@@ -7,6 +7,7 @@ use Illuminate\Support\Str;
 use RayzenAI\ProjectManagement\Models\Member;
 use RayzenAI\ProjectManagement\Models\Task;
 use RayzenAI\ProjectManagement\Notifications\MentionedInComment;
+use RayzenAI\ProjectManagement\Support\MentionParser;
 
 trait NotifiesMentions
 {
@@ -21,12 +22,14 @@ trait NotifiesMentions
             return;
         }
 
+        $excerpt = Str::limit(MentionParser::toDisplayText($body), 80);
+
         Member::with('user')->whereIn('id', $memberIds)->get()
             ->pluck('user')->filter()
             ->reject(fn ($user): bool => $user->id === $author->id)
             ->unique('id')
             ->each(fn ($user) => $user->notify(
-                new MentionedInComment($task, $author->name, Str::limit($body, 80))
+                new MentionedInComment($task, $author->name, $excerpt)
             ));
     }
 }
