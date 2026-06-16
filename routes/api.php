@@ -86,7 +86,6 @@ Route::middleware('api')->prefix('api/v1')->name('api.')->group(function () {
             Route::delete('/notes/{note}', [NoteController::class, 'destroy'])->name('notes.destroy');
             Route::post('/notes/{note}/restore', [NoteController::class, 'restore'])->name('notes.restore')->withTrashed();
             Route::post('/tasks/{task}/contacts', [ContactController::class, 'store'])->name('contacts.store');
-            Route::post('/contacts/{contact}/restore', [ContactController::class, 'restore'])->name('contacts.restore')->withTrashed();
 
             // Personal workspace notes
             Route::post('/my-notes', [WorkspaceNoteController::class, 'store'])->name('my-notes.store');

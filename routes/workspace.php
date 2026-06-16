@@ -90,7 +90,6 @@ Route::middleware([...config('project-management.middleware', ['web', 'auth']), 
         Route::post('/my-notes/{workspaceNote}/restore', [WorkspaceNoteController::class, 'restore'])->name('my-notes.restore')->withTrashed();
 
         Route::post('/tasks/{task}/contacts', [ContactController::class, 'store'])->name('contacts.store');
-        Route::post('/contacts/{contact}/restore', [ContactController::class, 'restore'])->name('contacts.restore')->withTrashed();
 
         Route::post('/tasks/{task}/subtasks', [SubtaskController::class, 'store'])->name('subtasks.store');
         Route::patch('/subtasks/{subtask}', [SubtaskController::class, 'update'])->name('subtasks.update');
