@@ -65,17 +65,17 @@
                     size === 'sm' ? 'px-1.5 py-px text-[10px]' : 'px-2 py-0.5 text-[11px]'
                 } ${
                     overdue
-                        ? 'bg-red-50 text-red-700 ring-red-200 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/30'
+                        ? 'bg-danger/10 text-danger ring-danger/30'
                         : dueToday
-                          ? 'bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:ring-amber-500/30'
-                          : 'bg-neutral-50 text-neutral-600 ring-neutral-200 dark:bg-neutral-800/60 dark:text-neutral-400 dark:ring-neutral-700'
-                } ${failed ? 'ring-2 ring-red-400' : ''}`}
+                          ? 'bg-warn/10 text-warn ring-warn/30'
+                          : 'bg-surface-alt text-fg-muted ring-line'
+                } ${failed ? 'ring-2 ring-danger' : ''}`}
             >
                 ⏱ {relative}
             </span>
         {:else}
             <span
-                class={`inline-flex items-center rounded-full px-1.5 py-px font-mono text-[10px] text-neutral-400 ring-1 ring-neutral-200 ring-inset dark:text-neutral-500 dark:ring-neutral-700 ${
+                class={`inline-flex items-center rounded-full px-1.5 py-px font-mono text-[10px] text-fg-faint ring-1 ring-line ring-inset ${
                     ghost ? 'opacity-0 transition group-hover:opacity-100' : ''
                 }`}
             >
@@ -88,14 +88,14 @@
         <input
             type="date"
             value={shown ?? ''}
-            class="rounded-md border border-neutral-300 bg-white px-2 py-1 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+            class="rounded-md border border-line bg-surface px-2 py-1 text-sm text-fg"
             onchange={(e) => setDeadline((e.currentTarget as HTMLInputElement).value || null)}
         />
         {#if shown}
             <button
                 type="button"
                 data-popover-item
-                class="font-mono text-xs text-neutral-500 hover:text-red-600 dark:hover:text-red-400"
+                class="font-mono text-xs text-fg-muted hover:text-danger"
                 onclick={() => setDeadline(null)}
             >
                 Clear

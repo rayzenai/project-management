@@ -177,7 +177,7 @@
 <svelte:window onkeydown={onWindowKey} onpointermove={onPointerMove} onpointerup={onPointerUp} />
 
 {#if open}
-    <div class="fixed inset-0 z-50 bg-neutral-950/30 backdrop-blur-[2px] select-none">
+    <div class="fixed inset-0 z-50 bg-black/30 backdrop-blur-[2px] select-none">
         <!-- click empty board to close -->
         <button
             type="button"
@@ -195,10 +195,10 @@
         <!-- toolbar -->
         <div class="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-center justify-between px-4 py-3">
             <div
-                class="pointer-events-auto flex items-center gap-2 rounded-full bg-white/90 px-4 py-1.5 text-sm font-semibold shadow-sm ring-1 ring-neutral-200 dark:bg-neutral-900/90 dark:ring-neutral-700"
+                class="pointer-events-auto flex items-center gap-2 rounded-full bg-surface/90 px-4 py-1.5 text-sm font-semibold shadow-sm ring-1 ring-line"
             >
                 <span>🗒 My notes</span>
-                <span class="rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-medium text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400"
+                <span class="rounded-full bg-surface-alt px-2 py-0.5 text-xs font-medium text-fg-muted"
                     >{notes.length}</span
                 >
             </div>
@@ -206,13 +206,13 @@
                 <button
                     type="button"
                     onclick={startCompose}
-                    class="rounded-full bg-amber-500 px-4 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-amber-600 dark:text-neutral-950">+ New note</button
+                    class="rounded-full bg-accent px-4 py-1.5 text-sm font-semibold text-bg shadow-sm hover:bg-accent-dim">+ New note</button
                 >
                 <button
                     type="button"
                     onclick={onClose}
                     aria-label="Close"
-                    class="rounded-full bg-white/90 p-2 text-neutral-600 shadow-sm ring-1 ring-neutral-200 hover:text-neutral-900 dark:bg-neutral-900/90 dark:text-neutral-300 dark:ring-neutral-700"
+                    class="rounded-full bg-surface/90 p-2 text-fg-muted shadow-sm ring-1 ring-line hover:text-fg"
                     >✕</button
                 >
             </div>
@@ -220,7 +220,7 @@
 
         {#if notes.length === 0 && !composing}
             <div class="pointer-events-none absolute inset-0 flex items-center justify-center">
-                <p class="rounded-xl bg-white/80 px-4 py-2 text-sm text-neutral-500 shadow-sm dark:bg-neutral-900/80 dark:text-neutral-400">
+                <p class="rounded-xl bg-surface/80 px-4 py-2 text-sm text-fg-muted shadow-sm">
                     No notes yet — tap “+ New note” to pin one.
                 </p>
             </div>
@@ -339,14 +339,14 @@
         <!-- compose -->
         {#if composing}
             <div class="absolute inset-0 z-50 flex items-center justify-center p-4">
-                <div class="w-full max-w-sm rounded-xl border border-neutral-200 bg-white p-4 shadow-2xl dark:border-neutral-800 dark:bg-neutral-900">
+                <div class="w-full max-w-sm rounded-xl border border-line bg-surface p-4 shadow-2xl">
                     <div class="mb-2 flex items-center justify-between">
                         <h3 class="text-sm font-semibold">New note</h3>
                         <button
                             type="button"
                             onclick={() => (composing = false)}
                             aria-label="Cancel"
-                            class="rounded-md p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-900 dark:hover:bg-neutral-800">✕</button
+                            class="rounded-md p-1 text-fg-faint hover:bg-surface-alt hover:text-fg">✕</button
                         >
                     </div>
                     <form
@@ -360,25 +360,25 @@
                             type="text"
                             bind:value={draftTitle}
                             placeholder="Heading (optional)"
-                            class="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm font-medium outline-none placeholder:text-neutral-400 focus:border-amber-400 dark:border-neutral-700 dark:bg-neutral-800"
+                            class="w-full rounded-lg border border-line bg-surface-alt px-3 py-2 text-sm font-medium outline-none placeholder:text-fg-faint focus:border-accent"
                         />
                         <textarea
                             bind:value={draftBody}
                             placeholder="Write a note…"
                             rows="5"
-                            class="w-full resize-y rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm outline-none placeholder:text-neutral-400 focus:border-amber-400 dark:border-neutral-700 dark:bg-neutral-800"
+                            class="w-full resize-y rounded-lg border border-line bg-surface-alt px-3 py-2 text-sm outline-none placeholder:text-fg-faint focus:border-accent"
                         ></textarea>
                         <div class="flex justify-end gap-2">
                             <button
                                 type="button"
                                 onclick={() => (composing = false)}
-                                class="rounded-lg px-3 py-1.5 text-sm font-medium text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                                class="rounded-lg px-3 py-1.5 text-sm font-medium text-fg-muted hover:bg-surface-alt"
                                 >Cancel</button
                             >
                             <button
                                 type="submit"
                                 disabled={!draftBody.trim() || saving}
-                                class="rounded-lg bg-amber-500 px-4 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-950"
+                                class="rounded-lg bg-accent px-4 py-1.5 text-sm font-semibold text-bg shadow-sm hover:bg-accent-dim disabled:cursor-not-allowed disabled:opacity-50"
                                 >Add note</button
                             >
                         </div>

@@ -52,15 +52,15 @@
     }
 </script>
 
-<section class="rounded-xl border border-emerald-200 bg-emerald-50/40 p-4 dark:border-emerald-500/30 dark:bg-emerald-500/5">
+<section class="rounded-xl border border-success/30 bg-success/5 p-4">
     <header class="mb-3 flex items-baseline justify-between">
         <div class="flex items-baseline gap-3">
-            <h2 class="ws-eyebrow text-emerald-800 dark:text-emerald-300">✓ My Open Todos</h2>
-            <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">
+            <h2 class="ws-eyebrow text-success">✓ My Open Todos</h2>
+            <span class="rounded-full bg-success/20 px-2 py-0.5 text-xs font-medium text-success">
                 {todos.length}
             </span>
         </div>
-        <button type="button" class="text-xs text-emerald-700 hover:underline dark:text-emerald-400" onclick={() => (hidden = !hidden)}
+        <button type="button" class="text-xs text-success hover:underline" onclick={() => (hidden = !hidden)}
             >{hidden ? 'Show' : 'Hide'}</button
         >
     </header>
@@ -68,7 +68,7 @@
     {#if !hidden}
         {#if todos.length === 0}
             <p
-                class="rounded-md border border-dashed border-emerald-300 bg-white px-4 py-6 text-center text-sm text-emerald-700 dark:border-emerald-500/40 dark:bg-neutral-900 dark:text-emerald-300"
+                class="rounded-md border border-dashed border-success/40 bg-surface px-4 py-6 text-center text-sm text-success"
             >
                 No open todos. Add some from any task's <em>Todos</em> tab.
             </p>
@@ -76,21 +76,21 @@
             <div class="space-y-5">
                 {#each groups as group (group.key)}
                     <div>
-                        <h3 class="mb-2 text-xs font-semibold tracking-wider text-neutral-600 uppercase dark:text-neutral-400">
+                        <h3 class="mb-2 text-xs font-semibold tracking-wider text-fg-muted uppercase">
                             {group.label}
-                            <span class="ml-1 text-neutral-400 dark:text-neutral-500">{group.items.length}</span>
+                            <span class="ml-1 text-fg-faint">{group.items.length}</span>
                         </h3>
                         <ul class="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
                             {#each group.items as t (t.id)}
                                 <li
-                                    class="group rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 transition hover:border-emerald-300 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-emerald-500/40"
+                                    class="group rounded-lg border border-line bg-surface px-2.5 py-1.5 transition hover:border-success/40"
                                 >
                                     <div class="flex items-start gap-2">
                                         <button
                                             type="button"
-                                            class="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 border-neutral-300 text-[10px] text-white transition hover:border-emerald-500 dark:border-neutral-600"
-                                            class:bg-emerald-500={t.is_done}
-                                            class:border-emerald-500={t.is_done}
+                                            class="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 border-line text-[10px] text-bg transition hover:border-success"
+                                            class:bg-success={t.is_done}
+                                            class:border-success={t.is_done}
                                             aria-pressed={t.is_done}
                                             onclick={(e) => {
                                                 e.stopPropagation();
@@ -105,18 +105,18 @@
                                             title="Open task"
                                         >
                                             <p
-                                                class="line-clamp-1 leading-snug text-neutral-900 dark:text-neutral-100"
+                                                class="line-clamp-1 leading-snug text-fg"
                                                 class:line-through={t.is_done}
-                                                class:text-neutral-400={t.is_done}
+                                                class:text-fg-faint={t.is_done}
                                             >
                                                 {t.body}
                                             </p>
                                             <div
-                                                class="mt-0.5 flex flex-wrap items-baseline gap-x-2 text-[11px] text-neutral-500 dark:text-neutral-400"
+                                                class="mt-0.5 flex flex-wrap items-baseline gap-x-2 text-[11px] text-fg-muted"
                                             >
                                                 {#if t.due_at}<span>{formatDate(t.due_at)}</span>{/if}
                                                 {#if t.task}
-                                                    <span class="truncate text-emerald-700 dark:text-emerald-400">
+                                                    <span class="truncate text-success">
                                                         {t.task.short_title || t.task.title}
                                                     </span>
                                                 {/if}
@@ -124,7 +124,7 @@
                                         </button>
                                         <button
                                             type="button"
-                                            class="invisible text-neutral-400 group-hover:visible hover:text-red-500"
+                                            class="invisible text-fg-faint group-hover:visible hover:text-danger"
                                             onclick={(e) => {
                                                 e.stopPropagation();
                                                 remove(t);

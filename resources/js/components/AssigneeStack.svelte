@@ -71,21 +71,21 @@
             {#each visible as assignment (assignment.id)}
                 <span
                     title={assignment.member?.name}
-                    class={`flex items-center justify-center rounded-full bg-neutral-200 font-semibold text-neutral-700 ring-2 ring-white dark:bg-neutral-700 dark:text-neutral-200 dark:ring-neutral-900 ${dim}`}
+                    class={`flex items-center justify-center rounded-full bg-surface-alt font-semibold text-fg-muted ring-2 ring-surface ${dim}`}
                 >
                     {initials(assignment.member?.name)}
                 </span>
             {/each}
             {#if overflow > 0}
                 <span
-                    class={`flex items-center justify-center rounded-full bg-neutral-100 font-mono text-neutral-500 ring-2 ring-white dark:bg-neutral-800 dark:text-neutral-400 dark:ring-neutral-900 ${dim}`}
+                    class={`flex items-center justify-center rounded-full bg-surface-alt font-mono text-fg-muted ring-2 ring-surface ${dim}`}
                 >
                     +{overflow}
                 </span>
             {/if}
             {#if assignments.length === 0}
                 <span
-                    class={`flex items-center justify-center rounded-full border border-dashed border-neutral-300 text-neutral-400 dark:border-neutral-600 dark:text-neutral-500 ${dim}`}
+                    class={`flex items-center justify-center rounded-full border border-dashed border-line text-fg-faint ${dim}`}
                 >
                     +
                 </span>
@@ -98,19 +98,19 @@
             type="text"
             bind:value={query}
             placeholder="Search people…"
-            class="w-full rounded-md border border-neutral-300 bg-white px-2 py-1 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+            class="w-full rounded-md border border-line bg-surface px-2 py-1 text-sm text-fg"
         />
     </div>
 
     {#if assignments.length > 0}
-        <div class="border-b border-neutral-100 px-1 pb-1 dark:border-neutral-800">
+        <div class="border-b border-line-soft px-1 pb-1">
             {#each assignments as assignment (assignment.id)}
-                <div class="flex items-center gap-2 rounded px-2 py-1 text-sm text-neutral-700 dark:text-neutral-200">
+                <div class="flex items-center gap-2 rounded px-2 py-1 text-sm text-fg-muted">
                     <span class="min-w-0 flex-1 truncate">{assignment.member?.name}</span>
                     <button
                         type="button"
                         aria-label={`Unassign ${assignment.member?.name ?? 'member'}`}
-                        class="text-neutral-400 hover:text-red-500 disabled:opacity-40"
+                        class="text-fg-faint hover:text-danger disabled:opacity-40"
                         disabled={assignment.id <= 0}
                         onclick={() => unassign(assignment)}
                     >
@@ -126,18 +126,18 @@
             <button
                 type="button"
                 data-popover-item
-                class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-sm text-neutral-700 hover:bg-neutral-100 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-sm text-fg-muted hover:bg-surface-alt"
                 onclick={() => assign(member)}
             >
                 <span
-                    class="flex h-5 w-5 items-center justify-center rounded-full bg-neutral-200 text-[9px] font-semibold text-neutral-700 dark:bg-neutral-700 dark:text-neutral-200"
+                    class="flex h-5 w-5 items-center justify-center rounded-full bg-surface-alt text-[9px] font-semibold text-fg-muted"
                 >
                     {initials(member.name)}
                 </span>
                 <span class="min-w-0 flex-1 truncate">{member.name}</span>
             </button>
         {:else}
-            <p class="px-2 py-1.5 text-xs text-neutral-400">No matches.</p>
+            <p class="px-2 py-1.5 text-xs text-fg-faint">No matches.</p>
         {/each}
     </div>
 </Popover>

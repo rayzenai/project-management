@@ -187,14 +187,14 @@
 </script>
 
 <div>
-    <form onsubmit={addComment} class="mb-4 rounded-xl border border-neutral-200 bg-white p-3 dark:border-neutral-800 dark:bg-neutral-900">
+    <form onsubmit={addComment} class="mb-4 rounded-xl border border-line bg-surface p-3">
         <div class="relative">
             <textarea
                 bind:this={textarea}
                 bind:value={composeForm.body}
                 rows="3"
                 placeholder="Write a comment… type @ to mention a teammate"
-                class="w-full resize-none rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                class="w-full resize-none rounded-md border border-line bg-surface px-3 py-1.5 text-sm"
                 oninput={detectMention}
                 onkeydown={onComposeKeydown}
                 onclick={detectMention}
@@ -203,14 +203,14 @@
 
             {#if mentionOpen && mentionMatches.length > 0}
                 <ul
-                    class="absolute right-0 left-0 z-30 mt-1 max-h-56 overflow-auto rounded-md border border-neutral-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
+                    class="absolute right-0 left-0 z-30 mt-1 max-h-56 overflow-auto rounded-md border border-line bg-surface py-1 shadow-lg"
                 >
                     {#each mentionMatches as member, i (member.id)}
                         <li>
                             <button
                                 type="button"
-                                class={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800 ${
-                                    i === highlighted ? 'bg-amber-50 dark:bg-amber-500/10' : ''
+                                class={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-surface-alt ${
+                                    i === highlighted ? 'bg-accent/10' : ''
                                 }`}
                                 onmousedown={(e) => {
                                     e.preventDefault();
@@ -218,7 +218,7 @@
                                 }}
                             >
                                 <span
-                                    class="flex h-6 w-6 items-center justify-center rounded-full bg-neutral-200 text-[10px] font-semibold text-neutral-700 dark:bg-neutral-700 dark:text-neutral-200"
+                                    class="flex h-6 w-6 items-center justify-center rounded-full bg-surface-alt text-[10px] font-semibold text-fg-muted"
                                 >
                                     {initials(member.name)}
                                 </span>
@@ -230,11 +230,11 @@
             {/if}
         </div>
         <div class="mt-2 flex items-center justify-between">
-            <p class="text-xs text-neutral-400 dark:text-neutral-500">Press ⌘/Ctrl + Enter to post</p>
+            <p class="text-xs text-fg-faint">Press ⌘/Ctrl + Enter to post</p>
             <button
                 type="submit"
                 disabled={composeForm.processing || !composeForm.body.trim()}
-                class="rounded-md bg-amber-500 px-3 py-1 text-xs font-semibold text-white hover:bg-amber-600 disabled:opacity-50 dark:text-neutral-950"
+                class="rounded-md bg-accent px-3 py-1 text-xs font-semibold text-bg hover:bg-accent-dim disabled:opacity-50"
                 >Comment</button
             >
         </div>
@@ -242,12 +242,12 @@
 
     <div class="space-y-2">
         {#each comments as comment (comment.id)}
-            <div class="rounded-xl border border-neutral-200 bg-white p-3 dark:border-neutral-800 dark:bg-neutral-900">
-                <div class="mb-1 flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400">
-                    <span class="flex h-6 w-6 items-center justify-center rounded-full bg-neutral-200 text-[10px] font-semibold text-neutral-700 dark:bg-neutral-700 dark:text-neutral-200">
+            <div class="rounded-xl border border-line bg-surface p-3">
+                <div class="mb-1 flex items-center gap-2 text-xs text-fg-muted">
+                    <span class="flex h-6 w-6 items-center justify-center rounded-full bg-surface-alt text-[10px] font-semibold text-fg-muted">
                         {initials(comment.author.name)}
                     </span>
-                    <span class="font-medium text-neutral-700 dark:text-neutral-300">{comment.author.name ?? 'Someone'}</span>
+                    <span class="font-medium text-fg-muted">{comment.author.name ?? 'Someone'}</span>
                     <span>· {formatTimeAgo(comment.created_at)}</span>
                     {#if comment.updated_at && comment.updated_at !== comment.created_at}
                         <span class="italic">· edited</span>
@@ -255,10 +255,10 @@
                     {#if comment.can_edit}
                         <div class="flex-1"></div>
                         {#if editingId === comment.id}
-                            <button type="button" onclick={cancelEdit} class="hover:text-neutral-700 dark:hover:text-neutral-200">Cancel</button>
+                            <button type="button" onclick={cancelEdit} class="hover:text-fg">Cancel</button>
                         {:else}
-                            <button type="button" onclick={() => startEdit(comment)} class="hover:text-amber-600 dark:hover:text-amber-400">Edit</button>
-                            <button type="button" onclick={() => deleteComment(comment)} class="text-neutral-400 hover:text-red-500" title="Delete comment"
+                            <button type="button" onclick={() => startEdit(comment)} class="hover:text-accent">Edit</button>
+                            <button type="button" onclick={() => deleteComment(comment)} class="text-fg-faint hover:text-danger" title="Delete comment"
                                 >×</button
                             >
                         {/if}
@@ -269,23 +269,23 @@
                     <textarea
                         bind:value={editDraft}
                         rows="3"
-                        class="w-full resize-none rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                        class="w-full resize-none rounded-md border border-line bg-surface px-3 py-1.5 text-sm"
                     ></textarea>
                     <div class="mt-2 flex justify-end">
                         <button
                             type="button"
                             onclick={() => saveEdit(comment)}
                             disabled={editProcessing || !editDraft.trim()}
-                            class="rounded-md bg-amber-500 px-3 py-1 text-xs font-semibold text-white hover:bg-amber-600 disabled:opacity-50 dark:text-neutral-950"
+                            class="rounded-md bg-accent px-3 py-1 text-xs font-semibold text-bg hover:bg-accent-dim disabled:opacity-50"
                             >Save</button
                         >
                     </div>
                 {:else}
-                    <p class="text-sm whitespace-pre-wrap text-neutral-700 dark:text-neutral-200">
+                    <p class="text-sm whitespace-pre-wrap text-fg-muted">
                         {#each parseBody(comment.body) as seg, i (i)}
                             {#if seg.type === 'mention'}
                                 <span
-                                    class="rounded bg-amber-100 px-1 font-medium text-amber-800 dark:bg-amber-500/20 dark:text-amber-300"
+                                    class="rounded bg-accent/10 px-1 font-medium text-accent"
                                     >@{seg.name}</span
                                 >
                             {:else}{seg.value}{/if}
@@ -294,7 +294,7 @@
                 {/if}
             </div>
         {:else}
-            <p class="text-sm text-neutral-500 dark:text-neutral-400">No comments yet.</p>
+            <p class="text-sm text-fg-muted">No comments yet.</p>
         {/each}
     </div>
 </div>

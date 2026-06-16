@@ -266,20 +266,20 @@
 
 {#if palette.isOpen}
     <div
-        class="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-neutral-950/40 px-4 py-16 backdrop-blur-md"
+        class="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-black/40 px-4 py-16 backdrop-blur-md"
         onclick={close}
         role="presentation"
     >
         <div
-            class="w-full max-w-2xl overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-2xl dark:border-neutral-800 dark:bg-neutral-900"
+            class="w-full max-w-2xl overflow-hidden rounded-2xl border border-line bg-surface shadow-2xl"
             onclick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
             aria-label="Command palette"
             tabindex="-1"
         >
-            <div class="flex items-center gap-2 border-b border-neutral-200 px-4 py-3 dark:border-neutral-800">
-                <span class="text-neutral-400">⌕</span>
+            <div class="flex items-center gap-2 border-b border-line px-4 py-3">
+                <span class="text-fg-faint">⌕</span>
                 <input
                     bind:this={inputEl}
                     type="text"
@@ -287,7 +287,7 @@
                     oninput={onInput}
                     onkeydown={onKeydown}
                     placeholder="Search or jump to…"
-                    class="w-full bg-transparent text-sm outline-none placeholder:text-neutral-400"
+                    class="w-full bg-transparent text-sm outline-none placeholder:text-fg-faint"
                     role="combobox"
                     aria-expanded="true"
                     aria-controls="palette-listbox"
@@ -297,14 +297,14 @@
                     spellcheck="false"
                 />
                 <kbd
-                    class="rounded border border-neutral-300 px-1.5 py-0.5 text-[10px] text-neutral-500 dark:border-neutral-700 dark:text-neutral-400"
+                    class="rounded border border-line px-1.5 py-0.5 text-[10px] text-fg-muted"
                     >Esc</kbd
                 >
             </div>
 
             <div id="palette-listbox" role="listbox" aria-label="Results" class="max-h-[60vh] overflow-y-auto pb-2">
                 {#each grouped as group (group.label)}
-                    <div class="ws-eyebrow px-4 pt-3 pb-1 text-neutral-400">{group.label}</div>
+                    <div class="ws-eyebrow px-4 pt-3 pb-1 text-fg-faint">{group.label}</div>
                     {#each group.items as item, j (itemKey(item))}
                         {@const i = group.offset + j}
                         <div
@@ -313,42 +313,42 @@
                             aria-selected={i === activeIndex}
                             tabindex="-1"
                             class={`flex cursor-pointer items-center gap-2 border-l-2 px-4 py-2 text-sm ${
-                                i === activeIndex ? 'border-amber-500 bg-amber-50 dark:border-amber-400 dark:bg-amber-500/10' : 'border-transparent'
+                                i === activeIndex ? 'border-accent bg-accent/10' : 'border-transparent'
                             }`}
                             onclick={() => execute(item)}
                             onmousemove={() => (activeIndex = i)}
                         >
                             {#if item.kind === 'action'}
-                                <span class="w-5 text-center font-semibold text-amber-600 dark:text-amber-400">+</span>
+                                <span class="w-5 text-center font-semibold text-accent">+</span>
                                 <span class="min-w-0 flex-1 truncate">{item.label}</span>
                                 <kbd
-                                    class="shrink-0 rounded border border-neutral-300 px-1.5 py-0.5 text-[10px] text-neutral-500 dark:border-neutral-700 dark:text-neutral-400"
+                                    class="shrink-0 rounded border border-line px-1.5 py-0.5 text-[10px] text-fg-muted"
                                     >{hasQuery ? '⏎' : 'q'}</kbd
                                 >
                             {:else if item.kind === 'nav'}
-                                <span class="w-5 text-center text-base text-neutral-500 dark:text-neutral-400">{item.icon}</span>
+                                <span class="w-5 text-center text-base text-fg-muted">{item.icon}</span>
                                 <span class="min-w-0 flex-1 truncate">{item.label}</span>
                             {:else if item.kind === 'project'}
-                                <span class="w-5 text-center text-base text-neutral-500 dark:text-neutral-400">▤</span>
+                                <span class="w-5 text-center text-base text-fg-muted">▤</span>
                                 <span class="min-w-0 flex-1 truncate">{item.title}</span>
-                                <span class="shrink-0 text-xs text-neutral-500 dark:text-neutral-400">{item.meta}</span>
+                                <span class="shrink-0 text-xs text-fg-muted">{item.meta}</span>
                             {:else if item.kind === 'task'}
                                 {#if item.item_number}
-                                    <span class="shrink-0 font-mono text-xs text-neutral-400">#{item.item_number}</span>
+                                    <span class="shrink-0 font-mono text-xs text-fg-faint">#{item.item_number}</span>
                                 {/if}
                                 <span class="min-w-0 flex-1 truncate">{item.title}</span>
                                 {#if item.meta}
-                                    <span class="shrink-0 text-xs text-neutral-500 dark:text-neutral-400">{item.meta}</span>
+                                    <span class="shrink-0 text-xs text-fg-muted">{item.meta}</span>
                                 {/if}
                             {:else if item.kind === 'note'}
-                                <span class="min-w-0 flex-1 truncate text-neutral-600 dark:text-neutral-300">“{item.body}”</span>
+                                <span class="min-w-0 flex-1 truncate text-fg-muted">“{item.body}”</span>
                                 {#if item.meta}
-                                    <span class="shrink-0 text-xs text-neutral-500 dark:text-neutral-400">{item.meta}</span>
+                                    <span class="shrink-0 text-xs text-fg-muted">{item.meta}</span>
                                 {/if}
                             {:else}
                                 <span class="min-w-0 flex-1 truncate">{item.name}</span>
                                 {#if item.meta}
-                                    <span class="shrink-0 text-xs text-neutral-500 dark:text-neutral-400">{item.meta}</span>
+                                    <span class="shrink-0 text-xs text-fg-muted">{item.meta}</span>
                                 {/if}
                             {/if}
                         </div>
@@ -357,7 +357,7 @@
             </div>
 
             <div
-                class="flex items-center gap-4 border-t border-neutral-200 px-4 py-2 font-mono text-[10px] text-neutral-500 dark:border-neutral-800 dark:text-neutral-400"
+                class="flex items-center gap-4 border-t border-line px-4 py-2 font-mono text-[10px] text-fg-muted"
             >
                 <span>↑↓ navigate</span>
                 <span>⏎ open</span>

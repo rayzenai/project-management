@@ -15,6 +15,6 @@
     } = $props();
 </script>
 
-<div class="rounded-xl border border-neutral-200 bg-white p-3 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
+<div class="rounded-xl border border-line bg-surface p-3 shadow-sm">
     <QuickAddForm {projects} {team} {currentMemberId} {defaultProjectId} variant="inline" />
 </div>

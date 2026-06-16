@@ -66,7 +66,7 @@
     triggerClass={hidden ? 'opacity-0 transition group-hover:opacity-100' : ''}
 >
     {#snippet trigger()}
-        <span class={`text-sm leading-none ${meta.flag} ${failed ? 'rounded ring-2 ring-red-400' : ''}`}>⚑</span>
+        <span class={`text-sm leading-none ${meta.flag} ${failed ? 'rounded ring-2 ring-danger' : ''}`}>⚑</span>
     {/snippet}
 
     {#each OPTIONS as option (option.value)}
@@ -75,12 +75,12 @@
             data-popover-item
             role="option"
             aria-selected={option.value === shown}
-            class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-neutral-700 hover:bg-neutral-100 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-fg-muted hover:bg-surface-alt"
             onclick={() => setPriority(option.value)}
         >
             <span class={option.flag}>⚑</span>
             <span class="flex-1">{option.label}</span>
-            {#if option.value === shown}<span class="text-amber-600 dark:text-amber-400">✓</span>{/if}
+            {#if option.value === shown}<span class="text-accent">✓</span>{/if}
         </button>
     {/each}
 </Popover>

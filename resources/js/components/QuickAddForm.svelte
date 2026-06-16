@@ -77,20 +77,20 @@
 
 {#snippet advancedFields()}
     <div>
-        <label class="mb-1 block text-xs font-medium text-neutral-600 dark:text-neutral-400">Assign to</label>
+        <label class="mb-1 block text-xs font-medium text-fg-muted">Assign to</label>
         <AssigneePicker {team} bind:selectedIds={form.assignee_member_ids} max={5} placeholder="Pick teammates..." />
-        <button type="button" class="mt-1 text-xs text-amber-600 hover:underline dark:text-amber-400" onclick={assignMe}>Assign me</button>
+        <button type="button" class="mt-1 text-xs text-accent hover:underline" onclick={assignMe}>Assign me</button>
     </div>
     <div>
-        <label class="mb-1 block text-xs font-medium text-neutral-600 dark:text-neutral-400">Due date</label>
+        <label class="mb-1 block text-xs font-medium text-fg-muted">Due date</label>
         <input
             type="date"
             bind:value={form.deadline_at}
-            class="w-full rounded-md border border-neutral-300 bg-white px-2 py-1 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+            class="w-full rounded-md border border-line bg-surface px-2 py-1 text-sm"
         />
     </div>
     <div>
-        <label class="mb-1 block text-xs font-medium text-neutral-600 dark:text-neutral-400">Priority</label>
+        <label class="mb-1 block text-xs font-medium text-fg-muted">Priority</label>
         <PillGroup
             bind:value={form.priority}
             options={[
@@ -112,7 +112,7 @@
     {#if variant === 'inline'}
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
             <div class="flex flex-1 items-center gap-2">
-                <span class="rounded-md bg-amber-500/15 px-2 py-1 text-base font-semibold text-amber-600 select-none dark:text-amber-400">+</span>
+                <span class="rounded-md bg-accent/15 px-2 py-1 text-base font-semibold text-accent select-none">+</span>
                 <div class="min-w-0 flex-1">
                     <TokenInput
                         bind:this={tokenInput}
@@ -126,7 +126,7 @@
             <div class="flex items-center gap-2">
                 <select
                     bind:value={form.project_id}
-                    class="rounded-md border border-neutral-300 bg-white px-2 py-1 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                    class="rounded-md border border-line bg-surface px-2 py-1 text-sm"
                 >
                     {#each projects as project (project.id)}
                         <option value={project.id}>{project.title}</option>
@@ -134,25 +134,25 @@
                 </select>
                 <button
                     type="button"
-                    class="text-xs text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+                    class="text-xs text-fg-muted hover:text-fg"
                     onclick={() => (advanced = !advanced)}>{advanced ? 'Less' : 'More'}</button
                 >
                 <button
                     type="submit"
                     disabled={form.processing || !form.title.trim()}
-                    class="rounded-md bg-amber-500 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-950"
+                    class="rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-bg shadow-sm transition hover:bg-accent-dim disabled:cursor-not-allowed disabled:opacity-50"
                     >Add</button
                 >
             </div>
         </div>
 
         {#if advanced}
-            <div class="mt-3 grid grid-cols-1 gap-3 border-t border-neutral-200 pt-3 sm:grid-cols-3 dark:border-neutral-800">
+            <div class="mt-3 grid grid-cols-1 gap-3 border-t border-line pt-3 sm:grid-cols-3">
                 {@render advancedFields()}
             </div>
         {/if}
     {:else}
-        <div class="border-b border-neutral-200 dark:border-neutral-800">
+        <div class="border-b border-line">
             <TokenInput
                 bind:this={tokenInput}
                 bind:value={form.title}
@@ -163,7 +163,7 @@
         </div>
 
         <div
-            class="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-neutral-200 px-3 py-2 font-mono text-[10px] text-neutral-500 dark:border-neutral-800 dark:text-neutral-400"
+            class="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-line px-3 py-2 font-mono text-[10px] text-fg-muted"
         >
             <span>#project</span>
             <span>@assignee</span>
@@ -172,11 +172,11 @@
         </div>
 
         <div class="flex items-center justify-between gap-2 px-3 py-3">
-            <label class="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+            <label class="flex items-center gap-2 text-sm text-fg-muted">
                 Project:
                 <select
                     bind:value={form.project_id}
-                    class="rounded-md border border-neutral-300 bg-white px-2 py-1 text-sm text-neutral-900 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                    class="rounded-md border border-line bg-surface px-2 py-1 text-sm text-fg"
                 >
                     {#each projects as project (project.id)}
                         <option value={project.id}>{project.title}</option>
@@ -185,36 +185,36 @@
             </label>
             <button
                 type="button"
-                class="text-xs text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+                class="text-xs text-fg-muted hover:text-fg"
                 onclick={() => (advanced = !advanced)}>{advanced ? 'Less ▴' : 'More ▾'}</button
             >
         </div>
 
         {#if advanced}
-            <div class="grid grid-cols-1 gap-3 border-t border-neutral-200 px-3 py-3 sm:grid-cols-3 dark:border-neutral-800">
+            <div class="grid grid-cols-1 gap-3 border-t border-line px-3 py-3 sm:grid-cols-3">
                 {@render advancedFields()}
             </div>
         {/if}
 
-        <div class="flex items-center justify-end gap-2 border-t border-neutral-200 px-3 py-3 dark:border-neutral-800">
+        <div class="flex items-center justify-end gap-2 border-t border-line px-3 py-3">
             {#if onCancel}
                 <button
                     type="button"
-                    class="rounded-md px-3 py-1.5 text-sm text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
+                    class="rounded-md px-3 py-1.5 text-sm text-fg-muted hover:bg-surface-alt"
                     onclick={onCancel}>Cancel</button
                 >
             {/if}
             <button
                 type="submit"
                 disabled={form.processing || !form.title.trim()}
-                class="rounded-md bg-amber-500 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-950"
+                class="rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-bg shadow-sm transition hover:bg-accent-dim disabled:cursor-not-allowed disabled:opacity-50"
                 >Add task ⏎</button
             >
         </div>
     {/if}
 
     {#if form.errors.title}
-        <p class="mt-2 text-xs text-red-600 dark:text-red-400" class:px-3={variant === 'overlay'} class:pb-3={variant === 'overlay'}>
+        <p class="mt-2 text-xs text-danger" class:px-3={variant === 'overlay'} class:pb-3={variant === 'overlay'}>
             {form.errors.title}
         </p>
     {/if}
