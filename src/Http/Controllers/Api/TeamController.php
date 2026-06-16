@@ -63,11 +63,11 @@ class TeamController extends Controller
         return response()->json(['message' => 'Team deleted.']);
     }
 
-    public function restore(Request $request, Team $team): JsonResponse
+    public function restore(Request $request, RestoreWorkspaceModel $service, Team $team): JsonResponse
     {
         abort_unless(WorkspaceAccess::isSuperAdmin($request->user()), 403);
 
-        $result = app(RestoreWorkspaceModel::class)->execute($team);
+        $result = $service->execute($team);
 
         return $this->respondWithResult(
             $result,
