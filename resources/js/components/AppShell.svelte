@@ -56,10 +56,7 @@
 
     $effect(() => {
         if (typeof window === 'undefined') return;
-        const id = setInterval(
-            () => router.reload({ only: ['unreadNotifications'], preserveScroll: true, preserveState: true }),
-            30000,
-        );
+        const id = setInterval(() => router.reload({ only: ['unreadNotifications'] }), 30000);
         return () => clearInterval(id);
     });
 
