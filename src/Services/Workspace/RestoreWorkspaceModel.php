@@ -26,6 +26,13 @@ class RestoreWorkspaceModel
         }
     }
 
+    /**
+     * Defensive: currently unreachable for existing models. `tasks`/`teams`
+     * slugs carry a global unique index that also covers trashed rows, and the
+     * create-paths skip past trashed slugs — so a restored row's slug is always
+     * free. Retained for a future partial-index schema or any slugged model
+     * whose slug uniqueness is not enforced at the database level.
+     */
     private function ensureUniqueSlug(Model $model): void
     {
         if (empty($model->slug)) {
