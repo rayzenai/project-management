@@ -7,6 +7,7 @@ use RayzenAI\ProjectManagement\Http\Controllers\Workspace\DashboardController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\MemberController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\MyWorkspaceController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\NoteController;
+use RayzenAI\ProjectManagement\Http\Controllers\Workspace\NotificationController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\PlanTrackerController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\ProjectController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\QuickAddController;
@@ -95,6 +96,10 @@ Route::middleware([...config('project-management.middleware', ['web', 'auth']), 
         Route::patch('/subtasks/{subtask}', [SubtaskController::class, 'update'])->name('subtasks.update');
         Route::delete('/subtasks/{subtask}', [SubtaskController::class, 'destroy'])->name('subtasks.destroy');
         Route::post('/subtasks/{subtask}/restore', [SubtaskController::class, 'restore'])->name('subtasks.restore')->withTrashed();
+
+        Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
+        Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
+        Route::post('/notifications/{id}/read', [NotificationController::class, 'read'])->name('notifications.read');
 
         Route::get('/100-point-tracker', PlanTrackerController::class)->name('plan-tracker');
     });

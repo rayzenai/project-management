@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { page, router } from '@inertiajs/svelte';
+    import { inertia, page, router } from '@inertiajs/svelte';
     import { initials } from '../lib/format';
     import { notesBoard } from '../lib/notesBoard.svelte';
     import { palette } from '../lib/palette.svelte';
@@ -20,6 +20,7 @@
     const flash = $derived(shared.flash ?? null);
     const path = $derived(page.url ?? '/workspace');
     const noteCount = $derived(shared.workspaceNotes?.length ?? 0);
+    const unreadNotifications = $derived(shared.unreadNotifications ?? 0);
 
     let isDark = $state(false);
     let mobileOpen = $state(false);
@@ -56,6 +57,15 @@
                     : undefined,
             });
         }
+    });
+
+    $effect(() => {
+        if (typeof window === 'undefined') return;
+        const id = setInterval(
+            () => router.reload({ only: ['unreadNotifications'], preserveScroll: true, preserveState: true }),
+            30000,
+        );
+        return () => clearInterval(id);
     });
 
     const nav = [
@@ -201,6 +211,21 @@
             >
             <div class="flex-1"></div>
             <div class="flex items-center gap-2">
+                <a
+                    href="/workspace/notifications"
+                    use:inertia
+                    aria-label={`Notifications${unreadNotifications ? ` (${unreadNotifications} unread)` : ''}`}
+                    title="Notifications"
+                    class="relative rounded-md p-2 text-neutral-600 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                >
+                    <span class="text-base">🔔</span>
+                    {#if unreadNotifications > 0}
+                        <span
+                            class="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-500 px-1 text-[10px] leading-none font-semibold text-white dark:text-neutral-950"
+                            >{unreadNotifications > 99 ? '99+' : unreadNotifications}</span
+                        >
+                    {/if}
+                </a>
                 <button
                     type="button"
                     onclick={() => notesBoard.toggle()}

@@ -220,5 +220,6 @@ export interface SharedProps {
     quickAddContext?: QuickAddContext | null;
     isSuperAdmin?: boolean;
     ledTeamIds?: Id[];
+    unreadNotifications?: number;
     [key: string]: unknown;
 }

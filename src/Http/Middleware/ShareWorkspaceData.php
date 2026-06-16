@@ -70,6 +70,8 @@ class ShareWorkspaceData
             )->resolve();
         });
 
+        Inertia::share('unreadNotifications', fn (): int => $request->user()?->unreadNotifications()->count() ?? 0);
+
         Inertia::share('flash', fn (): ?array => $request->session()->get('workspace_flash'));
 
         Inertia::share('isSuperAdmin', fn (): bool => $request->user() !== null
