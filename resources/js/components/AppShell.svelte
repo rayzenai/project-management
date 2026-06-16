@@ -119,24 +119,24 @@
     }
 </script>
 
-<div class="ws-canvas flex min-h-screen bg-neutral-50 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
+<div class="ws-canvas flex min-h-screen bg-bg text-fg">
     {#if mobileOpen}
         <button type="button" aria-label="Close menu" class="fixed inset-0 z-30 bg-black/40 lg:hidden" onclick={() => (mobileOpen = false)}></button>
     {/if}
 
     <aside
-        class="fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col border-r border-neutral-200 bg-white px-4 py-6 transition-transform lg:static lg:translate-x-0 dark:border-neutral-800 dark:bg-neutral-900"
+        class="fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col border-r border-line bg-surface px-4 py-6 transition-transform lg:static lg:translate-x-0"
         class:translate-x-0={mobileOpen}
     >
         <div class="mb-8 flex items-center justify-between">
             <div>
-                <div class="ws-eyebrow text-amber-600 dark:text-amber-400">Kiran Timsina</div>
+                <div class="ws-eyebrow text-accent">Kiran Timsina</div>
                 <div class="font-display text-lg font-bold tracking-tight">Workspace</div>
             </div>
             <button
                 type="button"
                 aria-label="Close sidebar"
-                class="rounded-md p-1 text-neutral-500 hover:bg-neutral-100 lg:hidden dark:hover:bg-neutral-800"
+                class="rounded-md p-1 text-fg-muted hover:bg-surface-alt lg:hidden"
                 onclick={() => (mobileOpen = false)}>✕</button
             >
         </div>
@@ -148,8 +148,8 @@
                     href={item.href}
                     class={`flex items-center gap-3 rounded-lg border-l-2 px-3 py-2 font-mono text-[0.8rem] font-medium tracking-wide transition ${
                         active
-                            ? 'border-amber-500 bg-amber-50 text-amber-900 dark:border-amber-400 dark:bg-amber-500/10 dark:text-amber-400'
-                            : 'border-transparent text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800'
+                            ? 'border-accent bg-accent/10 text-accent'
+                            : 'border-transparent text-fg-muted hover:bg-surface-alt'
                     }`}
                 >
                     <span class="w-5 text-center text-base">{item.icon}</span>
@@ -158,22 +158,22 @@
             {/each}
         </nav>
 
-        <div class="mt-6 border-t border-neutral-200 pt-4 dark:border-neutral-800">
+        <div class="mt-6 border-t border-line pt-4">
             {#if user}
                 <div class="flex items-center gap-3">
                     <div
-                        class="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-200 text-sm font-semibold text-neutral-700 dark:bg-neutral-700 dark:text-neutral-200"
+                        class="flex h-9 w-9 items-center justify-center rounded-full bg-surface-alt text-sm font-semibold text-fg-muted"
                     >
                         {initials(user.name)}
                     </div>
                     <div class="min-w-0 flex-1">
                         <div class="truncate text-sm font-medium">{user.name}</div>
-                        <div class="truncate text-xs text-neutral-500 dark:text-neutral-400">{user.email}</div>
+                        <div class="truncate text-xs text-fg-muted">{user.email}</div>
                     </div>
                     <button
                         type="button"
                         aria-label="Sign out"
-                        class="rounded-md p-1 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
+                        class="rounded-md p-1 text-fg-muted hover:bg-surface-alt hover:text-fg"
                         onclick={logout}
                         title="Sign out">↩</button
                     >
@@ -184,12 +184,12 @@
 
     <div class="flex min-w-0 flex-1 flex-col">
         <header
-            class="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-neutral-200 bg-white/80 px-4 backdrop-blur-md lg:px-8 dark:border-neutral-800 dark:bg-neutral-900/80"
+            class="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-line bg-surface/80 px-4 backdrop-blur-md lg:px-8"
         >
             <button
                 type="button"
                 aria-label="Open menu"
-                class="rounded-md p-2 text-neutral-600 hover:bg-neutral-100 lg:hidden dark:text-neutral-300 dark:hover:bg-neutral-800"
+                class="rounded-md p-2 text-fg-muted hover:bg-surface-alt lg:hidden"
                 onclick={() => (mobileOpen = true)}>☰</button
             >
             <div class="flex-1"></div>
@@ -199,12 +199,12 @@
                     use:inertia
                     aria-label={`Notifications${unreadNotifications ? ` (${unreadNotifications} unread)` : ''}`}
                     title="Notifications"
-                    class="relative rounded-md p-2 text-neutral-600 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                    class="relative rounded-md p-2 text-fg-muted hover:bg-surface-alt"
                 >
                     <span class="text-base">🔔</span>
                     {#if unreadNotifications > 0}
                         <span
-                            class="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-500 px-1 text-[10px] leading-none font-semibold text-white dark:text-neutral-950"
+                            class="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] leading-none font-semibold text-bg"
                             >{unreadNotifications > 99 ? '99+' : unreadNotifications}</span
                         >
                     {/if}
@@ -215,12 +215,12 @@
                     aria-label={`My notes${noteCount ? ` (${noteCount})` : ''}`}
                     aria-expanded={notesBoard.open}
                     title="My notes"
-                    class="relative rounded-md p-2 text-neutral-600 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                    class="relative rounded-md p-2 text-fg-muted hover:bg-surface-alt"
                 >
                     <span class="text-base">🗒</span>
                     {#if noteCount > 0}
                         <span
-                            class="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-500 px-1 text-[10px] leading-none font-semibold text-white dark:text-neutral-950"
+                            class="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] leading-none font-semibold text-bg"
                             >{noteCount}</span
                         >
                     {/if}

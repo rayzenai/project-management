@@ -29,7 +29,7 @@
 <div
     role="button"
     tabindex="0"
-    class="group block w-full cursor-pointer rounded-lg border border-neutral-200 bg-white p-3 text-left transition hover:border-amber-300 hover:shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-amber-500/40"
+    class="group block w-full cursor-pointer rounded-lg border border-line bg-surface p-3 text-left transition hover:border-accent hover:shadow-sm"
     class:p-2={compact}
     onclick={openPeek}
     onkeydown={(e) => {
@@ -42,7 +42,7 @@
     <div class="flex items-start gap-3">
         {#if task.item_number}
             <span
-                class="mt-0.5 rounded bg-neutral-100 px-1.5 py-0.5 font-mono text-xs text-neutral-500 select-none dark:bg-neutral-800 dark:text-neutral-400"
+                class="mt-0.5 rounded bg-surface-alt px-1.5 py-0.5 font-mono text-xs text-fg-muted select-none"
             >
                 #{task.item_number}
             </span>
@@ -50,17 +50,17 @@
         <div class="min-w-0 flex-1">
             <div class="flex flex-wrap items-baseline gap-2">
                 <h3
-                    class="truncate text-sm font-medium text-neutral-900 group-hover:text-amber-700 dark:text-neutral-100 dark:group-hover:text-amber-400"
+                    class="truncate text-sm font-medium text-fg group-hover:text-accent"
                 >
                     {task.short_title || task.title}
                 </h3>
                 {#if showProject && task.project}
-                    <span class="text-xs text-neutral-500 dark:text-neutral-400">in {task.project.title}</span>
+                    <span class="text-xs text-fg-muted">in {task.project.title}</span>
                 {/if}
             </div>
 
             {#if !compact && task.description}
-                <p class="mt-1 line-clamp-2 text-sm text-neutral-600 dark:text-neutral-400">{task.description}</p>
+                <p class="mt-1 line-clamp-2 text-sm text-fg-muted">{task.description}</p>
             {/if}
 
             <div class="mt-2 flex flex-wrap items-center gap-2 text-xs">
@@ -72,7 +72,7 @@
                     <StatusBadge status={task.status} label={task.status_label} />
                 {/if}
                 {#if task.progress > 0}
-                    <span class="text-neutral-500 dark:text-neutral-400">{task.progress}%</span>
+                    <span class="text-fg-muted">{task.progress}%</span>
                 {/if}
                 {#if task.category_label}
                     <span
@@ -82,7 +82,7 @@
                     >
                 {/if}
                 {#if task.responsible_ministry}
-                    <span class="text-neutral-500 dark:text-neutral-400">{task.responsible_ministry}</span>
+                    <span class="text-fg-muted">{task.responsible_ministry}</span>
                 {/if}
             </div>
         </div>
@@ -91,13 +91,13 @@
             <div class="flex -space-x-1.5">
                 {#each assignees.slice(0, 3) as a (a.id)}
                     <span
-                        class="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-neutral-200 text-[10px] font-semibold text-neutral-700 dark:border-neutral-900 dark:bg-neutral-700 dark:text-neutral-200"
+                        class="flex h-7 w-7 items-center justify-center rounded-full border-2 border-surface bg-surface-alt text-[10px] font-semibold text-fg-muted"
                         title={a.member?.name}>{initials(a.member?.name)}</span
                     >
                 {/each}
                 {#if assignees.length > 3}
                     <span
-                        class="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-neutral-100 text-[10px] font-semibold text-neutral-500 dark:border-neutral-900 dark:bg-neutral-800 dark:text-neutral-400"
+                        class="flex h-7 w-7 items-center justify-center rounded-full border-2 border-surface bg-surface-alt text-[10px] font-semibold text-fg-faint"
                     >
                         +{assignees.length - 3}
                     </span>
