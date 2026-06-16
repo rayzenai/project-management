@@ -24,13 +24,13 @@
     );
 </script>
 
-<section class="mb-4 rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+<section class="mb-4 rounded-xl border border-line bg-surface p-4">
     <div class="flex items-center gap-4">
         <div class="shrink-0">
-            <div class="text-2xl font-bold text-neutral-900 tabular-nums dark:text-neutral-100">{percent}%</div>
-            <div class="ws-eyebrow text-neutral-500 dark:text-neutral-400">Complete</div>
+            <div class="text-2xl font-bold text-fg tabular-nums">{percent}%</div>
+            <div class="ws-eyebrow text-fg-muted">Complete</div>
         </div>
-        <div class="flex h-2 flex-1 overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800" role="img" aria-label={`${percent}% complete`}>
+        <div class="flex h-2 flex-1 overflow-hidden rounded-full bg-surface-alt" role="img" aria-label={`${percent}% complete`}>
             {#each segments as seg (seg.value)}
                 <div
                     class="h-full"
@@ -43,26 +43,26 @@
 
     <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <div>
-            <div class="text-lg font-semibold text-neutral-900 tabular-nums dark:text-neutral-100">{total}</div>
-            <div class="ws-eyebrow text-neutral-500 dark:text-neutral-400">Tasks</div>
+            <div class="text-lg font-semibold text-fg tabular-nums">{total}</div>
+            <div class="ws-eyebrow text-fg-muted">Tasks</div>
         </div>
         <div>
-            <div class="text-lg font-semibold text-neutral-900 tabular-nums dark:text-neutral-100">{openCount} / {doneCount}</div>
-            <div class="ws-eyebrow text-neutral-500 dark:text-neutral-400">Open/Done</div>
+            <div class="text-lg font-semibold text-fg tabular-nums">{openCount} / {doneCount}</div>
+            <div class="ws-eyebrow text-fg-muted">Open/Done</div>
         </div>
         <div>
             <div
-                class={`text-lg font-semibold tabular-nums ${overdueCount > 0 ? 'text-red-600 dark:text-red-400' : 'text-neutral-900 dark:text-neutral-100'}`}
+                class={`text-lg font-semibold tabular-nums ${overdueCount > 0 ? 'text-danger' : 'text-fg'}`}
             >
                 {overdueCount} <span class="text-sm">⚠</span>
             </div>
-            <div class="ws-eyebrow text-neutral-500 dark:text-neutral-400">Overdue</div>
+            <div class="ws-eyebrow text-fg-muted">Overdue</div>
         </div>
         <div>
-            <div class="text-lg font-semibold text-neutral-900 tabular-nums dark:text-neutral-100">
-                {unassignedCount} <span class="text-sm text-neutral-400 dark:text-neutral-500">◌</span>
+            <div class="text-lg font-semibold text-fg tabular-nums">
+                {unassignedCount} <span class="text-sm text-fg-faint">◌</span>
             </div>
-            <div class="ws-eyebrow text-neutral-500 dark:text-neutral-400">Unassigned</div>
+            <div class="ws-eyebrow text-fg-muted">Unassigned</div>
         </div>
     </div>
 </section>

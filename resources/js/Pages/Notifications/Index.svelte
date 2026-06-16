@@ -46,14 +46,14 @@
     <div class="mb-6 flex items-end justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold tracking-tight">Notifications</h1>
-            <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+            <p class="mt-1 text-sm text-fg-muted">
                 Activity that involves you — assignments, mentions, and updates.
             </p>
         </div>
         {#if hasUnread}
             <button
                 type="button"
-                class="rounded-md border border-neutral-300 px-3 py-1.5 font-mono text-xs font-medium tracking-wide text-neutral-700 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                class="rounded-md border border-line px-3 py-1.5 font-mono text-xs font-medium tracking-wide text-fg-muted hover:bg-surface-alt"
                 onclick={markAllRead}>Mark all read</button
             >
         {/if}
@@ -61,7 +61,7 @@
 
     {#if notifications.data.length === 0}
         <div
-            class="rounded-xl border border-dashed border-neutral-300 px-6 py-16 text-center text-sm text-neutral-500 dark:border-neutral-700 dark:text-neutral-400"
+            class="rounded-xl border border-dashed border-line px-6 py-16 text-center text-sm text-fg-muted"
         >
             <div class="mb-2 text-2xl">🔔</div>
             You're all caught up — no notifications yet.
@@ -70,7 +70,7 @@
         <ul class="flex flex-col gap-2">
             {#snippet body(n: NotificationRow, unread: boolean)}
                 <span
-                    class={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${unread ? 'bg-amber-500' : 'bg-transparent'}`}
+                    class={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${unread ? 'bg-accent' : 'bg-transparent'}`}
                     aria-hidden="true"
                 ></span>
                 <div class="min-w-0 flex-1">
@@ -78,12 +78,12 @@
                         {n.data.title ?? 'Notification'}
                     </div>
                     {#if n.data.body}
-                        <div class="mt-0.5 truncate text-sm text-neutral-600 dark:text-neutral-400">
+                        <div class="mt-0.5 truncate text-sm text-fg-muted">
                             {n.data.body}
                         </div>
                     {/if}
                 </div>
-                <span class="ws-eyebrow shrink-0 text-neutral-400 dark:text-neutral-500">
+                <span class="ws-eyebrow shrink-0 text-fg-faint">
                     {formatTimeAgo(n.created_at)}
                 </span>
             {/snippet}
@@ -92,9 +92,9 @@
                 {@const unread = n.read_at === null}
                 {@const itemClass = `flex w-full items-start gap-3 rounded-lg border px-4 py-3 text-left transition ${
                     unread
-                        ? 'border-amber-300 bg-amber-50 dark:border-amber-500/40 dark:bg-amber-500/10'
-                        : 'border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900'
-                } hover:border-neutral-300 dark:hover:border-neutral-700`}
+                        ? 'border-accent/40 bg-accent/10'
+                        : 'border-line bg-surface'
+                } hover:border-line`}
                 <li>
                     {#if n.data.url}
                         <a
@@ -125,12 +125,12 @@
                             onclick={() => router.visit(link.url as string, { preserveScroll: true })}
                             class={`rounded-md px-3 py-1.5 font-mono text-xs transition ${
                                 link.active
-                                    ? 'bg-amber-500 text-white dark:text-neutral-950'
-                                    : 'text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800'
+                                    ? 'bg-accent text-bg'
+                                    : 'text-fg-muted hover:bg-surface-alt'
                             }`}>{@html link.label}</button
                         >
                     {:else}
-                        <span class="px-3 py-1.5 font-mono text-xs text-neutral-300 dark:text-neutral-600">{@html link.label}</span>
+                        <span class="px-3 py-1.5 font-mono text-xs text-fg-faint">{@html link.label}</span>
                     {/if}
                 {/each}
             </div>

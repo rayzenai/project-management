@@ -26,13 +26,13 @@
     }
 </script>
 
-<form onsubmit={submit} class="rounded-lg border border-amber-300 bg-white p-2 dark:border-amber-500/40 dark:bg-neutral-900">
+<form onsubmit={submit} class="rounded-lg border border-accent bg-surface p-2">
     <input
         type="text"
         bind:this={input}
         bind:value={form.title}
         placeholder="Add a task…"
-        class="w-full bg-transparent text-sm outline-none placeholder:text-neutral-400 dark:text-neutral-100 dark:placeholder:text-neutral-500"
+        class="w-full bg-transparent text-sm text-fg outline-none placeholder:text-fg-faint"
         onkeydown={(e) => {
             if (e.key === 'Escape') {
                 form.title = '';
@@ -41,12 +41,12 @@
         }}
     />
     {#if form.errors.title}
-        <p class="mt-1 text-xs text-red-600 dark:text-red-400">{form.errors.title}</p>
+        <p class="mt-1 text-xs text-danger">{form.errors.title}</p>
     {/if}
     <div class="mt-2 flex items-center justify-end gap-2">
         <button
             type="button"
-            class="text-xs text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-100"
+            class="text-xs text-fg-muted hover:text-fg"
             onclick={() => {
                 form.title = '';
                 onClose?.();
@@ -57,7 +57,7 @@
         <button
             type="submit"
             disabled={form.processing || !form.title.trim()}
-            class="rounded-md bg-amber-500 px-2.5 py-1 text-xs font-semibold text-white hover:bg-amber-600 disabled:opacity-50 dark:text-neutral-950"
+            class="rounded-md bg-accent px-2.5 py-1 text-xs font-semibold text-bg hover:bg-accent-dim disabled:opacity-50"
         >
             Add
         </button>

@@ -118,8 +118,7 @@
 
     const visibleTeams = $derived(isSuperAdmin ? teams : teams.filter((t) => canManageTeam(t)));
 
-    const inputClass =
-        'w-full rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100';
+    const inputClass = 'w-full rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg';
 </script>
 
 <svelte:head><title>Team · Workspace</title></svelte:head>
@@ -127,7 +126,7 @@
 <AppShell>
     <div class="mb-6">
         <h1 class="text-2xl font-bold tracking-tight">Team</h1>
-        <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+        <p class="mt-1 text-sm text-fg-muted">
             People who can be assigned work — with or without a login — and the teams that group them.
         </p>
     </div>
@@ -136,21 +135,21 @@
         <!-- Teams panel -->
         <section class="xl:col-span-2">
             <div class="mb-3 flex items-center justify-between">
-                <h2 class="ws-eyebrow text-neutral-500 dark:text-neutral-400">Teams · {teams.length}</h2>
+                <h2 class="ws-eyebrow text-fg-muted">Teams · {teams.length}</h2>
                 {#if isSuperAdmin}
                     <button
                         type="button"
-                        class="rounded-md bg-amber-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-amber-600 dark:text-neutral-950"
+                        class="rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-bg hover:bg-accent-dim"
                         onclick={() => (creatingTeam = !creatingTeam)}>{creatingTeam ? 'Cancel' : '+ New team'}</button
                     >
                 {/if}
             </div>
 
             {#if isSuperAdmin && creatingTeam}
-                <form onsubmit={createTeam} class="mb-3 rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
-                    <label class="mb-1 block text-xs font-medium text-neutral-600 dark:text-neutral-400" for="team-name">Name</label>
+                <form onsubmit={createTeam} class="mb-3 rounded-xl border border-line bg-surface p-4">
+                    <label class="mb-1 block text-xs font-medium text-fg-muted" for="team-name">Name</label>
                     <input id="team-name" type="text" bind:value={teamForm.name} required class={inputClass} />
-                    <label class="mt-3 mb-1 block text-xs font-medium text-neutral-600 dark:text-neutral-400" for="team-description"
+                    <label class="mt-3 mb-1 block text-xs font-medium text-fg-muted" for="team-description"
                         >Description (optional)</label
                     >
                     <input id="team-description" type="text" bind:value={teamForm.description} class={inputClass} />
@@ -158,17 +157,17 @@
                         <button
                             type="submit"
                             disabled={teamForm.processing || !teamForm.name.trim()}
-                            class="rounded-md bg-amber-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-amber-600 disabled:opacity-50 dark:text-neutral-950"
+                            class="rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-bg hover:bg-accent-dim disabled:opacity-50"
                             >Create team</button
                         >
                     </div>
-                    {#if teamForm.errors.name}<p class="mt-2 text-xs text-red-600 dark:text-red-400">{teamForm.errors.name}</p>{/if}
+                    {#if teamForm.errors.name}<p class="mt-2 text-xs text-danger">{teamForm.errors.name}</p>{/if}
                 </form>
             {/if}
 
             {#if visibleTeams.length === 0 && !creatingTeam}
                 <div
-                    class="rounded-xl border border-dashed border-neutral-300 bg-white p-8 text-center text-sm text-neutral-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-400"
+                    class="rounded-xl border border-dashed border-line bg-surface p-8 text-center text-sm text-fg-muted"
                 >
                     No teams yet. Until a project is attached to a team, every active member is assignable everywhere.
                 </div>
@@ -176,7 +175,7 @@
 
             <div class="space-y-3">
                 {#each visibleTeams as team (team.id)}
-                    <div class="rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+                    <div class="rounded-xl border border-line bg-surface p-4">
                         <div class="flex items-center gap-2">
                             {#if editingTeamId === team.id}
                                 <input
@@ -193,28 +192,28 @@
                                 {#if isSuperAdmin}
                                     <button
                                         type="button"
-                                        class="min-w-0 flex-1 truncate text-left text-base font-semibold hover:text-amber-700 dark:hover:text-amber-400"
+                                        class="min-w-0 flex-1 truncate text-left text-base font-semibold hover:text-accent"
                                         title="Rename"
                                         onclick={() => startRename(team)}>{team.name}</button
                                     >
                                 {:else}
                                     <span class="min-w-0 flex-1 truncate text-base font-semibold">{team.name}</span>
                                 {/if}
-                                <span class="ws-eyebrow shrink-0 text-neutral-500 dark:text-neutral-400">
+                                <span class="ws-eyebrow shrink-0 text-fg-muted">
                                     {team.member_ids?.length ?? 0} member{(team.member_ids?.length ?? 0) === 1 ? '' : 's'}
                                 </span>
                                 {#if isSuperAdmin}
                                     <button
                                         type="button"
                                         aria-label={`Delete ${team.name}`}
-                                        class="shrink-0 rounded p-1 text-neutral-400 hover:text-red-500"
+                                        class="shrink-0 rounded p-1 text-fg-faint hover:text-danger"
                                         onclick={() => deleteTeam(team)}>✕</button
                                     >
                                 {/if}
                             {/if}
                         </div>
                         {#if team.description}
-                            <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">{team.description}</p>
+                            <p class="mt-1 text-sm text-fg-muted">{team.description}</p>
                         {/if}
                         {#if canManageTeam(team) && members.length > 0}
                             <div class="mt-3 space-y-1.5">
@@ -226,25 +225,25 @@
                                                 {#if isLeaderOf(team, member)}
                                                     <button
                                                         type="button"
-                                                        class="text-xs text-amber-600 hover:underline dark:text-amber-400"
+                                                        class="text-xs text-accent hover:underline"
                                                         onclick={() => setTeamRole(team, member, 'member')}>Leader ✓</button
                                                     >
                                                 {:else}
                                                     <button
                                                         type="button"
-                                                        class="text-xs text-neutral-500 hover:text-amber-600 dark:text-neutral-400 dark:hover:text-amber-400"
+                                                        class="text-xs text-fg-muted hover:text-accent"
                                                         onclick={() => setTeamRole(team, member, 'leader')}>Make leader</button
                                                     >
                                                 {/if}
                                                 <button
                                                     type="button"
-                                                    class="text-xs text-neutral-500 hover:text-red-600 dark:text-neutral-400 dark:hover:text-red-400"
+                                                    class="text-xs text-fg-muted hover:text-danger"
                                                     onclick={() => removeMemberFromTeam(team, member)}>Remove</button
                                                 >
                                             {:else}
                                                 <button
                                                     type="button"
-                                                    class="text-xs text-neutral-500 hover:text-amber-600 dark:text-neutral-400 dark:hover:text-amber-400"
+                                                    class="text-xs text-fg-muted hover:text-accent"
                                                     onclick={() => addMemberToTeam(team, member)}>Add</button
                                                 >
                                             {/if}
@@ -256,7 +255,7 @@
                             <div class="mt-3 flex flex-wrap gap-1.5">
                                 {#each members.filter((m) => (team.member_ids ?? []).includes(m.id)) as member (member.id)}
                                     <span
-                                        class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-900 ring-1 ring-amber-400 dark:bg-amber-500/20 dark:text-amber-200 dark:ring-amber-500/60"
+                                        class="rounded-full bg-accent/20 px-2.5 py-1 text-xs font-medium text-accent ring-1 ring-accent/60"
                                     >
                                         {member.name}
                                     </span>
@@ -271,25 +270,25 @@
         <!-- Members panel -->
         <section class="xl:col-span-3">
             <div class="mb-3 flex items-center justify-between">
-                <h2 class="ws-eyebrow text-neutral-500 dark:text-neutral-400">Members · {members.length}</h2>
+                <h2 class="ws-eyebrow text-fg-muted">Members · {members.length}</h2>
                 {#if isSuperAdmin}
                     <button
                         type="button"
-                        class="rounded-md bg-amber-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-amber-600 dark:text-neutral-950"
+                        class="rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-bg hover:bg-accent-dim"
                         onclick={() => (addingMember = !addingMember)}>{addingMember ? 'Cancel' : '+ Add person'}</button
                     >
                 {/if}
             </div>
 
             {#if isSuperAdmin && addingMember}
-                <form onsubmit={addMember} class="mb-3 rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+                <form onsubmit={addMember} class="mb-3 rounded-xl border border-line bg-surface p-4">
                     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <div>
-                            <label class="mb-1 block text-xs font-medium text-neutral-600 dark:text-neutral-400" for="member-name">Name</label>
+                            <label class="mb-1 block text-xs font-medium text-fg-muted" for="member-name">Name</label>
                             <input id="member-name" type="text" bind:value={memberForm.name} required class={inputClass} />
                         </div>
                         <div>
-                            <label class="mb-1 block text-xs font-medium text-neutral-600 dark:text-neutral-400" for="member-email"
+                            <label class="mb-1 block text-xs font-medium text-fg-muted" for="member-email"
                                 >Email {memberForm.password ? '' : '(optional)'}</label
                             >
                             <input
@@ -301,7 +300,7 @@
                             />
                         </div>
                         <div>
-                            <label class="mb-1 block text-xs font-medium text-neutral-600 dark:text-neutral-400" for="member-password"
+                            <label class="mb-1 block text-xs font-medium text-fg-muted" for="member-password"
                                 >Password (optional)</label
                             >
                             <input
@@ -314,32 +313,32 @@
                             />
                         </div>
                         <div>
-                            <label class="mb-1 block text-xs font-medium text-neutral-600 dark:text-neutral-400" for="member-title"
+                            <label class="mb-1 block text-xs font-medium text-fg-muted" for="member-title"
                                 >Title (optional)</label
                             >
                             <input id="member-title" type="text" bind:value={memberForm.title} class={inputClass} />
                         </div>
                     </div>
-                    <p class="mt-2 text-xs text-neutral-500 dark:text-neutral-400">
+                    <p class="mt-2 text-xs text-fg-muted">
                         Set a password to give them a login right away — or leave it blank and upgrade them later from Edit.
                     </p>
                     <div class="mt-3 flex justify-end">
                         <button
                             type="submit"
                             disabled={memberForm.processing || !memberForm.name.trim()}
-                            class="rounded-md bg-amber-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-amber-600 disabled:opacity-50 dark:text-neutral-950"
+                            class="rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-bg hover:bg-accent-dim disabled:opacity-50"
                             >Add person</button
                         >
                     </div>
-                    {#if memberForm.errors.name}<p class="mt-2 text-xs text-red-600 dark:text-red-400">{memberForm.errors.name}</p>{/if}
-                    {#if memberForm.errors.email}<p class="mt-2 text-xs text-red-600 dark:text-red-400">{memberForm.errors.email}</p>{/if}
-                    {#if memberForm.errors.password}<p class="mt-2 text-xs text-red-600 dark:text-red-400">{memberForm.errors.password}</p>{/if}
+                    {#if memberForm.errors.name}<p class="mt-2 text-xs text-danger">{memberForm.errors.name}</p>{/if}
+                    {#if memberForm.errors.email}<p class="mt-2 text-xs text-danger">{memberForm.errors.email}</p>{/if}
+                    {#if memberForm.errors.password}<p class="mt-2 text-xs text-danger">{memberForm.errors.password}</p>{/if}
                 </form>
             {/if}
 
             {#if members.length === 0 && !addingMember}
                 <div
-                    class="rounded-xl border border-dashed border-neutral-300 bg-white p-8 text-center text-sm text-neutral-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-400"
+                    class="rounded-xl border border-dashed border-line bg-surface p-8 text-center text-sm text-fg-muted"
                 >
                     No members yet. Add anyone you assign work to — give them a password now or upgrade them to a login later.
                 </div>
@@ -348,10 +347,8 @@
             <div class="space-y-2">
                 {#each members as member (member.id)}
                     <div
-                        class={`rounded-xl border bg-white p-4 dark:bg-neutral-900 ${
-                            member.is_active === false
-                                ? 'border-neutral-200 opacity-60 dark:border-neutral-800'
-                                : 'border-neutral-200 dark:border-neutral-800'
+                        class={`rounded-xl border border-line bg-surface p-4 ${
+                            member.is_active === false ? 'opacity-60' : ''
                         }`}
                     >
                         {#if editingMemberId === member.id}
@@ -368,29 +365,29 @@
                                     placeholder={member.user_id ? 'New password (leave blank to keep)' : 'Set a password to enable login'}
                                 />
                             </div>
-                            {#if memberEditForm.errors.email}<p class="mt-2 text-xs text-red-600 dark:text-red-400">
+                            {#if memberEditForm.errors.email}<p class="mt-2 text-xs text-danger">
                                     {memberEditForm.errors.email}
                                 </p>{/if}
-                            {#if memberEditForm.errors.password}<p class="mt-2 text-xs text-red-600 dark:text-red-400">
+                            {#if memberEditForm.errors.password}<p class="mt-2 text-xs text-danger">
                                     {memberEditForm.errors.password}
                                 </p>{/if}
                             <div class="mt-3 flex items-center justify-end gap-2">
                                 <button
                                     type="button"
-                                    class="rounded-md px-3 py-1.5 text-sm text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
+                                    class="rounded-md px-3 py-1.5 text-sm text-fg-muted hover:bg-surface-alt"
                                     onclick={() => (editingMemberId = null)}>Cancel</button
                                 >
                                 <button
                                     type="button"
                                     disabled={memberEditForm.processing}
-                                    class="rounded-md bg-amber-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-amber-600 disabled:opacity-50 dark:text-neutral-950"
+                                    class="rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-bg hover:bg-accent-dim disabled:opacity-50"
                                     onclick={() => saveMember(member)}>Save</button
                                 >
                             </div>
                         {:else}
                             <div class="flex items-center gap-3">
                                 <span
-                                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-neutral-200 text-xs font-semibold text-neutral-700 dark:bg-neutral-700 dark:text-neutral-200"
+                                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-alt text-xs font-semibold text-fg-muted"
                                 >
                                     {initials(member.name)}
                                 </span>
@@ -399,18 +396,18 @@
                                         <span class="truncate text-sm font-semibold">{member.name}</span>
                                         {#if !member.user_id}
                                             <span
-                                                class="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:bg-amber-500/15 dark:text-amber-400"
+                                                class="rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-medium text-accent"
                                                 title="Edit and set a password to enable login">no login</span
                                             >
                                         {/if}
                                         {#if member.is_active === false}
                                             <span
-                                                class="rounded-full bg-neutral-100 px-2 py-0.5 text-[10px] font-medium text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400"
+                                                class="rounded-full bg-surface-alt px-2 py-0.5 text-[10px] font-medium text-fg-muted"
                                                 >inactive</span
                                             >
                                         {/if}
                                     </div>
-                                    <div class="truncate text-xs text-neutral-500 dark:text-neutral-400">
+                                    <div class="truncate text-xs text-fg-muted">
                                         {[member.title, member.email].filter(Boolean).join(' · ') || '—'}
                                         {#if memberTeamNames(member).length > 0}
                                             · {memberTeamNames(member).join(', ')}
@@ -420,19 +417,19 @@
                                 {#if canEditMember(member)}
                                     <button
                                         type="button"
-                                        class="shrink-0 text-xs text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+                                        class="shrink-0 text-xs text-fg-muted hover:text-fg"
                                         onclick={() => startEditMember(member)}>Edit</button
                                     >
                                     {#if member.is_active === false}
                                         <button
                                             type="button"
-                                            class="shrink-0 text-xs text-emerald-600 hover:underline dark:text-emerald-400"
+                                            class="shrink-0 text-xs text-success hover:underline"
                                             onclick={() => setMemberActive(member, true)}>Reactivate</button
                                         >
                                     {:else}
                                         <button
                                             type="button"
-                                            class="shrink-0 text-xs text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+                                            class="shrink-0 text-xs text-fg-muted hover:text-fg"
                                             onclick={() => setMemberActive(member, false)}>Deactivate</button
                                         >
                                     {/if}
@@ -441,7 +438,7 @@
                                     <button
                                         type="button"
                                         aria-label={`Delete ${member.name}`}
-                                        class="shrink-0 rounded p-1 text-neutral-400 hover:text-red-500"
+                                        class="shrink-0 rounded p-1 text-fg-faint hover:text-danger"
                                         onclick={() => deleteMember(member)}>✕</button
                                     >
                                 {/if}

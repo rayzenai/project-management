@@ -143,10 +143,10 @@
         {@const isHover = hoverTarget?.status === def.value}
         {@const droppable = def.value !== OTHER}
         <div
-            class={`flex min-h-[200px] w-72 min-w-72 shrink-0 flex-col rounded-xl border-2 bg-neutral-50/60 transition dark:bg-neutral-900/40 ${
+            class={`flex min-h-[200px] w-72 min-w-72 shrink-0 flex-col rounded-xl border-2 bg-surface-alt transition ${
                 isHover
-                    ? 'border-amber-400 bg-amber-50/40 dark:border-amber-500/60 dark:bg-amber-500/5'
-                    : 'border-neutral-200 dark:border-neutral-800'
+                    ? 'border-accent bg-accent/5'
+                    : 'border-line'
             }`}
             ondragover={droppable ? (e) => onColumnDragOver(def.value, e) : undefined}
             ondragleave={droppable ? onColumnDragLeave : undefined}
@@ -155,22 +155,22 @@
             aria-label={def.label}
         >
             <header class="flex items-baseline justify-between px-3 pt-3 pb-2">
-                <h3 class="ws-eyebrow flex items-center gap-1.5 text-neutral-600 dark:text-neutral-300">
+                <h3 class="ws-eyebrow flex items-center gap-1.5 text-fg-muted">
                     <span class="h-2 w-2 shrink-0 rounded-full" style={`background:${def.color}`}></span>
                     {def.label}
                 </h3>
-                <span class="font-mono text-xs text-neutral-500 dark:text-neutral-400">{colTasks.length}</span>
+                <span class="font-mono text-xs text-fg-muted">{colTasks.length}</span>
             </header>
 
             <div class="flex-1 space-y-2 px-2 pb-2">
                 {#if colTasks.length === 0}
-                    <div class="flex min-h-40 items-center justify-center rounded-lg border border-dashed border-neutral-300 dark:border-neutral-700">
-                        <span class="font-mono text-xs text-neutral-500 dark:text-neutral-400">{filtersActive ? 'No matches' : 'Drop here'}</span>
+                    <div class="flex min-h-40 items-center justify-center rounded-lg border border-dashed border-line">
+                        <span class="font-mono text-xs text-fg-muted">{filtersActive ? 'No matches' : 'Drop here'}</span>
                     </div>
                 {:else}
                     {#each colTasks as task, index (task.id)}
                         {#if isHover && hoverTarget?.index === index}
-                            <div class="-mb-1 h-1 rounded-full bg-amber-400/80"></div>
+                            <div class="-mb-1 h-1 rounded-full bg-accent/80"></div>
                         {/if}
                         <BoardCard
                             {task}
@@ -182,7 +182,7 @@
                         />
                     {/each}
                     {#if isHover && hoverTarget?.index === colTasks.length}
-                        <div class="-mt-1 h-1 rounded-full bg-amber-400/80"></div>
+                        <div class="-mt-1 h-1 rounded-full bg-accent/80"></div>
                     {/if}
                 {/if}
             </div>
@@ -194,7 +194,7 @@
                     {:else}
                         <button
                             type="button"
-                            class="w-full rounded-lg border border-dashed border-neutral-300 bg-transparent px-3 py-2 text-left text-sm text-neutral-500 transition hover:border-amber-400 hover:bg-amber-50/50 hover:text-amber-700 dark:border-neutral-700 dark:text-neutral-400 dark:hover:border-amber-500/50 dark:hover:bg-amber-500/5 dark:hover:text-amber-300"
+                            class="w-full rounded-lg border border-dashed border-line bg-transparent px-3 py-2 text-left text-sm text-fg-muted transition hover:border-accent hover:bg-accent/5 hover:text-accent"
                             onclick={() => (composerOpenFor = def.value)}
                         >
                             + Add

@@ -19,7 +19,7 @@
 
 <tr
     tabindex="0"
-    class="group cursor-pointer border-b border-neutral-100 transition last:border-b-0 hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-800/40"
+    class="group cursor-pointer border-b border-line-soft transition last:border-b-0 hover:bg-surface-alt"
     onclick={openPeek}
     onkeydown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -31,18 +31,18 @@
     <td class="w-8 px-3 py-2">
         <CompleteCheckbox {task} projectSlug={project.slug} />
     </td>
-    <td class="w-14 px-2 py-2 font-mono text-xs text-neutral-500 dark:text-neutral-400">
+    <td class="w-14 px-2 py-2 font-mono text-xs text-fg-muted">
         {#if task.item_number}#{task.item_number}{/if}
     </td>
     <td class="px-2 py-2">
-        <span class="text-sm font-medium text-neutral-900 group-hover:text-amber-700 dark:text-neutral-100 dark:group-hover:text-amber-400">
+        <span class="text-sm font-medium text-fg group-hover:text-accent">
             {task.short_title || task.title}
         </span>
         {#if task.notes_count}
-            <span class="ml-1.5 font-mono text-[11px] text-neutral-400 dark:text-neutral-500">✎{task.notes_count}</span>
+            <span class="ml-1.5 font-mono text-[11px] text-fg-faint">✎{task.notes_count}</span>
         {/if}
         {#if task.contacts_count}
-            <span class="ml-1 font-mono text-[11px] text-neutral-400 dark:text-neutral-500">☎{task.contacts_count}</span>
+            <span class="ml-1 font-mono text-[11px] text-fg-faint">☎{task.contacts_count}</span>
         {/if}
     </td>
     <td class="w-36 px-2 py-2">
