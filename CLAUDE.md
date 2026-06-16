@@ -30,8 +30,10 @@ package-specific layer, not a replacement.
 - Registers 5 observers: `Task`, `ProjectNote`, `ProjectContact`, `Subtask`,
   `ProjectAssignment` (these write the `ProjectActivity` audit log, and dispatch the
   in-app notifications below).
-- Registers the `digest:send-weekly` console command (`SendProjectWeeklyDigest`) and
-  the `workspace:prune-trashed` command (`PruneTrashedWorkspaceModels`, scheduled daily).
+- Registers the `digest:send-weekly` console command (`SendProjectWeeklyDigest`),
+  the `workspace:prune-trashed` command (`PruneTrashedWorkspaceModels`, scheduled daily),
+  and the `workspace:send-deadline-reminders` command (`SendProjectDeadlineReminders`,
+  scheduled daily at `reminders.run_at`).
 - Publishes the config under tag `project-management-config`.
 
 ### In-app notifications (`src/Notifications/`)
@@ -65,6 +67,7 @@ php artisan test --compact --filter=TeamPermissions
 php artisan migrate                         # package migrations load automatically
 php artisan digest:send-weekly --pretend    # dry-run the weekly digest
 php artisan workspace:prune-trashed --pretend  # dry-run the soft-delete prune (force-deletes rows past trash_ttl_days)
+php artisan workspace:send-deadline-reminders --pretend  # dry-run deadline reminders (heads-up/due-today/overdue → in-app notifications)
 ```
 
 ## Configuration (`config/project-management.php`)
