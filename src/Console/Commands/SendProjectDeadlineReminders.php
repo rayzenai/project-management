@@ -11,7 +11,7 @@ use RayzenAI\ProjectManagement\Notifications\TaskDeadlineDue;
 
 class SendProjectDeadlineReminders extends Command
 {
-    protected $signature = 'workspace:send-deadline-reminders {--pretend}';
+    protected $signature = 'workspace:send-deadline-reminders {--pretend : List what would be sent without notifying or logging}';
 
     protected $description = 'Notify assignees of upcoming and overdue task deadlines.';
 
@@ -22,11 +22,10 @@ class SendProjectDeadlineReminders extends Command
         $leadDays = array_map('intval', (array) config('project-management.reminders.reminder_lead_days', [2]));
         $repeat = max(1, (int) config('project-management.reminders.overdue_repeat_days', 3));
 
-        $tasks = Task::query()
-            ->whereNotIn('status', Task::completeStatuses())
+        $tasks = Task::incomplete()
             ->whereNotNull('deadline_at')
             ->with('assignments.member.user')
-            ->get();
+            ->lazy();
 
         $sent = 0;
 
@@ -38,7 +37,11 @@ class SendProjectDeadlineReminders extends Command
 
             $referenceDate = $this->referenceDate($window, $task->deadline_at, $today, $repeat);
 
-            if (! $pretend && ! $this->claim($task->id, $window, $referenceDate)) {
+            if ($pretend) {
+                if ($this->alreadyClaimed($task->id, $window, $referenceDate)) {
+                    continue;
+                }
+            } elseif (! $this->claim($task->id, $window, $referenceDate)) {
                 continue;
             }
 
@@ -85,6 +88,15 @@ class SendProjectDeadlineReminders extends Command
         $bucket = intdiv($daysOverdue, $repeat);
 
         return $deadline->copy()->startOfDay()->addDays($bucket * $repeat);
+    }
+
+    private function alreadyClaimed(int $taskId, string $window, Carbon $referenceDate): bool
+    {
+        return DB::table('task_reminder_logs')
+            ->where('task_id', $taskId)
+            ->where('window', $window)
+            ->where('reference_date', $referenceDate->toDateString())
+            ->exists();
     }
 
     private function claim(int $taskId, string $window, Carbon $referenceDate): bool
