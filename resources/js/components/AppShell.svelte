@@ -45,7 +45,16 @@
         const message = flash?.message ?? null;
         if (message && message !== lastFlash) {
             lastFlash = message;
-            toast.show(message, { variant: flash?.success === false ? 'error' : 'success' });
+            const undo = flash?.undo;
+            toast.show(message, {
+                variant: flash?.success === false ? 'error' : 'success',
+                undo: undo
+                    ? {
+                          label: undo.label,
+                          run: () => router.post(undo.url, {}, { preserveScroll: true, preserveState: false }),
+                      }
+                    : undefined,
+            });
         }
     });
 

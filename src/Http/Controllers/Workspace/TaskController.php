@@ -59,7 +59,14 @@ class TaskController extends Controller
         if ($result->success) {
             return redirect()
                 ->route('workspace.projects.show', ['project' => $project->slug])
-                ->with('workspace_flash', ['success' => true, 'message' => $result->message]);
+                ->with('workspace_flash', [
+                    'success' => true,
+                    'message' => $result->message,
+                    'undo' => [
+                        'label' => 'Undo',
+                        'url' => route('workspace.tasks.restore', [$project, $task]),
+                    ],
+                ]);
         }
 
         return $this->redirectWithResult($result);

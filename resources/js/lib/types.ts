@@ -204,6 +204,7 @@ export interface QuickAddContext {
 export interface Flash {
     success?: boolean;
     message?: string | null;
+    undo?: { label: string; url: string };
 }
 
 export interface AuthUser extends User {

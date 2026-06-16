@@ -40,7 +40,10 @@ class AssignmentController extends Controller
     {
         $result = $service->execute($assignment);
 
-        return $this->redirectWithResult($result);
+        return $this->redirectWithResult($result, undo: [
+            'label' => 'Undo',
+            'url' => route('workspace.assignments.restore', $assignment),
+        ]);
     }
 
     public function restore(ProjectAssignment $assignment, RestoreWorkspaceModel $service): RedirectResponse

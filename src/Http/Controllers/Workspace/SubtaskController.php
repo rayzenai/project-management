@@ -45,7 +45,10 @@ class SubtaskController extends Controller
 
         $result = $service->execute($subtask);
 
-        return $this->redirectWithResult($result);
+        return $this->redirectWithResult($result, undo: [
+            'label' => 'Undo',
+            'url' => route('workspace.subtasks.restore', $subtask),
+        ]);
     }
 
     public function restore(Subtask $subtask, RestoreWorkspaceModel $service, Request $request): RedirectResponse

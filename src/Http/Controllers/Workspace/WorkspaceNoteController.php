@@ -54,7 +54,10 @@ class WorkspaceNoteController extends Controller
 
         $result = $service->execute($workspaceNote);
 
-        return $this->redirectWithResult($result);
+        return $this->redirectWithResult($result, undo: [
+            'label' => 'Undo',
+            'url' => route('workspace.my-notes.restore', $workspaceNote),
+        ]);
     }
 
     public function restore(WorkspaceNote $workspaceNote, RestoreWorkspaceModel $service): RedirectResponse

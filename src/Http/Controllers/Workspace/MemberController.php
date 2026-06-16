@@ -104,7 +104,14 @@ class MemberController extends Controller
             $user?->delete();
         });
 
-        return back()->with('workspace_flash', ['success' => true, 'message' => 'Member and their login removed.']);
+        return back()->with('workspace_flash', [
+            'success' => true,
+            'message' => 'Member and their login removed.',
+            'undo' => [
+                'label' => 'Undo',
+                'url' => route('workspace.members.restore', $member),
+            ],
+        ]);
     }
 
     public function restore(Request $request, Member $member, RestoreWorkspaceModel $service): RedirectResponse

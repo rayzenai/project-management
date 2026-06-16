@@ -12,12 +12,19 @@ use RayzenAI\ProjectManagement\Support\ServiceResult;
  */
 trait RedirectsWithServiceResult
 {
-    protected function redirectWithResult(ServiceResult $result, string $successRoute = '', ?string $defaultRoute = null): RedirectResponse
+    /**
+     * @param  array{label: string, url: string}|null  $undo
+     */
+    protected function redirectWithResult(ServiceResult $result, string $successRoute = '', ?string $defaultRoute = null, ?array $undo = null): RedirectResponse
     {
         $flash = [
             'success' => $result->success,
             'message' => $result->message,
         ];
+
+        if ($result->success && $undo !== null) {
+            $flash['undo'] = $undo;
+        }
 
         if ($result->success) {
             return $successRoute

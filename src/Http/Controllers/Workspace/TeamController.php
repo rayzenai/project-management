@@ -47,7 +47,14 @@ class TeamController extends Controller
 
         $team->delete();
 
-        return back()->with('workspace_flash', ['success' => true, 'message' => 'Team deleted.']);
+        return back()->with('workspace_flash', [
+            'success' => true,
+            'message' => 'Team deleted.',
+            'undo' => [
+                'label' => 'Undo',
+                'url' => route('workspace.teams.restore', $team),
+            ],
+        ]);
     }
 
     public function restore(Request $request, Team $team, RestoreWorkspaceModel $service): RedirectResponse
