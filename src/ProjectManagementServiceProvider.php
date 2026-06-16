@@ -30,6 +30,10 @@ class ProjectManagementServiceProvider extends ServiceProvider
     {
         if (! Gate::has('manage-workspace')) {
             Gate::define('manage-workspace', function ($user): bool {
+                if (! empty($user->is_super_admin)) {
+                    return true;
+                }
+
                 return in_array(
                     $user->email,
                     (array) config('project-management.super_admins', []),
