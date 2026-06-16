@@ -14,7 +14,7 @@ use RayzenAI\ProjectManagement\Models\WorkspaceNote;
 
 class PruneTrashedWorkspaceModels extends Command
 {
-    protected $signature = 'workspace:prune-trashed';
+    protected $signature = 'workspace:prune-trashed {--pretend : Count what would be pruned without deleting}';
 
     protected $description = 'Force-delete workspace rows trashed longer than the configured TTL.';
 
@@ -27,17 +27,32 @@ class PruneTrashedWorkspaceModels extends Command
     public function handle(): int
     {
         $cutoff = now()->subDays((int) config('project-management.trash_ttl_days', 30));
+        $pretend = (bool) $this->option('pretend');
         $total = 0;
 
         foreach ($this->models as $model) {
-            $rows = $model::onlyTrashed()->where('deleted_at', '<', $cutoff)->get();
-            foreach ($rows as $row) {
-                $row->forceDelete();
-                $total++;
+            $count = 0;
+
+            foreach ($model::onlyTrashed()->where('deleted_at', '<', $cutoff)->cursor() as $row) {
+                if (! $pretend) {
+                    $row->forceDelete();
+                }
+
+                $count++;
             }
+
+            if ($count > 0) {
+                $this->line(class_basename($model).": {$count}");
+            }
+
+            $total += $count;
         }
 
-        $this->info("Pruned {$total} trashed row(s).");
+        if ($pretend) {
+            $this->info("[pretend] Would prune {$total} trashed row(s).");
+        } else {
+            $this->info("Pruned {$total} trashed row(s).");
+        }
 
         return self::SUCCESS;
     }

@@ -86,7 +86,7 @@ class ProjectManagementServiceProvider extends ServiceProvider
         }
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
-            $schedule->command('workspace:prune-trashed')->daily();
+            $schedule->command('workspace:prune-trashed')->daily()->withoutOverlapping();
         });
     }
 }
