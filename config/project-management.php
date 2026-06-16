@@ -91,4 +91,16 @@ return [
 
     'super_admin_default_password' => env('PM_SUPER_ADMIN_PASSWORD', 'password'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Trash TTL (days)
+    |--------------------------------------------------------------------------
+    |
+    | How long a soft-deleted workspace row is retained before the daily
+    | `workspace:prune-trashed` command force-deletes it. Defaults to 30 days.
+    |
+    */
+
+    'trash_ttl_days' => (int) env('PM_TRASH_TTL_DAYS', 30),
+
 ];

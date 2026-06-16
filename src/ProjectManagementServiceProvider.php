@@ -2,9 +2,11 @@
 
 namespace RayzenAI\ProjectManagement;
 
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use RayzenAI\ProjectManagement\Console\Commands\PruneTrashedWorkspaceModels;
 use RayzenAI\ProjectManagement\Console\Commands\SendProjectWeeklyDigest;
 use RayzenAI\ProjectManagement\Models\Member;
 use RayzenAI\ProjectManagement\Models\ProjectAssignment;
@@ -79,7 +81,12 @@ class ProjectManagementServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 SendProjectWeeklyDigest::class,
+                PruneTrashedWorkspaceModels::class,
             ]);
         }
+
+        $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
+            $schedule->command('workspace:prune-trashed')->daily();
+        });
     }
 }
