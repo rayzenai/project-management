@@ -12,6 +12,7 @@ use RayzenAI\ProjectManagement\Models\Subtask;
 use RayzenAI\ProjectManagement\Models\Task;
 use RayzenAI\ProjectManagement\Services\Workspace\CreateSubtaskService;
 use RayzenAI\ProjectManagement\Services\Workspace\DeleteSubtaskService;
+use RayzenAI\ProjectManagement\Services\Workspace\RestoreWorkspaceModel;
 use RayzenAI\ProjectManagement\Services\Workspace\UpdateSubtaskService;
 
 class SubtaskController extends Controller
@@ -45,5 +46,14 @@ class SubtaskController extends Controller
         $result = $service->execute($subtask);
 
         return $this->redirectWithResult($result);
+    }
+
+    public function restore(Subtask $subtask, RestoreWorkspaceModel $service, Request $request): RedirectResponse
+    {
+        abort_unless($subtask->user_id === $request->user()->id, 403);
+
+        $service->execute($subtask);
+
+        return back()->with('workspace_flash', ['success' => true, 'message' => 'Restored.']);
     }
 }

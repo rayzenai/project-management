@@ -11,6 +11,7 @@ use RayzenAI\ProjectManagement\Models\ProjectNote;
 use RayzenAI\ProjectManagement\Models\Task;
 use RayzenAI\ProjectManagement\Services\Workspace\AddNoteService;
 use RayzenAI\ProjectManagement\Services\Workspace\DeleteNoteService;
+use RayzenAI\ProjectManagement\Services\Workspace\RestoreWorkspaceModel;
 
 /**
  * JSON sibling of the Workspace\NoteController. Reuses the same FormRequests
@@ -41,5 +42,15 @@ class NoteController extends Controller
         $result = $service->execute($note);
 
         return $this->respondWithResult($result);
+    }
+
+    public function restore(ProjectNote $note, RestoreWorkspaceModel $service): JsonResponse
+    {
+        $result = $service->execute($note);
+
+        return $this->respondWithResult(
+            $result,
+            $result->data instanceof ProjectNote ? new NoteResource($result->data) : null,
+        );
     }
 }

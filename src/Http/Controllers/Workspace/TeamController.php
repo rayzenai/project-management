@@ -11,6 +11,7 @@ use RayzenAI\ProjectManagement\Http\Requests\StoreTeamRequest;
 use RayzenAI\ProjectManagement\Http\Requests\UpdateTeamRequest;
 use RayzenAI\ProjectManagement\Models\Team;
 use RayzenAI\ProjectManagement\Queries\TeamIndexQuery;
+use RayzenAI\ProjectManagement\Services\Workspace\RestoreWorkspaceModel;
 use RayzenAI\ProjectManagement\Support\WorkspaceAccess;
 
 class TeamController extends Controller
@@ -47,5 +48,14 @@ class TeamController extends Controller
         $team->delete();
 
         return back()->with('workspace_flash', ['success' => true, 'message' => 'Team deleted.']);
+    }
+
+    public function restore(Request $request, Team $team, RestoreWorkspaceModel $service): RedirectResponse
+    {
+        abort_unless(WorkspaceAccess::isSuperAdmin($request->user()), 403);
+
+        $service->execute($team);
+
+        return back()->with('workspace_flash', ['success' => true, 'message' => 'Restored.']);
     }
 }

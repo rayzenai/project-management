@@ -13,6 +13,7 @@ use RayzenAI\ProjectManagement\Http\Resources\WorkspaceNoteResource;
 use RayzenAI\ProjectManagement\Models\WorkspaceNote;
 use RayzenAI\ProjectManagement\Services\Workspace\CreateWorkspaceNoteService;
 use RayzenAI\ProjectManagement\Services\Workspace\DeleteWorkspaceNoteService;
+use RayzenAI\ProjectManagement\Services\Workspace\RestoreWorkspaceModel;
 use RayzenAI\ProjectManagement\Services\Workspace\UpdateWorkspaceNotePlacementService;
 use RayzenAI\ProjectManagement\Services\Workspace\UpdateWorkspaceNoteService;
 
@@ -71,6 +72,18 @@ class WorkspaceNoteController extends Controller
         $result = $service->execute($workspaceNote);
 
         return $this->respondWithResult($result);
+    }
+
+    public function restore(WorkspaceNote $workspaceNote, RestoreWorkspaceModel $service, Request $request): JsonResponse
+    {
+        $this->authorizeOwnership($request, $workspaceNote);
+
+        $result = $service->execute($workspaceNote);
+
+        return $this->respondWithResult(
+            $result,
+            $result->data instanceof WorkspaceNote ? new WorkspaceNoteResource($result->data) : null,
+        );
     }
 
     private function authorizeOwnership(Request $request, WorkspaceNote $note): void

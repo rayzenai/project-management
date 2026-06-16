@@ -10,6 +10,7 @@ use RayzenAI\ProjectManagement\Models\ProjectNote;
 use RayzenAI\ProjectManagement\Models\Task;
 use RayzenAI\ProjectManagement\Services\Workspace\AddNoteService;
 use RayzenAI\ProjectManagement\Services\Workspace\DeleteNoteService;
+use RayzenAI\ProjectManagement\Services\Workspace\RestoreWorkspaceModel;
 
 class NoteController extends Controller
 {
@@ -31,5 +32,12 @@ class NoteController extends Controller
         $result = $service->execute($note);
 
         return $this->redirectWithResult($result);
+    }
+
+    public function restore(ProjectNote $note, RestoreWorkspaceModel $service): RedirectResponse
+    {
+        $service->execute($note);
+
+        return back()->with('workspace_flash', ['success' => true, 'message' => 'Restored.']);
     }
 }

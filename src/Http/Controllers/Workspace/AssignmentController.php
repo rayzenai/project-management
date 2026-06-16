@@ -10,6 +10,7 @@ use RayzenAI\ProjectManagement\Http\Requests\UpdateAssignmentRequest;
 use RayzenAI\ProjectManagement\Models\ProjectAssignment;
 use RayzenAI\ProjectManagement\Models\Task;
 use RayzenAI\ProjectManagement\Services\Workspace\AssignMemberService;
+use RayzenAI\ProjectManagement\Services\Workspace\RestoreWorkspaceModel;
 use RayzenAI\ProjectManagement\Services\Workspace\UnassignMemberService;
 use RayzenAI\ProjectManagement\Services\Workspace\UpdateAssignmentService;
 
@@ -40,5 +41,12 @@ class AssignmentController extends Controller
         $result = $service->execute($assignment);
 
         return $this->redirectWithResult($result);
+    }
+
+    public function restore(ProjectAssignment $assignment, RestoreWorkspaceModel $service): RedirectResponse
+    {
+        $service->execute($assignment);
+
+        return back()->with('workspace_flash', ['success' => true, 'message' => 'Restored.']);
     }
 }

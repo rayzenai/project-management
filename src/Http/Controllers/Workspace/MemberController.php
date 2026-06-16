@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use RayzenAI\ProjectManagement\Http\Requests\StoreMemberRequest;
 use RayzenAI\ProjectManagement\Http\Requests\UpdateMemberRequest;
 use RayzenAI\ProjectManagement\Models\Member;
+use RayzenAI\ProjectManagement\Services\Workspace\RestoreWorkspaceModel;
 use RayzenAI\ProjectManagement\Support\WorkspaceAccess;
 
 /**
@@ -104,5 +105,14 @@ class MemberController extends Controller
         });
 
         return back()->with('workspace_flash', ['success' => true, 'message' => 'Member and their login removed.']);
+    }
+
+    public function restore(Request $request, Member $member, RestoreWorkspaceModel $service): RedirectResponse
+    {
+        abort_unless(WorkspaceAccess::isSuperAdmin($request->user()), 403);
+
+        $service->execute($member);
+
+        return back()->with('workspace_flash', ['success' => true, 'message' => 'Restored.']);
     }
 }

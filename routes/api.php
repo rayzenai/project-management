@@ -41,6 +41,7 @@ Route::middleware('api')->prefix('api/v1')->name('api.')->group(function () {
             Route::post('/teams', [TeamController::class, 'store'])->name('teams.store');
             Route::patch('/teams/{team}', [TeamController::class, 'update'])->name('teams.update');
             Route::delete('/teams/{team}', [TeamController::class, 'destroy'])->name('teams.destroy');
+            Route::post('/teams/{team}/restore', [TeamController::class, 'restore'])->name('teams.restore')->withTrashed();
             Route::post('/teams/{team}/members', [TeamMemberController::class, 'store'])->name('teams.members.store');
             Route::delete('/teams/{team}/members/{member}', [TeamMemberController::class, 'destroy'])->name('teams.members.destroy');
             Route::patch('/teams/{team}/members/{member}', [TeamMemberController::class, 'updateRole'])->name('teams.members.role');
@@ -49,6 +50,7 @@ Route::middleware('api')->prefix('api/v1')->name('api.')->group(function () {
             Route::post('/members', [MemberController::class, 'store'])->name('members.store');
             Route::patch('/members/{member}', [MemberController::class, 'update'])->name('members.update');
             Route::delete('/members/{member}', [MemberController::class, 'destroy'])->name('members.destroy');
+            Route::post('/members/{member}/restore', [MemberController::class, 'restore'])->name('members.restore')->withTrashed();
 
             // Projects
             Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
@@ -65,27 +67,33 @@ Route::middleware('api')->prefix('api/v1')->name('api.')->group(function () {
             Route::get('/projects/{project:slug}/tasks/{task:slug}', [TaskController::class, 'show'])->scopeBindings()->name('tasks.show');
             Route::patch('/projects/{project:slug}/tasks/{task:slug}', [TaskController::class, 'update'])->scopeBindings()->name('tasks.update');
             Route::delete('/projects/{project:slug}/tasks/{task:slug}', [TaskController::class, 'destroy'])->scopeBindings()->name('tasks.destroy');
+            Route::post('/projects/{project:slug}/tasks/{task:slug}/restore', [TaskController::class, 'restore'])->scopeBindings()->name('tasks.restore')->withTrashed();
 
             // Assignments
             Route::post('/tasks/{task}/assignments', [AssignmentController::class, 'store'])->name('assignments.store');
             Route::patch('/assignments/{assignment}', [AssignmentController::class, 'update'])->name('assignments.update');
             Route::delete('/assignments/{assignment}', [AssignmentController::class, 'destroy'])->name('assignments.destroy');
+            Route::post('/assignments/{assignment}/restore', [AssignmentController::class, 'restore'])->name('assignments.restore')->withTrashed();
 
             // Subtasks
             Route::post('/tasks/{task}/subtasks', [SubtaskController::class, 'store'])->name('subtasks.store');
             Route::patch('/subtasks/{subtask}', [SubtaskController::class, 'update'])->name('subtasks.update');
             Route::delete('/subtasks/{subtask}', [SubtaskController::class, 'destroy'])->name('subtasks.destroy');
+            Route::post('/subtasks/{subtask}/restore', [SubtaskController::class, 'restore'])->name('subtasks.restore')->withTrashed();
 
             // Notes & contacts
             Route::post('/tasks/{task}/notes', [NoteController::class, 'store'])->name('notes.store');
             Route::delete('/notes/{note}', [NoteController::class, 'destroy'])->name('notes.destroy');
+            Route::post('/notes/{note}/restore', [NoteController::class, 'restore'])->name('notes.restore')->withTrashed();
             Route::post('/tasks/{task}/contacts', [ContactController::class, 'store'])->name('contacts.store');
+            Route::post('/contacts/{contact}/restore', [ContactController::class, 'restore'])->name('contacts.restore')->withTrashed();
 
             // Personal workspace notes
             Route::post('/my-notes', [WorkspaceNoteController::class, 'store'])->name('my-notes.store');
             Route::patch('/my-notes/{workspaceNote}', [WorkspaceNoteController::class, 'update'])->name('my-notes.update');
             Route::patch('/my-notes/{workspaceNote}/placement', [WorkspaceNoteController::class, 'placement'])->name('my-notes.placement');
             Route::delete('/my-notes/{workspaceNote}', [WorkspaceNoteController::class, 'destroy'])->name('my-notes.destroy');
+            Route::post('/my-notes/{workspaceNote}/restore', [WorkspaceNoteController::class, 'restore'])->name('my-notes.restore')->withTrashed();
         });
     });
 });

@@ -11,6 +11,7 @@ use RayzenAI\ProjectManagement\Http\Resources\AssignmentResource;
 use RayzenAI\ProjectManagement\Models\ProjectAssignment;
 use RayzenAI\ProjectManagement\Models\Task;
 use RayzenAI\ProjectManagement\Services\Workspace\AssignMemberService;
+use RayzenAI\ProjectManagement\Services\Workspace\RestoreWorkspaceModel;
 use RayzenAI\ProjectManagement\Services\Workspace\UnassignMemberService;
 use RayzenAI\ProjectManagement\Services\Workspace\UpdateAssignmentService;
 
@@ -53,5 +54,15 @@ class AssignmentController extends Controller
         $result = $service->execute($assignment);
 
         return $this->respondWithResult($result);
+    }
+
+    public function restore(ProjectAssignment $assignment, RestoreWorkspaceModel $service): JsonResponse
+    {
+        $result = $service->execute($assignment);
+
+        return $this->respondWithResult(
+            $result,
+            $result->data instanceof ProjectAssignment ? new AssignmentResource($result->data) : null,
+        );
     }
 }

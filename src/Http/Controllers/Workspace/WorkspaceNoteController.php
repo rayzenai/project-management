@@ -12,6 +12,7 @@ use RayzenAI\ProjectManagement\Http\Requests\UpdateWorkspaceNoteRequest;
 use RayzenAI\ProjectManagement\Models\WorkspaceNote;
 use RayzenAI\ProjectManagement\Services\Workspace\CreateWorkspaceNoteService;
 use RayzenAI\ProjectManagement\Services\Workspace\DeleteWorkspaceNoteService;
+use RayzenAI\ProjectManagement\Services\Workspace\RestoreWorkspaceModel;
 use RayzenAI\ProjectManagement\Services\Workspace\UpdateWorkspaceNotePlacementService;
 use RayzenAI\ProjectManagement\Services\Workspace\UpdateWorkspaceNoteService;
 
@@ -54,6 +55,15 @@ class WorkspaceNoteController extends Controller
         $result = $service->execute($workspaceNote);
 
         return $this->redirectWithResult($result);
+    }
+
+    public function restore(WorkspaceNote $workspaceNote, RestoreWorkspaceModel $service): RedirectResponse
+    {
+        $this->authorizeOwnership(request(), $workspaceNote);
+
+        $service->execute($workspaceNote);
+
+        return back()->with('workspace_flash', ['success' => true, 'message' => 'Restored.']);
     }
 
     private function authorizeOwnership(Request $request, WorkspaceNote $note): void
