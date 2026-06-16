@@ -8,6 +8,7 @@ use RayzenAI\ProjectManagement\Http\Controllers\Api\DashboardController;
 use RayzenAI\ProjectManagement\Http\Controllers\Api\MemberController;
 use RayzenAI\ProjectManagement\Http\Controllers\Api\MyWorkspaceController;
 use RayzenAI\ProjectManagement\Http\Controllers\Api\NoteController;
+use RayzenAI\ProjectManagement\Http\Controllers\Api\NotificationController;
 use RayzenAI\ProjectManagement\Http\Controllers\Api\PlanTrackerController;
 use RayzenAI\ProjectManagement\Http\Controllers\Api\ProjectController;
 use RayzenAI\ProjectManagement\Http\Controllers\Api\QuickAddController;
@@ -27,6 +28,12 @@ Route::middleware('api')->prefix('api/v1')->name('api.')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
         Route::get('/user', [AuthController::class, 'user'])->name('user');
+
+        // Notification inbox (in-app) — top-level under /api/v1, not the workspace prefix.
+        Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+        Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unread');
+        Route::post('/notifications/{id}/read', [NotificationController::class, 'read'])->name('notifications.read');
+        Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
 
         Route::prefix('workspace')->name('workspace.')->group(function () {
             // Feeds & overview
