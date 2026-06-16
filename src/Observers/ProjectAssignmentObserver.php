@@ -4,6 +4,7 @@ namespace RayzenAI\ProjectManagement\Observers;
 
 use RayzenAI\ProjectManagement\Models\ProjectActivity;
 use RayzenAI\ProjectManagement\Models\ProjectAssignment;
+use RayzenAI\ProjectManagement\Notifications\TaskAssigned;
 use RayzenAI\ProjectManagement\Services\ProjectActivityRecorder;
 
 class ProjectAssignmentObserver
@@ -18,6 +19,13 @@ class ProjectAssignmentObserver
             action: ProjectActivity::ACTION_CREATED,
             description: 'Assigned to '.$name.' ('.((string) $assignment->role).')',
         );
+
+        $user = $assignment->member?->user;
+
+        if ($user !== null) {
+            $actor = auth()->user()?->name ?? 'Someone';
+            $user->notify(new TaskAssigned($assignment->task, $actor));
+        }
     }
 
     public function updated(ProjectAssignment $assignment): void

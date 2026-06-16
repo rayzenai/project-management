@@ -4,6 +4,7 @@ namespace RayzenAI\ProjectManagement\Observers;
 
 use RayzenAI\ProjectManagement\Models\ProjectActivity;
 use RayzenAI\ProjectManagement\Models\Task;
+use RayzenAI\ProjectManagement\Notifications\TaskStatusChanged;
 use RayzenAI\ProjectManagement\Services\ProjectActivityRecorder;
 
 class TaskObserver
@@ -68,6 +69,8 @@ class TaskObserver
                 description: 'Status: '.($from ?? '—').' → '.($to ?? '—'),
                 changes: ['from' => $from, 'to' => $to],
             );
+
+            $this->notifyStatusChange($item);
         }
 
         // progress change
@@ -122,5 +125,31 @@ class TaskObserver
                 changes: ['field' => $field, 'from' => $from, 'to' => is_scalar($to) ? $to : (string) $to],
             );
         }
+    }
+
+    /**
+     * Notify a task's assignees (linked users) — except the acting user —
+     * when the task transitions into a completed/late/failed status.
+     */
+    private function notifyStatusChange(Task $item): void
+    {
+        $notifyStatuses = [...Task::completeStatuses(), 'late', 'failed'];
+
+        if (! in_array($item->status, $notifyStatuses, true)) {
+            return;
+        }
+
+        $actorId = auth()->id();
+        $actorName = auth()->user()?->name ?? 'Someone';
+        $statusLabel = $item->status_label ?? $item->status;
+
+        $item->loadMissing('assignments.member.user');
+
+        $item->assignments
+            ->pluck('member.user')
+            ->filter()
+            ->reject(fn ($user) => $user->id === $actorId)
+            ->unique('id')
+            ->each(fn ($user) => $user->notify(new TaskStatusChanged($item, $statusLabel, $actorName)));
     }
 }
