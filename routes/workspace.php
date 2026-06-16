@@ -12,6 +12,7 @@ use RayzenAI\ProjectManagement\Http\Controllers\Workspace\PlanTrackerController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\ProjectController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\QuickAddController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\SubtaskController;
+use RayzenAI\ProjectManagement\Http\Controllers\Workspace\TaskCommentController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\TaskController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\TaskPreviewController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\TaskReorderController;
@@ -91,6 +92,12 @@ Route::middleware([...config('project-management.middleware', ['web', 'auth']), 
         Route::post('/my-notes/{workspaceNote}/restore', [WorkspaceNoteController::class, 'restore'])->name('my-notes.restore')->withTrashed();
 
         Route::post('/tasks/{task}/contacts', [ContactController::class, 'store'])->name('contacts.store');
+
+        Route::get('/tasks/{task}/comments', [TaskCommentController::class, 'index'])->name('tasks.comments.index');
+        Route::post('/tasks/{task}/comments', [TaskCommentController::class, 'store'])->name('tasks.comments.store');
+        Route::patch('/comments/{comment}', [TaskCommentController::class, 'update'])->name('comments.update');
+        Route::delete('/comments/{comment}', [TaskCommentController::class, 'destroy'])->name('comments.destroy');
+        Route::post('/comments/{comment}/restore', [TaskCommentController::class, 'restore'])->name('comments.restore')->withTrashed();
 
         Route::post('/tasks/{task}/subtasks', [SubtaskController::class, 'store'])->name('subtasks.store');
         Route::patch('/subtasks/{subtask}', [SubtaskController::class, 'update'])->name('subtasks.update');

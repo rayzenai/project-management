@@ -6,6 +6,7 @@ use RayzenAI\ProjectManagement\Http\Resources\ContactResource;
 use RayzenAI\ProjectManagement\Http\Resources\NoteResource;
 use RayzenAI\ProjectManagement\Http\Resources\ProjectResource;
 use RayzenAI\ProjectManagement\Http\Resources\SubtaskResource;
+use RayzenAI\ProjectManagement\Http\Resources\TaskCommentResource;
 use RayzenAI\ProjectManagement\Http\Resources\TaskResource;
 use RayzenAI\ProjectManagement\Models\Member;
 use RayzenAI\ProjectManagement\Models\Project;
@@ -26,6 +27,7 @@ class TaskShowQuery
      *     notes: array<int, array<string, mixed>>,
      *     contacts: array<int, array<string, mixed>>,
      *     subtasks: array<int, array<string, mixed>>,
+     *     comments: array<int, array<string, mixed>>,
      *     team: array<int, array{id: int, name: string, email: ?string, user_id: ?int}>
      * }
      */
@@ -42,12 +44,16 @@ class TaskShowQuery
             ->orderBy('position')
             ->get();
 
+        $comments = $task->comments()->with('user')->latest()->get();
+        TaskCommentResource::preload($comments);
+
         return [
             'project' => (new ProjectResource($project))->resolve(),
             'task' => (new TaskResource($task))->resolve(),
             'notes' => NoteResource::collection($task->notes)->resolve(),
             'contacts' => ContactResource::collection($task->contacts)->resolve(),
             'subtasks' => SubtaskResource::collection($mySubtasks)->resolve(),
+            'comments' => TaskCommentResource::collection($comments)->resolve(),
             'team' => $team->map(fn (Member $m): array => ['id' => $m->id, 'name' => $m->name, 'email' => $m->email, 'user_id' => $m->user_id])->all(),
         ];
     }
