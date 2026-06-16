@@ -47,17 +47,13 @@
     {/if}
 {/snippet}
 
-<div class="overflow-x-auto rounded-xl border border-line bg-surface">
+<div class="bg-surface overflow-x-auto rounded-xl border border-line">
     <table class="w-full text-left">
         <thead>
             <tr class="border-b border-line">
                 <th class="w-8 px-3 py-2"><span class="sr-only">Complete</span></th>
                 <th class="w-14 px-2 py-2">
-                    <button
-                        type="button"
-                        class="ws-eyebrow text-fg-muted hover:text-fg"
-                        onclick={() => toggleSort('item')}
-                    >
+                    <button type="button" class="ws-eyebrow text-fg-muted hover:text-fg" onclick={() => toggleSort('item')}>
                         # {@render sortArrow('item')}
                     </button>
                 </th>
@@ -68,16 +64,14 @@
                         type="button"
                         class="ws-eyebrow text-fg-muted hover:text-fg"
                         onclick={() => toggleSort('priority')}
+                        aria-label="Sort by priority"
                     >
-                        ⚑ {@render sortArrow('priority')}
+                        <span class="bg-fg-faint inline-block h-2 w-2 rounded-full align-middle"></span>
+                        {@render sortArrow('priority')}
                     </button>
                 </th>
                 <th class="w-28 px-2 py-2">
-                    <button
-                        type="button"
-                        class="ws-eyebrow text-fg-muted hover:text-fg"
-                        onclick={() => toggleSort('deadline')}
-                    >
+                    <button type="button" class="ws-eyebrow text-fg-muted hover:text-fg" onclick={() => toggleSort('deadline')}>
                         Deadline {@render sortArrow('deadline')}
                     </button>
                 </th>

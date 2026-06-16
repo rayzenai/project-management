@@ -31,9 +31,7 @@
 
     // When launched from inside a project, the project is fixed — we hide the
     // selector and show its name as static text instead.
-    const lockedProjectName = $derived(
-        lockProject ? (projects.find((p) => p.id === defaultProjectId)?.title ?? null) : null,
-    );
+    const lockedProjectName = $derived(lockProject ? (projects.find((p) => p.id === defaultProjectId)?.title ?? null) : null);
 
     // Empty picker values are stripped before POSTing so parsed title tokens
     // (#project @assignee !priority dates) can fill the gaps server-side;
@@ -85,21 +83,18 @@
 
 {#snippet advancedFields()}
     <div>
-        <label class="mb-1 block text-xs font-medium text-fg-muted">Assign to</label>
+        <label class="text-fg-muted mb-1 block text-xs font-medium">Assign to</label>
         <AssigneePicker {team} bind:selectedIds={form.assignee_member_ids} max={5} placeholder="Pick teammates..." />
-        <button type="button" class="mt-1 text-xs text-accent hover:underline" onclick={assignMe}>Assign me</button>
+        <button type="button" class="text-accent mt-1 text-xs hover:underline" onclick={assignMe}>Assign me</button>
     </div>
     <div>
-        <label class="mb-1 block text-xs font-medium text-fg-muted">Due date</label>
-        <input
-            type="date"
-            bind:value={form.deadline_at}
-            class="w-full rounded-md border border-line bg-surface px-2 py-1 text-sm"
-        />
+        <label class="text-fg-muted mb-1 block text-xs font-medium">Due date</label>
+        <input type="date" bind:value={form.deadline_at} class="bg-surface w-full rounded-md border border-line px-2 py-1 text-sm" />
     </div>
     <div>
-        <label class="mb-1 block text-xs font-medium text-fg-muted">Priority</label>
+        <label class="text-fg-muted mb-1 block text-xs font-medium">Priority</label>
         <PillGroup
+            dot
             bind:value={form.priority}
             options={[
                 { value: 'low', label: 'Low', tone: 'neutral' },
@@ -120,7 +115,7 @@
     {#if variant === 'inline'}
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
             <div class="flex flex-1 items-center gap-2">
-                <span class="rounded-md bg-accent/15 px-2 py-1 text-base font-semibold text-accent select-none">+</span>
+                <span class="bg-accent/15 text-accent rounded-md px-2 py-1 text-base font-semibold select-none">+</span>
                 <div class="min-w-0 flex-1">
                     <TokenInput
                         bind:this={tokenInput}
@@ -134,27 +129,22 @@
             <div class="flex items-center gap-2">
                 {#if lockProject}
                     {#if lockedProjectName}
-                        <span class="text-sm text-fg-muted">Project: <span class="text-fg">{lockedProjectName}</span></span>
+                        <span class="text-fg-muted text-sm">Project: <span class="text-fg">{lockedProjectName}</span></span>
                     {/if}
                 {:else}
-                    <select
-                        bind:value={form.project_id}
-                        class="rounded-md border border-line bg-surface px-2 py-1 text-sm"
-                    >
+                    <select bind:value={form.project_id} class="bg-surface rounded-md border border-line px-2 py-1 text-sm">
                         {#each projects as project (project.id)}
                             <option value={project.id}>{project.title}</option>
                         {/each}
                     </select>
                 {/if}
-                <button
-                    type="button"
-                    class="text-xs text-fg-muted hover:text-fg"
-                    onclick={() => (advanced = !advanced)}>{advanced ? 'Less' : 'More'}</button
+                <button type="button" class="text-fg-muted hover:text-fg text-xs" onclick={() => (advanced = !advanced)}
+                    >{advanced ? 'Less' : 'More'}</button
                 >
                 <button
                     type="submit"
                     disabled={form.processing || !form.title.trim()}
-                    class="rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-bg shadow-sm transition hover:bg-accent-dim disabled:cursor-not-allowed disabled:opacity-50"
+                    class="bg-accent text-bg hover:bg-accent-dim rounded-md px-3 py-1.5 text-sm font-semibold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
                     >Add</button
                 >
             </div>
@@ -176,9 +166,7 @@
             />
         </div>
 
-        <div
-            class="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-line px-3 py-2 font-mono text-[10px] text-fg-muted"
-        >
+        <div class="text-fg-muted flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-line px-3 py-2 font-mono text-[10px]">
             <span>#project</span>
             <span>@assignee</span>
             <span>!low / !medium / !high / !urgent</span>
@@ -187,27 +175,22 @@
 
         <div class="flex items-center justify-between gap-2 px-3 py-3">
             {#if lockProject}
-                <span class="text-sm text-fg-muted">
+                <span class="text-fg-muted text-sm">
                     Project:
                     {#if lockedProjectName}<span class="text-fg">{lockedProjectName}</span>{/if}
                 </span>
             {:else}
-                <label class="flex items-center gap-2 text-sm text-fg-muted">
+                <label class="text-fg-muted flex items-center gap-2 text-sm">
                     Project:
-                    <select
-                        bind:value={form.project_id}
-                        class="rounded-md border border-line bg-surface px-2 py-1 text-sm text-fg"
-                    >
+                    <select bind:value={form.project_id} class="bg-surface text-fg rounded-md border border-line px-2 py-1 text-sm">
                         {#each projects as project (project.id)}
                             <option value={project.id}>{project.title}</option>
                         {/each}
                     </select>
                 </label>
             {/if}
-            <button
-                type="button"
-                class="text-xs text-fg-muted hover:text-fg"
-                onclick={() => (advanced = !advanced)}>{advanced ? 'Less ▴' : 'More ▾'}</button
+            <button type="button" class="text-fg-muted hover:text-fg text-xs" onclick={() => (advanced = !advanced)}
+                >{advanced ? 'Less ▴' : 'More ▾'}</button
             >
         </div>
 
@@ -219,16 +202,12 @@
 
         <div class="flex items-center justify-end gap-2 border-t border-line px-3 py-3">
             {#if onCancel}
-                <button
-                    type="button"
-                    class="rounded-md px-3 py-1.5 text-sm text-fg-muted hover:bg-surface-alt"
-                    onclick={onCancel}>Cancel</button
-                >
+                <button type="button" class="text-fg-muted hover:bg-surface-alt rounded-md px-3 py-1.5 text-sm" onclick={onCancel}>Cancel</button>
             {/if}
             <button
                 type="submit"
                 disabled={form.processing || !form.title.trim()}
-                class="rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-bg shadow-sm transition hover:bg-accent-dim disabled:cursor-not-allowed disabled:opacity-50"
+                class="bg-accent text-bg hover:bg-accent-dim rounded-md px-3 py-1.5 text-sm font-semibold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
                 >Add task ⏎</button
             >
         </div>

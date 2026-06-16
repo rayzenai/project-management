@@ -29,8 +29,9 @@
         statuses: { value: string; label: string }[];
     } = $props();
 
-    type TabId = 'overview' | 'todos' | 'notes' | 'comments' | 'contacts';
-    const tabIds: TabId[] = ['overview', 'todos', 'notes', 'comments', 'contacts'];
+    type TabId = 'overview' | 'todos' | 'notes' | 'contacts';
+    // Comments live in the right column now (not a tab); ?tab=comments falls back to overview.
+    const tabIds: TabId[] = ['overview', 'todos', 'notes', 'contacts'];
 
     function tabFromUrl(url: string): TabId {
         const requested = new URL(url, 'http://localhost').searchParams.get('tab');
@@ -186,17 +187,14 @@
 
 <AppShell>
     {#if todoForm.processing || noteForm.processing}
-        <div
-            class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center"
-            aria-hidden="true"
-        >
-            <div class="rounded-full border border-line bg-surface/90 p-3 shadow-lg backdrop-blur-sm">
+        <div class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center" aria-hidden="true">
+            <div class="bg-surface/90 rounded-full border border-line p-3 shadow-lg backdrop-blur-sm">
                 <Spinner size={28} />
             </div>
         </div>
     {/if}
 
-    <nav class="mb-3 text-xs text-fg-muted">
+    <nav class="text-fg-muted mb-3 text-xs">
         <a href="/workspace/projects" class="hover:underline">Projects</a> /
         <a href={`/workspace/projects/${project.slug}`} class="hover:underline">{project.title}</a> /
         <span>{task.short_title || task.title}</span>
@@ -206,28 +204,26 @@
         <div class="flex items-start justify-between gap-4">
             <div class="min-w-0 flex-1">
                 {#if task.item_number}
-                    <div
-                        class="mb-1 inline-flex items-center rounded bg-surface-alt px-2 py-0.5 font-mono text-xs text-fg-muted"
-                    >
+                    <div class="bg-surface-alt text-fg-muted mb-1 inline-flex items-center rounded px-2 py-0.5 font-mono text-xs">
                         #{task.item_number}
                     </div>
                 {/if}
                 <h1 class="text-2xl font-bold tracking-tight">{task.title}</h1>
                 {#if task.title_np}
-                    <div class="mt-1 text-base text-fg-muted">{task.title_np}</div>
+                    <div class="text-fg-muted mt-1 text-base">{task.title_np}</div>
                 {/if}
                 <div class="mt-3 flex flex-wrap items-center gap-2">
                     <StatusBadge status={task.status} label={task.status_label} />
                     {#if task.deadline_at}
-                        <span class="text-xs text-fg-muted">
+                        <span class="text-fg-muted text-xs">
                             Due {formatDate(task.deadline_at)} · {task.days_relative_label}
                         </span>
                     {/if}
                     {#if task.progress > 0}
-                        <span class="text-xs text-fg-muted">{task.progress}% complete</span>
+                        <span class="text-fg-muted text-xs">{task.progress}% complete</span>
                     {/if}
                     {#if task.responsible_ministry}
-                        <span class="text-xs text-fg-muted">· {task.responsible_ministry}</span>
+                        <span class="text-fg-muted text-xs">· {task.responsible_ministry}</span>
                     {/if}
                 </div>
             </div>
@@ -235,8 +231,7 @@
                 <button
                     type="button"
                     onclick={deleteTask}
-                    class="rounded-md border border-danger/30 bg-surface px-3 py-1.5 text-sm text-danger hover:bg-danger/10"
-                    >Delete</button
+                    class="bg-surface rounded-md border border-danger/30 px-3 py-1.5 text-sm text-danger hover:bg-danger/10">Delete</button
                 >
             </div>
         </div>
@@ -245,7 +240,7 @@
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div class="lg:col-span-2">
             <div class="mb-4 flex gap-1 border-b border-line">
-                {#each [['overview', 'Overview'], ['todos', `My todos (${subtasks.filter((s) => !s.is_done).length})`], ['notes', `Notes (${notes.length})`], ['comments', `Comments (${comments.length})`], ['contacts', `Contacts (${contacts.length})`]] as [key, label] (key)}
+                {#each [['overview', 'Overview'], ['todos', `My todos (${subtasks.filter((s) => !s.is_done).length})`], ['notes', `Notes (${notes.length})`], ['contacts', `Contacts (${contacts.length})`]] as [key, label] (key)}
                     <button
                         type="button"
                         class="border-b-2 px-3 py-2 text-sm font-medium transition"
@@ -258,44 +253,45 @@
                 {/each}
             </div>
 
-            <p class="mb-3 text-xs text-fg-faint">
+            <p class="text-fg-faint mb-3 text-xs">
                 Press
-                <kbd class="rounded border border-line bg-surface-alt px-1 font-sans">Ctrl</kbd
-                >/<kbd class="rounded border border-line bg-surface-alt px-1 font-sans">⌘</kbd>
+                <kbd class="bg-surface-alt rounded border border-line px-1 font-sans">Ctrl</kbd>/<kbd
+                    class="bg-surface-alt rounded border border-line px-1 font-sans">⌘</kbd
+                >
                 +
-                <kbd class="rounded border border-line bg-surface-alt px-1 font-sans">S</kbd>
+                <kbd class="bg-surface-alt rounded border border-line px-1 font-sans">S</kbd>
                 to quick save
             </p>
 
             {#if activeTab === 'overview'}
-                <form onsubmit={saveEdit} class="rounded-xl border border-line bg-surface p-4">
+                <form onsubmit={saveEdit} class="bg-surface rounded-xl border border-line p-4">
                     <div class="space-y-3">
                         <div>
-                            <label class="mb-1 block text-xs font-medium text-fg-muted">Title</label>
+                            <label class="text-fg-muted mb-1 block text-xs font-medium">Title</label>
                             <input
                                 type="text"
                                 bind:value={editForm.title}
-                                class="w-full rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
+                                class="bg-surface text-fg w-full rounded-md border border-line px-3 py-1.5 text-sm"
                             />
                         </div>
                         <div>
-                            <label class="mb-1 block text-xs font-medium text-fg-muted">Description</label>
+                            <label class="text-fg-muted mb-1 block text-xs font-medium">Description</label>
                             <textarea
                                 bind:value={editForm.description}
                                 rows="4"
                                 placeholder="Add a description..."
-                                class="w-full rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
+                                class="bg-surface text-fg w-full rounded-md border border-line px-3 py-1.5 text-sm"
                             ></textarea>
                             {#if task.description_np}
-                                <p class="mt-2 text-sm whitespace-pre-wrap text-fg-muted">{task.description_np}</p>
+                                <p class="text-fg-muted mt-2 text-sm whitespace-pre-wrap">{task.description_np}</p>
                             {/if}
                         </div>
                         <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
                             <div>
-                                <label class="mb-1 block text-xs font-medium text-fg-muted">Status</label>
+                                <label class="text-fg-muted mb-1 block text-xs font-medium">Status</label>
                                 <select
                                     bind:value={editForm.status}
-                                    class="w-full rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
+                                    class="bg-surface text-fg w-full rounded-md border border-line px-3 py-1.5 text-sm"
                                 >
                                     {#each statuses as s (s.value)}
                                         <option value={s.value}>{s.label}</option>
@@ -303,9 +299,9 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="mb-1 flex items-center justify-between text-xs font-medium text-fg-muted">
+                                <label class="text-fg-muted mb-1 flex items-center justify-between text-xs font-medium">
                                     <span>Progress</span>
-                                    <span class="font-semibold text-fg">{editForm.task_progress}%</span>
+                                    <span class="text-fg font-semibold">{editForm.task_progress}%</span>
                                 </label>
                                 <input
                                     type="range"
@@ -313,64 +309,64 @@
                                     max="100"
                                     step="5"
                                     bind:value={editForm.task_progress}
-                                    class="mt-2.5 w-full accent-accent"
+                                    class="accent-accent mt-2.5 w-full"
                                 />
                             </div>
                             <div>
-                                <label class="mb-1 block text-xs font-medium text-fg-muted">Due date</label>
+                                <label class="text-fg-muted mb-1 block text-xs font-medium">Due date</label>
                                 <input
                                     type="date"
                                     bind:value={editForm.deadline_at}
-                                    class="w-full rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
+                                    class="bg-surface text-fg w-full rounded-md border border-line px-3 py-1.5 text-sm"
                                 />
                             </div>
                         </div>
                         <div>
-                            <span class="mb-1 block text-xs font-medium text-fg-muted">Priority</span>
+                            <span class="text-fg-muted mb-1 block text-xs font-medium">Priority</span>
                             <PillGroup
+                                dot
                                 bind:value={editForm.priority}
                                 options={[
-                                    { value: 'low', label: 'Low' },
-                                    { value: 'medium', label: 'Medium' },
-                                    { value: 'high', label: 'High' },
-                                    { value: 'urgent', label: 'Urgent' },
+                                    { value: 'low', label: 'Low', tone: 'neutral' },
+                                    { value: 'medium', label: 'Medium', tone: 'amber' },
+                                    { value: 'high', label: 'High', tone: 'orange' },
+                                    { value: 'urgent', label: 'Urgent', tone: 'red' },
                                 ]}
                             />
                         </div>
                         <div>
-                            <label class="mb-1 block text-xs font-medium text-fg-muted">Status note</label>
+                            <label class="text-fg-muted mb-1 block text-xs font-medium">Status note</label>
                             <textarea
                                 bind:value={editForm.status_note}
                                 rows="3"
                                 placeholder="What's the latest on this?"
-                                class="w-full rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
+                                class="bg-surface text-fg w-full rounded-md border border-line px-3 py-1.5 text-sm"
                             ></textarea>
                         </div>
                         <div>
-                            <label class="mb-1 block text-xs font-medium text-fg-muted">Source URL</label>
+                            <label class="text-fg-muted mb-1 block text-xs font-medium">Source URL</label>
                             <input
                                 type="url"
                                 bind:value={editForm.source_url}
                                 placeholder="https://..."
-                                class="w-full rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
+                                class="bg-surface text-fg w-full rounded-md border border-line px-3 py-1.5 text-sm"
                             />
                         </div>
                     </div>
                     <div class="mt-4 flex items-center justify-end gap-2">
                         {#if editForm.isDirty}
-                            <span class="mr-auto text-xs text-fg-muted">Unsaved changes</span>
+                            <span class="text-fg-muted mr-auto text-xs">Unsaved changes</span>
                             <button
                                 type="button"
                                 onclick={() => editForm.reset()}
-                                class="rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
-                                >Discard</button
+                                class="bg-surface text-fg rounded-md border border-line px-3 py-1.5 text-sm">Discard</button
                             >
                         {/if}
                         <button
                             type="submit"
                             disabled={editForm.processing || !editForm.isDirty}
                             title="Save (⌘S / Ctrl+S)"
-                            class="rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-bg hover:bg-accent-dim disabled:opacity-50"
+                            class="bg-accent text-bg hover:bg-accent-dim rounded-md px-3 py-1.5 text-sm font-semibold disabled:opacity-50"
                             >Save</button
                         >
                     </div>
@@ -378,23 +374,23 @@
             {/if}
 
             {#if activeTab === 'todos'}
-                <form onsubmit={addTodo} class="mb-4 rounded-xl border border-line bg-surface p-3">
+                <form onsubmit={addTodo} class="bg-surface mb-4 rounded-xl border border-line p-3">
                     <div class="flex items-center gap-2">
                         <input
                             type="text"
                             bind:value={todoForm.body}
                             placeholder="Add a todo for yourself..."
-                            class="flex-1 rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
+                            class="bg-surface text-fg flex-1 rounded-md border border-line px-3 py-1.5 text-sm"
                         />
                         <input
                             type="date"
                             bind:value={todoForm.due_at}
-                            class="rounded-md border border-line bg-surface px-2 py-1.5 text-sm text-fg"
+                            class="bg-surface text-fg rounded-md border border-line px-2 py-1.5 text-sm"
                         />
                         <button
                             type="submit"
                             disabled={todoForm.processing || !todoForm.body.trim()}
-                            class="inline-flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-bg hover:bg-accent-dim disabled:opacity-50"
+                            class="bg-accent text-bg hover:bg-accent-dim inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-semibold disabled:opacity-50"
                         >
                             {#if todoForm.processing}
                                 <Spinner size={14} class="text-bg" />Adding…
@@ -403,17 +399,15 @@
                             {/if}
                         </button>
                     </div>
-                    <p class="mt-1.5 text-xs text-fg-muted">Todos are private to you. They show up in My Workspace too.</p>
+                    <p class="text-fg-muted mt-1.5 text-xs">Todos are private to you. They show up in My Workspace too.</p>
                 </form>
 
                 <ul class="space-y-2">
                     {#each subtasks as t (t.id)}
-                        <li
-                            class="group flex items-start gap-3 rounded-xl border border-line bg-surface p-3"
-                        >
+                        <li class="group bg-surface flex items-start gap-3 rounded-xl border border-line p-3">
                             <button
                                 type="button"
-                                class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-line text-xs text-bg transition hover:border-success"
+                                class="text-bg mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-line text-xs transition hover:border-success"
                                 class:bg-success={t.is_done}
                                 class:border-success={t.is_done}
                                 onclick={() => toggleTodo(t)}>{t.is_done ? '✓' : ''}</button
@@ -421,12 +415,12 @@
                             <div class="min-w-0 flex-1 text-sm">
                                 <p class:line-through={t.is_done} class:text-fg-faint={t.is_done}>{t.body}</p>
                                 {#if t.due_at}
-                                    <p class="mt-0.5 text-xs text-fg-muted">due {formatDate(t.due_at)}</p>
+                                    <p class="text-fg-muted mt-0.5 text-xs">due {formatDate(t.due_at)}</p>
                                 {/if}
                             </div>
                             <button
                                 type="button"
-                                class="invisible text-fg-faint group-hover:visible hover:text-danger"
+                                class="text-fg-faint invisible group-hover:visible hover:text-danger"
                                 onclick={() => deleteTodo(t)}
                                 title="Delete">×</button
                             >
@@ -438,18 +432,15 @@
             {/if}
 
             {#if activeTab === 'notes'}
-                <form onsubmit={addNote} class="mb-4 rounded-xl border border-line bg-surface p-3">
+                <form onsubmit={addNote} class="bg-surface mb-4 rounded-xl border border-line p-3">
                     <textarea
                         bind:value={noteForm.body}
                         rows="2"
                         placeholder="Add a note..."
-                        class="w-full resize-none rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
+                        class="bg-surface text-fg w-full resize-none rounded-md border border-line px-3 py-1.5 text-sm"
                     ></textarea>
                     <div class="mt-2 flex items-center gap-2">
-                        <select
-                            bind:value={noteForm.type}
-                            class="rounded-md border border-line bg-surface px-2 py-1 text-xs text-fg"
-                        >
+                        <select bind:value={noteForm.type} class="bg-surface text-fg rounded-md border border-line px-2 py-1 text-xs">
                             <option value="general">General</option>
                             <option value="action_taken">Action taken</option>
                             <option value="meeting">Meeting</option>
@@ -460,13 +451,13 @@
                         <input
                             type="date"
                             bind:value={noteForm.happened_at}
-                            class="rounded-md border border-line bg-surface px-2 py-1 text-xs text-fg"
+                            class="bg-surface text-fg rounded-md border border-line px-2 py-1 text-xs"
                         />
                         <div class="flex-1"></div>
                         <button
                             type="submit"
                             disabled={noteForm.processing || !noteForm.body.trim()}
-                            class="inline-flex items-center gap-1.5 rounded-md bg-accent px-3 py-1 text-xs font-semibold text-bg hover:bg-accent-dim disabled:opacity-50"
+                            class="bg-accent text-bg hover:bg-accent-dim inline-flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-semibold disabled:opacity-50"
                         >
                             {#if noteForm.processing}
                                 <Spinner size={12} class="text-bg" />Adding…
@@ -479,9 +470,9 @@
 
                 <div class="space-y-2">
                     {#each notes as note (note.id)}
-                        <div class="rounded-xl border border-line bg-surface p-3">
-                            <div class="mb-1 flex items-center gap-2 text-xs text-fg-muted">
-                                <span class="font-medium text-fg">{note.user?.name ?? "Someone"}</span>
+                        <div class="bg-surface rounded-xl border border-line p-3">
+                            <div class="text-fg-muted mb-1 flex items-center gap-2 text-xs">
+                                <span class="text-fg font-medium">{note.user?.name ?? 'Someone'}</span>
                                 <span>· {note.type_label}</span>
                                 {#if note.happened_at}<span>· {formatDate(note.happened_at)}</span>{/if}
                                 <div class="flex-1"></div>
@@ -497,53 +488,46 @@
                 </div>
             {/if}
 
-            {#if activeTab === 'comments'}
-                <CommentThread {comments} {task} members={team} />
-            {/if}
-
             {#if activeTab === 'contacts'}
-                <form
-                    onsubmit={addContact}
-                    class="mb-4 rounded-xl border border-line bg-surface p-3"
-                >
+                <form onsubmit={addContact} class="bg-surface mb-4 rounded-xl border border-line p-3">
                     <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
                         <input
                             type="text"
                             placeholder="Name *"
                             bind:value={contactForm.name}
                             required
-                            class="rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
+                            class="bg-surface text-fg rounded-md border border-line px-3 py-1.5 text-sm"
                         />
                         <input
                             type="text"
                             placeholder="Role"
                             bind:value={contactForm.role}
-                            class="rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
+                            class="bg-surface text-fg rounded-md border border-line px-3 py-1.5 text-sm"
                         />
                         <input
                             type="text"
                             placeholder="Organization"
                             bind:value={contactForm.organization}
-                            class="rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
+                            class="bg-surface text-fg rounded-md border border-line px-3 py-1.5 text-sm"
                         />
                         <input
                             type="email"
                             placeholder="Email"
                             bind:value={contactForm.email}
-                            class="rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
+                            class="bg-surface text-fg rounded-md border border-line px-3 py-1.5 text-sm"
                         />
                         <input
                             type="tel"
                             placeholder="Phone"
                             bind:value={contactForm.phone}
-                            class="rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
+                            class="bg-surface text-fg rounded-md border border-line px-3 py-1.5 text-sm"
                         />
                     </div>
                     <div class="mt-2 flex justify-end">
                         <button
                             type="submit"
                             disabled={contactForm.processing || !contactForm.name.trim()}
-                            class="rounded-md bg-accent px-3 py-1 text-xs font-semibold text-bg hover:bg-accent-dim disabled:opacity-50"
+                            class="bg-accent text-bg hover:bg-accent-dim rounded-md px-3 py-1 text-xs font-semibold disabled:opacity-50"
                             >Add contact</button
                         >
                     </div>
@@ -551,14 +535,14 @@
 
                 <div class="space-y-2">
                     {#each contacts as contact (contact.id)}
-                        <div class="rounded-xl border border-line bg-surface p-3">
+                        <div class="bg-surface rounded-xl border border-line p-3">
                             <div class="text-sm font-medium">{contact.name}</div>
                             {#if contact.role || contact.organization}
-                                <div class="text-xs text-fg-muted">
+                                <div class="text-fg-muted text-xs">
                                     {[contact.role, contact.organization].filter(Boolean).join(' · ')}
                                 </div>
                             {/if}
-                            <div class="mt-1 flex flex-wrap gap-3 text-xs text-fg-muted">
+                            <div class="text-fg-muted mt-1 flex flex-wrap gap-3 text-xs">
                                 {#if contact.email}<a href={`mailto:${contact.email}`} class="hover:underline">✉ {contact.email}</a>{/if}
                                 {#if contact.phone}<span>☎ {contact.phone}</span>{/if}
                             </div>
@@ -571,21 +555,19 @@
         </div>
 
         <aside class="space-y-4">
-            <section class="rounded-xl border border-line bg-surface p-4">
-                <h3 class="mb-3 text-xs font-semibold tracking-wider text-fg-muted uppercase">
+            <section class="bg-surface rounded-xl border border-line p-4">
+                <h3 class="text-fg-muted mb-3 text-xs font-semibold tracking-wider uppercase">
                     Assignees ({task.assignments?.length ?? 0})
                 </h3>
                 <div class="space-y-2">
                     {#each task.assignments ?? [] as a (a.id)}
                         <div class="flex items-center gap-2">
-                            <span
-                                class="flex h-7 w-7 items-center justify-center rounded-full bg-surface-alt text-xs font-semibold text-fg-muted"
-                            >
+                            <span class="bg-surface-alt text-fg-muted flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold">
                                 {initials(a.member?.name)}
                             </span>
                             <div class="min-w-0 flex-1">
                                 <div class="truncate text-sm font-medium">{a.member?.name}</div>
-                                <div class="truncate text-xs text-fg-muted">
+                                <div class="text-fg-muted truncate text-xs">
                                     {a.personal_progress}%
                                 </div>
                             </div>
@@ -600,9 +582,16 @@
                 </div>
             </section>
 
+            <section class="bg-surface rounded-xl border border-line p-4">
+                <h3 class="text-fg-muted mb-3 text-xs font-semibold tracking-wider uppercase">
+                    Comments ({comments.length})
+                </h3>
+                <CommentThread {comments} {task} members={team} embedded />
+            </section>
+
             {#if task.category_label || task.deadline_label || task.responsible_ministry}
-                <section class="rounded-xl border border-line bg-surface p-4">
-                    <h3 class="mb-3 text-xs font-semibold tracking-wider text-fg-muted uppercase">Plan metadata</h3>
+                <section class="bg-surface rounded-xl border border-line p-4">
+                    <h3 class="text-fg-muted mb-3 text-xs font-semibold tracking-wider uppercase">Plan metadata</h3>
                     <dl class="space-y-2 text-sm">
                         {#if task.category_label}
                             <div class="flex items-center justify-between">

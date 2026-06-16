@@ -7,10 +7,13 @@
         comments,
         task,
         members,
+        embedded = false,
     }: {
         comments: Comment[];
         task: Task;
         members: Member[];
+        /** When inside an existing panel, drop the composer/comment card chrome to avoid nested boxes. */
+        embedded?: boolean;
     } = $props();
 
     /** Matches the canonical mention token `@[Display Name](member:ID)` (mirrors the PHP MentionParser). */
@@ -49,13 +52,7 @@
     let mentionStart = $state(-1);
     let highlighted = $state(0);
 
-    const mentionMatches = $derived(
-        mentionOpen
-            ? members
-                  .filter((m) => m.name.toLowerCase().includes(mentionQuery.toLowerCase()))
-                  .slice(0, 8)
-            : [],
-    );
+    const mentionMatches = $derived(mentionOpen ? members.filter((m) => m.name.toLowerCase().includes(mentionQuery.toLowerCase())).slice(0, 8) : []);
 
     /**
      * Detect an in-progress `@mention` immediately before the caret. A token is
@@ -187,14 +184,14 @@
 </script>
 
 <div>
-    <form onsubmit={addComment} class="mb-4 rounded-xl border border-line bg-surface p-3">
+    <form onsubmit={addComment} class={embedded ? 'mb-4' : 'bg-surface mb-4 rounded-xl border border-line p-3'}>
         <div class="relative">
             <textarea
                 bind:this={textarea}
                 bind:value={composeForm.body}
                 rows="3"
                 placeholder="Write a comment… type @ to mention a teammate"
-                class="w-full resize-none rounded-md border border-line bg-surface px-3 py-1.5 text-sm"
+                class="bg-surface w-full resize-none rounded-md border border-line px-3 py-1.5 text-sm"
                 oninput={detectMention}
                 onkeydown={onComposeKeydown}
                 onclick={detectMention}
@@ -202,14 +199,12 @@
             ></textarea>
 
             {#if mentionOpen && mentionMatches.length > 0}
-                <ul
-                    class="absolute right-0 left-0 z-30 mt-1 max-h-56 overflow-auto rounded-md border border-line bg-surface py-1 shadow-lg"
-                >
+                <ul class="bg-surface absolute right-0 left-0 z-30 mt-1 max-h-56 overflow-auto rounded-md border border-line py-1 shadow-lg">
                     {#each mentionMatches as member, i (member.id)}
                         <li>
                             <button
                                 type="button"
-                                class={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-surface-alt ${
+                                class={`hover:bg-surface-alt flex w-full items-center gap-2 px-3 py-2 text-left text-sm ${
                                     i === highlighted ? 'bg-accent/10' : ''
                                 }`}
                                 onmousedown={(e) => {
@@ -218,7 +213,7 @@
                                 }}
                             >
                                 <span
-                                    class="flex h-6 w-6 items-center justify-center rounded-full bg-surface-alt text-[10px] font-semibold text-fg-muted"
+                                    class="bg-surface-alt text-fg-muted flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-semibold"
                                 >
                                     {initials(member.name)}
                                 </span>
@@ -230,24 +225,23 @@
             {/if}
         </div>
         <div class="mt-2 flex items-center justify-between">
-            <p class="text-xs text-fg-faint">Press ⌘/Ctrl + Enter to post</p>
+            <p class="text-fg-faint text-xs">Press ⌘/Ctrl + Enter to post</p>
             <button
                 type="submit"
                 disabled={composeForm.processing || !composeForm.body.trim()}
-                class="rounded-md bg-accent px-3 py-1 text-xs font-semibold text-bg hover:bg-accent-dim disabled:opacity-50"
-                >Comment</button
+                class="bg-accent text-bg hover:bg-accent-dim rounded-md px-3 py-1 text-xs font-semibold disabled:opacity-50">Comment</button
             >
         </div>
     </form>
 
-    <div class="space-y-2">
+    <div class={embedded ? 'divide-y divide-line-soft' : 'space-y-2'}>
         {#each comments as comment (comment.id)}
-            <div class="rounded-xl border border-line bg-surface p-3">
-                <div class="mb-1 flex items-center gap-2 text-xs text-fg-muted">
-                    <span class="flex h-6 w-6 items-center justify-center rounded-full bg-surface-alt text-[10px] font-semibold text-fg-muted">
+            <div class={embedded ? 'py-3 first:pt-0 last:pb-0' : 'bg-surface rounded-xl border border-line p-3'}>
+                <div class="text-fg-muted mb-1 flex items-center gap-2 text-xs">
+                    <span class="bg-surface-alt text-fg-muted flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-semibold">
                         {initials(comment.author.name)}
                     </span>
-                    <span class="font-medium text-fg-muted">{comment.author.name ?? 'Someone'}</span>
+                    <span class="text-fg-muted font-medium">{comment.author.name ?? 'Someone'}</span>
                     <span>· {formatTimeAgo(comment.created_at)}</span>
                     {#if comment.updated_at && comment.updated_at !== comment.created_at}
                         <span class="italic">· edited</span>
@@ -258,36 +252,32 @@
                             <button type="button" onclick={cancelEdit} class="hover:text-fg">Cancel</button>
                         {:else}
                             <button type="button" onclick={() => startEdit(comment)} class="hover:text-accent">Edit</button>
-                            <button type="button" onclick={() => deleteComment(comment)} class="text-fg-faint hover:text-danger" title="Delete comment"
-                                >×</button
+                            <button
+                                type="button"
+                                onclick={() => deleteComment(comment)}
+                                class="text-fg-faint hover:text-danger"
+                                title="Delete comment">×</button
                             >
                         {/if}
                     {/if}
                 </div>
 
                 {#if editingId === comment.id}
-                    <textarea
-                        bind:value={editDraft}
-                        rows="3"
-                        class="w-full resize-none rounded-md border border-line bg-surface px-3 py-1.5 text-sm"
+                    <textarea bind:value={editDraft} rows="3" class="bg-surface w-full resize-none rounded-md border border-line px-3 py-1.5 text-sm"
                     ></textarea>
                     <div class="mt-2 flex justify-end">
                         <button
                             type="button"
                             onclick={() => saveEdit(comment)}
                             disabled={editProcessing || !editDraft.trim()}
-                            class="rounded-md bg-accent px-3 py-1 text-xs font-semibold text-bg hover:bg-accent-dim disabled:opacity-50"
-                            >Save</button
+                            class="bg-accent text-bg hover:bg-accent-dim rounded-md px-3 py-1 text-xs font-semibold disabled:opacity-50">Save</button
                         >
                     </div>
                 {:else}
-                    <p class="text-sm whitespace-pre-wrap text-fg-muted">
+                    <p class="text-fg-muted text-sm whitespace-pre-wrap">
                         {#each parseBody(comment.body) as seg, i (i)}
                             {#if seg.type === 'mention'}
-                                <span
-                                    class="rounded bg-accent/10 px-1 font-medium text-accent"
-                                    >@{seg.name}</span
-                                >
+                                <span class="bg-accent/10 text-accent rounded px-1 font-medium">@{seg.name}</span>
                             {:else}{seg.value}{/if}
                         {/each}
                     </p>

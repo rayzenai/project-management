@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { router } from '@inertiajs/svelte';
+    import { page, router } from '@inertiajs/svelte';
     import { untrack } from 'svelte';
     import { notesBoard } from '../lib/notesBoard.svelte';
     import { palette } from '../lib/palette.svelte';
@@ -190,9 +190,12 @@
         const q = query.trim();
         close();
         switch (item.kind) {
-            case 'action':
-                quickAdd.open({ prefill: q });
+            case 'action': {
+                // Inherit the project you're viewing so "New task" doesn't re-ask it.
+                const proj = (page.props as Record<string, unknown>).project as { id?: number } | undefined;
+                quickAdd.open(typeof proj?.id === 'number' ? { prefill: q, projectId: proj.id, lockProject: true } : { prefill: q });
                 break;
+            }
             case 'nav':
                 router.visit(item.href);
                 break;
@@ -271,7 +274,7 @@
         role="presentation"
     >
         <div
-            class="w-full max-w-2xl overflow-hidden rounded-2xl border border-line bg-surface shadow-2xl"
+            class="bg-surface w-full max-w-2xl overflow-hidden rounded-2xl border border-line shadow-2xl"
             onclick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
@@ -287,7 +290,7 @@
                     oninput={onInput}
                     onkeydown={onKeydown}
                     placeholder="Search or jump to…"
-                    class="w-full bg-transparent text-sm outline-none placeholder:text-fg-faint"
+                    class="placeholder:text-fg-faint w-full bg-transparent text-sm outline-none"
                     role="combobox"
                     aria-expanded="true"
                     aria-controls="palette-listbox"
@@ -296,15 +299,12 @@
                     autocomplete="off"
                     spellcheck="false"
                 />
-                <kbd
-                    class="rounded border border-line px-1.5 py-0.5 text-[10px] text-fg-muted"
-                    >Esc</kbd
-                >
+                <kbd class="text-fg-muted rounded border border-line px-1.5 py-0.5 text-[10px]">Esc</kbd>
             </div>
 
             <div id="palette-listbox" role="listbox" aria-label="Results" class="max-h-[60vh] overflow-y-auto pb-2">
                 {#each grouped as group (group.label)}
-                    <div class="ws-eyebrow px-4 pt-3 pb-1 text-fg-faint">{group.label}</div>
+                    <div class="ws-eyebrow text-fg-faint px-4 pt-3 pb-1">{group.label}</div>
                     {#each group.items as item, j (itemKey(item))}
                         {@const i = group.offset + j}
                         <div
@@ -319,36 +319,33 @@
                             onmousemove={() => (activeIndex = i)}
                         >
                             {#if item.kind === 'action'}
-                                <span class="w-5 text-center font-semibold text-accent">+</span>
+                                <span class="text-accent w-5 text-center font-semibold">+</span>
                                 <span class="min-w-0 flex-1 truncate">{item.label}</span>
-                                <kbd
-                                    class="shrink-0 rounded border border-line px-1.5 py-0.5 text-[10px] text-fg-muted"
-                                    >{hasQuery ? '⏎' : 'q'}</kbd
-                                >
+                                <kbd class="text-fg-muted shrink-0 rounded border border-line px-1.5 py-0.5 text-[10px]">{hasQuery ? '⏎' : 'q'}</kbd>
                             {:else if item.kind === 'nav'}
-                                <span class="w-5 text-center text-base text-fg-muted">{item.icon}</span>
+                                <span class="text-fg-muted w-5 text-center text-base">{item.icon}</span>
                                 <span class="min-w-0 flex-1 truncate">{item.label}</span>
                             {:else if item.kind === 'project'}
-                                <span class="w-5 text-center text-base text-fg-muted">▤</span>
+                                <span class="text-fg-muted w-5 text-center text-base">▤</span>
                                 <span class="min-w-0 flex-1 truncate">{item.title}</span>
-                                <span class="shrink-0 text-xs text-fg-muted">{item.meta}</span>
+                                <span class="text-fg-muted shrink-0 text-xs">{item.meta}</span>
                             {:else if item.kind === 'task'}
                                 {#if item.item_number}
-                                    <span class="shrink-0 font-mono text-xs text-fg-faint">#{item.item_number}</span>
+                                    <span class="text-fg-faint shrink-0 font-mono text-xs">#{item.item_number}</span>
                                 {/if}
                                 <span class="min-w-0 flex-1 truncate">{item.title}</span>
                                 {#if item.meta}
-                                    <span class="shrink-0 text-xs text-fg-muted">{item.meta}</span>
+                                    <span class="text-fg-muted shrink-0 text-xs">{item.meta}</span>
                                 {/if}
                             {:else if item.kind === 'note'}
-                                <span class="min-w-0 flex-1 truncate text-fg-muted">“{item.body}”</span>
+                                <span class="text-fg-muted min-w-0 flex-1 truncate">“{item.body}”</span>
                                 {#if item.meta}
-                                    <span class="shrink-0 text-xs text-fg-muted">{item.meta}</span>
+                                    <span class="text-fg-muted shrink-0 text-xs">{item.meta}</span>
                                 {/if}
                             {:else}
                                 <span class="min-w-0 flex-1 truncate">{item.name}</span>
                                 {#if item.meta}
-                                    <span class="shrink-0 text-xs text-fg-muted">{item.meta}</span>
+                                    <span class="text-fg-muted shrink-0 text-xs">{item.meta}</span>
                                 {/if}
                             {/if}
                         </div>
@@ -356,9 +353,7 @@
                 {/each}
             </div>
 
-            <div
-                class="flex items-center gap-4 border-t border-line px-4 py-2 font-mono text-[10px] text-fg-muted"
-            >
+            <div class="text-fg-muted flex items-center gap-4 border-t border-line px-4 py-2 font-mono text-[10px]">
                 <span>↑↓ navigate</span>
                 <span>⏎ open</span>
                 <span>esc close</span>

@@ -33,6 +33,10 @@
     let descriptionDraft = $state('');
     let progressDraft = $state(0);
     let subtaskDraft = $state('');
+    let pendingSubtaskIds = $state(new Set<number>());
+    let editingSubtaskId = $state<number | null>(null);
+    let subtaskEditDraft = $state('');
+    let tempSubtaskSeq = 0;
     let noteDraft = $state('');
     let noteType = $state('general');
     let showContactForm = $state(false);
@@ -87,6 +91,8 @@
             progressDraft = cached?.task.progress ?? 0;
             editingTitle = editingDescription = showContactForm = showHistory = false;
             subtaskDraft = noteDraft = '';
+            editingSubtaskId = null;
+            pendingSubtaskIds = new Set();
             void load(opened.id, { background: cached !== null });
         });
 
@@ -158,10 +164,54 @@
     }
 
     function addSubtask() {
-        if (!task || subtaskDraft.trim() === '') return;
         const body = subtaskDraft.trim();
+        if (!task || body === '' || !preview) return;
         subtaskDraft = '';
-        router.post(`/workspace/tasks/${task.id}/subtasks`, { body }, { preserveState: true, preserveScroll: true, onSuccess: revalidate });
+
+        // Optimistically render the subtask with a spinner. The temp row uses a
+        // negative id; revalidate() reloads the real list and replaces it.
+        const tempId = -++tempSubtaskSeq;
+        pendingSubtaskIds = new Set(pendingSubtaskIds).add(tempId);
+        preview.subtasks = [
+            ...preview.subtasks,
+            { id: tempId, task_id: task.id, user_id: 0, body, is_done: false, position: preview.subtasks.length },
+        ];
+
+        router.post(
+            `/workspace/tasks/${task.id}/subtasks`,
+            { body },
+            {
+                preserveState: true,
+                preserveScroll: true,
+                onSuccess: revalidate,
+                onError: () => {
+                    if (preview) preview.subtasks = preview.subtasks.filter((s) => s.id !== tempId);
+                    subtaskDraft = body;
+                },
+                onFinish: () => {
+                    const next = new Set(pendingSubtaskIds);
+                    next.delete(tempId);
+                    pendingSubtaskIds = next;
+                },
+            },
+        );
+    }
+
+    function startEditSubtask(id: number, body: string) {
+        if (id < 0) return;
+        editingSubtaskId = id;
+        subtaskEditDraft = body;
+    }
+
+    function saveSubtaskEdit(id: number, original: string) {
+        if (editingSubtaskId !== id) return;
+        editingSubtaskId = null;
+        const body = subtaskEditDraft.trim();
+        if (body === '' || body === original) return;
+        if (preview) {
+            preview.subtasks = preview.subtasks.map((s) => (s.id === id ? { ...s, body } : s));
+        }
+        router.patch(`/workspace/subtasks/${id}`, { body }, { preserveState: true, preserveScroll: true, onSuccess: revalidate });
     }
 
     function deleteSubtask(id: number) {
@@ -227,11 +277,11 @@
         aria-labelledby="peek-title"
         aria-busy={!preview && !loadFailed}
         tabindex="-1"
-        class="fixed inset-y-0 right-0 z-50 flex w-full max-w-[540px] flex-col border-l border-line bg-surface shadow-2xl outline-none"
+        class="bg-surface fixed inset-y-0 right-0 z-50 flex w-full max-w-[540px] flex-col border-l border-line shadow-2xl outline-none"
         onkeydown={onPanelKeydown}
     >
         <header class="flex items-center gap-3 border-b border-line px-5 py-3">
-            <div class="ws-eyebrow min-w-0 flex-1 truncate text-fg-muted">
+            <div class="ws-eyebrow text-fg-muted min-w-0 flex-1 truncate">
                 {#if task}
                     {#if task.item_number}#{task.item_number} ·
                     {/if}
@@ -245,7 +295,7 @@
             {#if task}
                 <a
                     href={`/workspace/projects/${projectSlug}/tasks/${task.slug}`}
-                    class="font-mono text-[11px] whitespace-nowrap text-fg-muted hover:text-accent"
+                    class="text-fg-muted hover:text-accent font-mono text-[11px] whitespace-nowrap"
                 >
                     Open full page ↗
                 </a>
@@ -253,7 +303,7 @@
             <button
                 type="button"
                 aria-label="Close"
-                class="rounded-md p-1 text-fg-muted hover:bg-surface-alt hover:text-fg"
+                class="text-fg-muted hover:bg-surface-alt hover:text-fg rounded-md p-1"
                 onclick={() => peek.close()}
             >
                 ✕
@@ -263,10 +313,10 @@
         <div class="min-h-0 flex-1 overflow-y-auto px-5 py-4">
             {#if loadFailed}
                 <div class="flex flex-col items-center gap-3 py-16 text-center">
-                    <p class="text-sm text-fg-muted">Couldn't load this task.</p>
+                    <p class="text-fg-muted text-sm">Couldn't load this task.</p>
                     <button
                         type="button"
-                        class="rounded-md border border-line px-3 py-1.5 font-mono text-xs hover:border-accent"
+                        class="hover:border-accent rounded-md border border-line px-3 py-1.5 font-mono text-xs"
                         onclick={() => target && load(target.id)}
                     >
                         Retry
@@ -274,10 +324,10 @@
                 </div>
             {:else if !task}
                 <div class="animate-pulse space-y-4 py-2">
-                    <div class="h-6 w-3/4 rounded bg-surface-alt"></div>
-                    <div class="h-4 w-1/2 rounded bg-surface-alt"></div>
-                    <div class="h-24 rounded bg-surface-alt"></div>
-                    <div class="h-16 rounded bg-surface-alt"></div>
+                    <div class="bg-surface-alt h-6 w-3/4 rounded"></div>
+                    <div class="bg-surface-alt h-4 w-1/2 rounded"></div>
+                    <div class="bg-surface-alt h-24 rounded"></div>
+                    <div class="bg-surface-alt h-16 rounded"></div>
                 </div>
             {:else}
                 <div class="space-y-5">
@@ -291,7 +341,7 @@
                                 type="text"
                                 bind:value={titleDraft}
                                 autofocus
-                                class="min-w-0 flex-1 border-0 border-b border-accent bg-transparent p-0 font-display text-lg font-bold tracking-tight outline-none"
+                                class="border-accent min-w-0 flex-1 border-0 border-b bg-transparent p-0 font-display text-lg font-bold tracking-tight outline-none"
                                 onblur={saveTitle}
                                 onkeydown={(e) => {
                                     if (e.key === 'Enter') saveTitle();
@@ -305,7 +355,7 @@
                             <button
                                 type="button"
                                 id="peek-title"
-                                class="min-w-0 flex-1 text-left font-display text-lg leading-snug font-bold tracking-tight hover:text-accent"
+                                class="hover:text-accent min-w-0 flex-1 text-left font-display text-lg leading-snug font-bold tracking-tight"
                                 title="Click to rename"
                                 onclick={() => {
                                     titleDraft = task.title;
@@ -331,14 +381,14 @@
                             max="100"
                             step="5"
                             bind:value={progressDraft}
-                            class="flex-1 accent-accent"
+                            class="accent-accent flex-1"
                             onchange={saveProgress}
                         />
-                        <span class="w-10 text-right font-mono text-xs text-fg-muted">{progressDraft}%</span>
+                        <span class="text-fg-muted w-10 text-right font-mono text-xs">{progressDraft}%</span>
                     </div>
 
                     <div>
-                        <h3 class="ws-eyebrow mb-2 text-fg-muted">Assignees</h3>
+                        <h3 class="ws-eyebrow text-fg-muted mb-2">Assignees</h3>
                         <AssigneeStack
                             task={{ id: task.id, slug: task.slug, assignments: preview?.assignments ?? [] }}
                             team={preview?.team ?? []}
@@ -355,7 +405,7 @@
                                 bind:value={descriptionDraft}
                                 rows="4"
                                 autofocus
-                                class="w-full rounded-md border border-line bg-surface px-2.5 py-2 text-sm"
+                                class="bg-surface w-full rounded-md border border-line px-2.5 py-2 text-sm"
                                 onblur={saveDescription}
                                 onkeydown={(e) => {
                                     if (e.key === 'Escape') {
@@ -367,7 +417,7 @@
                         {:else}
                             <button
                                 type="button"
-                                class="w-full text-left text-sm whitespace-pre-wrap text-fg-muted hover:text-fg"
+                                class="text-fg-muted hover:text-fg w-full text-left text-sm whitespace-pre-wrap"
                                 onclick={() => {
                                     descriptionDraft = task.description ?? '';
                                     editingDescription = true;
@@ -383,66 +433,101 @@
                     </div>
 
                     <section class="border-t border-line-soft pt-4">
-                        <h3 class="ws-eyebrow mb-2 text-fg-muted">
+                        <h3 class="ws-eyebrow text-fg-muted mb-2">
                             Subtasks {#if preview && preview.subtasks.length > 0}({doneSubtasks}/{preview.subtasks.length}){/if}
                         </h3>
                         <ul class="space-y-1">
                             {#each preview?.subtasks ?? [] as subtask (subtask.id)}
+                                {@const pending = pendingSubtaskIds.has(subtask.id)}
                                 <li class="group flex items-center gap-2">
                                     <input
                                         type="checkbox"
                                         checked={subtask.is_done}
-                                        class="h-4 w-4 rounded accent-success"
+                                        disabled={pending}
+                                        class="h-4 w-4 rounded accent-success disabled:opacity-40"
                                         onchange={(e) => toggleSubtask(subtask.id, (e.currentTarget as HTMLInputElement).checked)}
                                     />
-                                    <span
-                                        class={`flex-1 text-sm ${subtask.is_done ? 'text-fg-faint line-through' : 'text-fg-muted'}`}
-                                    >
-                                        {subtask.body}
-                                    </span>
-                                    <button
-                                        type="button"
-                                        aria-label="Delete subtask"
-                                        class="text-fg-faint opacity-0 group-hover:opacity-100 hover:text-danger"
-                                        onclick={() => deleteSubtask(subtask.id)}
-                                    >
-                                        ×
-                                    </button>
+                                    {#if editingSubtaskId === subtask.id}
+                                        <!-- svelte-ignore a11y_autofocus -->
+                                        <input
+                                            type="text"
+                                            bind:value={subtaskEditDraft}
+                                            autofocus
+                                            class="border-accent text-fg-muted min-w-0 flex-1 border-0 border-b bg-transparent p-0 text-sm outline-none"
+                                            onblur={() => saveSubtaskEdit(subtask.id, subtask.body)}
+                                            onkeydown={(e) => {
+                                                if (e.key === 'Enter') saveSubtaskEdit(subtask.id, subtask.body);
+                                                if (e.key === 'Escape') {
+                                                    e.stopPropagation();
+                                                    editingSubtaskId = null;
+                                                }
+                                            }}
+                                        />
+                                    {:else}
+                                        <span
+                                            class={`flex-1 cursor-text text-sm ${subtask.is_done ? 'text-fg-faint line-through' : 'text-fg-muted'}`}
+                                            title="Double-click to edit"
+                                            ondblclick={() => startEditSubtask(subtask.id, subtask.body)}
+                                            role="button"
+                                            tabindex="-1"
+                                        >
+                                            {subtask.body}
+                                        </span>
+                                    {/if}
+                                    {#if pending}
+                                        <span
+                                            class="border-accent h-3.5 w-3.5 shrink-0 animate-spin rounded-full border-[1.5px] border-t-transparent"
+                                            aria-label="Saving"
+                                        ></span>
+                                    {:else}
+                                        <button
+                                            type="button"
+                                            aria-label="Delete subtask"
+                                            class="text-fg-faint opacity-0 group-hover:opacity-100 hover:text-danger"
+                                            onclick={() => deleteSubtask(subtask.id)}
+                                        >
+                                            ×
+                                        </button>
+                                    {/if}
                                 </li>
                             {/each}
                         </ul>
                         <input
                             type="text"
                             bind:value={subtaskDraft}
-                            placeholder="+ Add a subtask… ⏎"
-                            class="mt-2 w-full rounded-md border border-dashed border-line bg-transparent px-2.5 py-1.5 text-sm placeholder:text-fg-faint focus:border-accent focus:outline-none"
+                            placeholder="+ Add a subtask…"
+                            class="placeholder:text-fg-faint focus:border-accent mt-2 w-full rounded-md border border-dashed border-line bg-transparent px-2.5 py-1.5 text-sm focus:outline-none"
+                            onblur={addSubtask}
                             onkeydown={(e) => {
-                                if (e.key === 'Enter') addSubtask();
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    addSubtask();
+                                }
                             }}
                         />
                     </section>
 
                     <section class="border-t border-line-soft pt-4">
-                        <h3 class="ws-eyebrow mb-2 text-fg-muted">
+                        <h3 class="ws-eyebrow text-fg-muted mb-2">
                             Notes {#if preview && preview.notes.length > 0}({preview.notes.length}){/if}
                         </h3>
                         <div class="space-y-2">
                             {#each preview?.notes ?? [] as note (note.id)}
                                 <div class="group rounded-lg border border-line px-3 py-2">
-                                    <div class="flex items-center gap-2 font-mono text-[10px] text-fg-muted">
+                                    <div class="text-fg-muted flex items-center gap-2 font-mono text-[10px]">
                                         <span>{note.user?.name}</span>
                                         <span>· {note.type_label}</span>
                                         {#if note.happened_at}<span>· {formatDate(note.happened_at)}</span>{/if}
                                         <button
                                             type="button"
                                             aria-label="Delete note"
-                                            class="ml-auto text-fg-faint opacity-0 group-hover:opacity-100 hover:text-danger"
+                                            class="text-fg-faint ml-auto opacity-0 group-hover:opacity-100 hover:text-danger"
                                             onclick={() => deleteNote(note.id)}
                                         >
                                             ×
                                         </button>
                                     </div>
-                                    <p class="mt-1 text-sm whitespace-pre-wrap text-fg-muted">{note.body}</p>
+                                    <p class="text-fg-muted mt-1 text-sm whitespace-pre-wrap">{note.body}</p>
                                 </div>
                             {/each}
                         </div>
@@ -451,20 +536,17 @@
                                 bind:value={noteDraft}
                                 rows="2"
                                 placeholder="Add a note…"
-                                class="min-w-0 flex-1 rounded-md border border-line bg-surface px-2.5 py-1.5 text-sm"
+                                class="bg-surface min-w-0 flex-1 rounded-md border border-line px-2.5 py-1.5 text-sm"
                             ></textarea>
                             <div class="flex flex-col gap-1.5">
-                                <select
-                                    bind:value={noteType}
-                                    class="rounded-md border border-line bg-surface px-1.5 py-1 text-xs"
-                                >
+                                <select bind:value={noteType} class="bg-surface rounded-md border border-line px-1.5 py-1 text-xs">
                                     {#each NOTE_TYPES as t (t.value)}
                                         <option value={t.value}>{t.label}</option>
                                     {/each}
                                 </select>
                                 <button
                                     type="button"
-                                    class="rounded-md bg-accent px-2 py-1 text-xs font-semibold text-bg disabled:opacity-40"
+                                    class="bg-accent text-bg rounded-md px-2 py-1 text-xs font-semibold disabled:opacity-40"
                                     disabled={noteDraft.trim() === ''}
                                     onclick={addNote}
                                 >
@@ -478,7 +560,7 @@
                         <section class="border-t border-line-soft pt-4">
                             <a
                                 href={`/workspace/projects/${projectSlug}/tasks/${task.slug}`}
-                                class="ws-eyebrow flex items-center gap-1 text-fg-muted hover:text-accent"
+                                class="ws-eyebrow text-fg-muted hover:text-accent flex items-center gap-1"
                             >
                                 Comments ({preview.comments_count}) ↗
                             </a>
@@ -492,7 +574,7 @@
                             </h3>
                             <button
                                 type="button"
-                                class="font-mono text-[11px] text-fg-muted hover:text-accent"
+                                class="text-fg-muted hover:text-accent font-mono text-[11px]"
                                 onclick={() => (showContactForm = !showContactForm)}
                             >
                                 {showContactForm ? 'cancel' : '+ add'}
@@ -501,7 +583,7 @@
                         <div class="flex flex-wrap gap-1.5">
                             {#each preview?.contacts ?? [] as contact (contact.id)}
                                 <span
-                                    class="inline-flex items-center gap-1.5 rounded-full bg-surface-alt px-2.5 py-1 text-xs text-fg-muted"
+                                    class="bg-surface-alt text-fg-muted inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs"
                                     title={[contact.organization, contact.phone, contact.email].filter(Boolean).join(' · ')}
                                 >
                                     <span class="font-medium">{contact.name}</span>
@@ -515,35 +597,35 @@
                                     type="text"
                                     bind:value={contactDraft.name}
                                     placeholder="Name *"
-                                    class="col-span-2 rounded-md border border-line bg-surface px-2.5 py-1.5 text-sm"
+                                    class="bg-surface col-span-2 rounded-md border border-line px-2.5 py-1.5 text-sm"
                                 />
                                 <input
                                     type="text"
                                     bind:value={contactDraft.role}
                                     placeholder="Role"
-                                    class="rounded-md border border-line bg-surface px-2.5 py-1.5 text-sm"
+                                    class="bg-surface rounded-md border border-line px-2.5 py-1.5 text-sm"
                                 />
                                 <input
                                     type="text"
                                     bind:value={contactDraft.organization}
                                     placeholder="Organization"
-                                    class="rounded-md border border-line bg-surface px-2.5 py-1.5 text-sm"
+                                    class="bg-surface rounded-md border border-line px-2.5 py-1.5 text-sm"
                                 />
                                 <input
                                     type="text"
                                     bind:value={contactDraft.phone}
                                     placeholder="Phone"
-                                    class="rounded-md border border-line bg-surface px-2.5 py-1.5 text-sm"
+                                    class="bg-surface rounded-md border border-line px-2.5 py-1.5 text-sm"
                                 />
                                 <input
                                     type="email"
                                     bind:value={contactDraft.email}
                                     placeholder="Email"
-                                    class="rounded-md border border-line bg-surface px-2.5 py-1.5 text-sm"
+                                    class="bg-surface rounded-md border border-line px-2.5 py-1.5 text-sm"
                                 />
                                 <button
                                     type="button"
-                                    class="col-span-2 rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-bg disabled:opacity-40"
+                                    class="bg-accent text-bg col-span-2 rounded-md px-3 py-1.5 text-xs font-semibold disabled:opacity-40"
                                     disabled={contactDraft.name.trim() === ''}
                                     onclick={addContact}
                                 >
@@ -557,7 +639,7 @@
                         <button
                             type="button"
                             aria-expanded={showHistory}
-                            class="ws-eyebrow flex items-center gap-1 text-fg-muted hover:text-fg"
+                            class="ws-eyebrow text-fg-muted hover:text-fg flex items-center gap-1"
                             onclick={() => (showHistory = !showHistory)}
                         >
                             <span class={`transition-transform ${showHistory ? 'rotate-90' : ''}`}>▸</span>
@@ -566,15 +648,12 @@
                         {#if showHistory}
                             <ul class="mt-2 space-y-1.5">
                                 {#each preview?.activity ?? [] as entry (entry.id)}
-                                    <li class="flex items-baseline gap-2 text-xs text-fg-muted">
+                                    <li class="text-fg-muted flex items-baseline gap-2 text-xs">
                                         <span class="min-w-0 flex-1">
-                                            {#if entry.user}<span class="font-medium text-fg-muted">{entry.user.name}</span
-                                                >{/if}
+                                            {#if entry.user}<span class="text-fg-muted font-medium">{entry.user.name}</span>{/if}
                                             {entry.description}
                                         </span>
-                                        <span class="shrink-0 font-mono text-[10px] text-fg-faint"
-                                            >{formatDate(entry.created_at)}</span
-                                        >
+                                        <span class="text-fg-faint shrink-0 font-mono text-[10px]">{formatDate(entry.created_at)}</span>
                                     </li>
                                 {:else}
                                     <li class="text-xs text-fg-faint">No recorded activity.</li>

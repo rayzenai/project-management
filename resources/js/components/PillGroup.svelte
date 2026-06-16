@@ -1,7 +1,20 @@
 <script lang="ts">
-    type Option = { value: string; label: string; tone?: 'neutral' | 'amber' | 'orange' | 'red' };
+    type Tone = 'neutral' | 'amber' | 'orange' | 'red';
+    type Option = { value: string; label: string; tone?: Tone };
 
-    let { options, value = $bindable(''), size = 'md' }: { options: Option[]; value: string; size?: 'sm' | 'md' } = $props();
+    let {
+        options,
+        value = $bindable(''),
+        size = 'md',
+        dot = false,
+    }: { options: Option[]; value: string; size?: 'sm' | 'md'; dot?: boolean } = $props();
+
+    const dotClass: Record<Tone, string> = {
+        red: 'bg-red-500',
+        orange: 'bg-orange-500',
+        amber: 'bg-amber-400',
+        neutral: 'bg-neutral-400 dark:bg-neutral-500',
+    };
 
     function classFor(opt: Option, active: boolean): string {
         const base = size === 'sm' ? 'px-2 py-0.5 text-xs' : 'px-2.5 py-1 text-xs';
@@ -23,6 +36,10 @@
 
 <div class="inline-flex flex-wrap gap-1">
     {#each options as opt (opt.value)}
-        <button type="button" class={classFor(opt, value === opt.value)} onclick={() => (value = opt.value)}>{opt.label}</button>
+        <button type="button" class={classFor(opt, value === opt.value)} onclick={() => (value = opt.value)}>
+            {#if dot}<span
+                    class={`mr-1.5 inline-block h-2 w-2 rounded-full align-middle ring-1 ring-black/10 ring-inset dark:ring-white/15 ${dotClass[opt.tone ?? 'neutral']}`}
+                ></span>{/if}{opt.label}
+        </button>
     {/each}
 </div>

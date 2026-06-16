@@ -16,11 +16,11 @@
         onUpdated?: (priority: Priority) => void;
     } = $props();
 
-    const OPTIONS: { value: Priority; label: string; flag: string }[] = [
-        { value: 'urgent', label: 'Urgent', flag: 'text-red-600 dark:text-red-400' },
-        { value: 'high', label: 'High', flag: 'text-orange-500 dark:text-orange-400' },
-        { value: 'medium', label: 'Medium', flag: 'text-neutral-400 dark:text-neutral-500' },
-        { value: 'low', label: 'Low', flag: 'text-neutral-300 dark:text-neutral-600' },
+    const OPTIONS: { value: Priority; label: string; dot: string }[] = [
+        { value: 'urgent', label: 'Urgent', dot: 'bg-red-500' },
+        { value: 'high', label: 'High', dot: 'bg-orange-500' },
+        { value: 'medium', label: 'Medium', dot: 'bg-amber-400' },
+        { value: 'low', label: 'Low', dot: 'bg-neutral-400 dark:bg-neutral-500' },
     ];
 
     let open = $state(false);
@@ -66,7 +66,9 @@
     triggerClass={hidden ? 'opacity-0 transition group-hover:opacity-100' : ''}
 >
     {#snippet trigger()}
-        <span class={`text-sm leading-none ${meta.flag} ${failed ? 'rounded ring-2 ring-danger' : ''}`}>⚑</span>
+        <span
+            class={`inline-block h-2.5 w-2.5 rounded-full ring-1 ring-black/10 ring-inset dark:ring-white/15 ${meta.dot} ${failed ? 'ring-2 ring-danger' : ''}`}
+        ></span>
     {/snippet}
 
     {#each OPTIONS as option (option.value)}
@@ -75,10 +77,10 @@
             data-popover-item
             role="option"
             aria-selected={option.value === shown}
-            class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-fg-muted hover:bg-surface-alt"
+            class="text-fg-muted hover:bg-surface-alt flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm"
             onclick={() => setPriority(option.value)}
         >
-            <span class={option.flag}>⚑</span>
+            <span class={`inline-block h-2.5 w-2.5 rounded-full ring-1 ring-black/10 ring-inset dark:ring-white/15 ${option.dot}`}></span>
             <span class="flex-1">{option.label}</span>
             {#if option.value === shown}<span class="text-accent">✓</span>{/if}
         </button>

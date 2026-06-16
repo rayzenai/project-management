@@ -139,7 +139,10 @@
 
         if (e.key === 'q' || e.key === 'Q') {
             e.preventDefault();
-            quickAdd.open();
+            // On a project/task page, pre-select & lock that project so quick-add
+            // never asks which project you're already working in.
+            const proj = (page.props as Record<string, unknown>).project as { id?: number } | undefined;
+            quickAdd.open(typeof proj?.id === 'number' ? { projectId: proj.id, lockProject: true } : {});
             return;
         }
         if (e.key === '/') {
@@ -149,13 +152,13 @@
     }
 </script>
 
-<div class="ws-canvas flex min-h-screen bg-bg text-fg">
+<div class="ws-canvas bg-bg text-fg flex min-h-screen">
     {#if mobileOpen}
         <button type="button" aria-label="Close menu" class="fixed inset-0 z-30 bg-black/40 lg:hidden" onclick={() => (mobileOpen = false)}></button>
     {/if}
 
     <aside
-        class="fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col border-r border-line bg-surface px-4 py-6 transition-transform lg:static lg:translate-x-0"
+        class="bg-surface fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col border-r border-line px-4 py-6 transition-transform lg:static lg:translate-x-0"
         class:translate-x-0={mobileOpen}
     >
         <div class="mb-8 flex items-center justify-between">
@@ -165,7 +168,7 @@
             <button
                 type="button"
                 aria-label="Close sidebar"
-                class="rounded-md p-1 text-fg-muted hover:bg-surface-alt lg:hidden"
+                class="text-fg-muted hover:bg-surface-alt rounded-md p-1 lg:hidden"
                 onclick={() => (mobileOpen = false)}><X class="h-5 w-5" /></button
             >
         </div>
@@ -176,9 +179,7 @@
                 <a
                     href={item.href}
                     class={`flex items-center gap-3 rounded-lg border-l-2 px-3 py-2 font-mono text-[0.8rem] font-medium tracking-wide transition ${
-                        active
-                            ? 'border-accent bg-accent/10 text-accent'
-                            : 'border-transparent text-fg-muted hover:bg-surface-alt'
+                        active ? 'border-accent bg-accent/10 text-accent' : 'text-fg-muted hover:bg-surface-alt border-transparent'
                     }`}
                 >
                     <span class="w-5 text-center text-base">{item.icon}</span>
@@ -190,19 +191,17 @@
         <div class="mt-6 border-t border-line pt-4">
             {#if user}
                 <div class="flex items-center gap-3">
-                    <div
-                        class="flex h-9 w-9 items-center justify-center rounded-full bg-surface-alt text-sm font-semibold text-fg-muted"
-                    >
+                    <div class="bg-surface-alt text-fg-muted flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold">
                         {initials(user.name)}
                     </div>
                     <div class="min-w-0 flex-1">
                         <div class="truncate text-sm font-medium">{user.name}</div>
-                        <div class="truncate text-xs text-fg-muted">{user.email}</div>
+                        <div class="text-fg-muted truncate text-xs">{user.email}</div>
                     </div>
                     <button
                         type="button"
                         aria-label="Sign out"
-                        class="rounded-md p-1 text-fg-muted hover:bg-surface-alt hover:text-fg"
+                        class="text-fg-muted hover:bg-surface-alt hover:text-fg rounded-md p-1"
                         onclick={logout}
                         title="Sign out">↩</button
                     >
@@ -212,13 +211,11 @@
     </aside>
 
     <div class="flex min-w-0 flex-1 flex-col">
-        <header
-            class="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-line bg-surface/80 px-4 backdrop-blur-md lg:px-8"
-        >
+        <header class="bg-surface/80 sticky top-0 z-20 flex h-14 items-center justify-between border-b border-line px-4 backdrop-blur-md lg:px-8">
             <button
                 type="button"
                 aria-label="Open menu"
-                class="rounded-md p-2 text-fg-muted hover:bg-surface-alt lg:hidden"
+                class="text-fg-muted hover:bg-surface-alt rounded-md p-2 lg:hidden"
                 onclick={() => (mobileOpen = true)}><Menu class="h-5 w-5" /></button
             >
             <div class="flex-1"></div>
@@ -228,12 +225,12 @@
                     use:inertia
                     aria-label={`Notifications${unreadNotifications ? ` (${unreadNotifications} unread)` : ''}`}
                     title="Notifications"
-                    class="relative rounded-md p-2 text-fg-muted hover:bg-surface-alt"
+                    class="text-fg-muted hover:bg-surface-alt relative rounded-md p-2"
                 >
                     <Bell class="h-5 w-5" />
                     {#if unreadNotifications > 0}
                         <span
-                            class="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] leading-none font-semibold text-bg"
+                            class="bg-accent text-bg absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] leading-none font-semibold"
                             >{unreadNotifications > 99 ? '99+' : unreadNotifications}</span
                         >
                     {/if}
@@ -244,12 +241,12 @@
                     aria-label={`My notes${noteCount ? ` (${noteCount})` : ''}`}
                     aria-expanded={notesBoard.open}
                     title="My notes"
-                    class="relative rounded-md p-2 text-fg-muted hover:bg-surface-alt"
+                    class="text-fg-muted hover:bg-surface-alt relative rounded-md p-2"
                 >
                     <StickyNote class="h-5 w-5" />
                     {#if noteCount > 0}
                         <span
-                            class="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] leading-none font-semibold text-bg"
+                            class="bg-accent text-bg absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] leading-none font-semibold"
                             >{noteCount}</span
                         >
                     {/if}
@@ -259,7 +256,7 @@
                     onclick={() => (settingsOpen = true)}
                     aria-label="Appearance settings"
                     title="Appearance"
-                    class="rounded-md p-2 text-fg-muted hover:bg-surface-alt"
+                    class="text-fg-muted hover:bg-surface-alt rounded-md p-2"
                 >
                     <Settings class="h-5 w-5" />
                 </button>
@@ -281,13 +278,13 @@
     {#if settingsOpen && appearance}
         <div class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4 backdrop-blur-sm">
             <button type="button" aria-label="Close" class="fixed inset-0" onclick={() => (settingsOpen = false)}></button>
-            <div class="relative my-8 w-full max-w-2xl rounded-2xl border border-line bg-bg p-6 text-fg shadow-2xl">
+            <div class="bg-bg text-fg relative my-8 w-full max-w-2xl rounded-2xl border border-line p-6 shadow-2xl">
                 <div class="mb-6 flex items-center justify-between">
                     <h2 class="font-display text-xl font-bold tracking-tight">Appearance</h2>
                     <button
                         type="button"
                         aria-label="Close"
-                        class="rounded-md p-1 text-fg-muted hover:bg-surface-alt hover:text-fg"
+                        class="text-fg-muted hover:bg-surface-alt hover:text-fg rounded-md p-1"
                         onclick={() => (settingsOpen = false)}>✕</button
                     >
                 </div>
@@ -298,12 +295,12 @@
 
     <!-- First-run gate: full-screen blocking overlay until the user configures -->
     {#if showOnboarding && appearance}
-        <div class="fixed inset-0 z-50 overflow-y-auto bg-bg text-fg">
+        <div class="bg-bg text-fg fixed inset-0 z-50 overflow-y-auto">
             <div class="mx-auto w-full max-w-2xl px-4 py-12">
                 <div class="mb-8 text-center">
                     <div class="ws-eyebrow text-accent">Welcome</div>
                     <h1 class="font-display text-3xl font-bold tracking-tight">Make it yours</h1>
-                    <p class="mt-2 text-sm text-fg-muted">
+                    <p class="text-fg-muted mt-2 text-sm">
                         Choose a theme and fonts before you start. You can change these any time from the ⚙ menu.
                     </p>
                 </div>
@@ -312,7 +309,7 @@
                     <button
                         type="button"
                         onclick={skipOnboarding}
-                        class="text-sm text-fg-faint underline-offset-4 hover:text-fg-muted hover:underline"
+                        class="text-fg-faint hover:text-fg-muted text-sm underline-offset-4 hover:underline"
                     >
                         Skip — use defaults
                     </button>
