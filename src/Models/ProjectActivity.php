@@ -15,6 +15,8 @@ class ProjectActivity extends Model
 
     public const ACTION_DELETED = 'deleted';
 
+    public const ACTION_RESTORED = 'restored';
+
     public const ACTION_STATUS_CHANGED = 'status_changed';
 
     public const ACTION_PROGRESS_CHANGED = 'progress_changed';

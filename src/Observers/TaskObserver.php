@@ -43,6 +43,16 @@ class TaskObserver
         );
     }
 
+    public function restored(Task $item): void
+    {
+        ProjectActivityRecorder::record(
+            taskId: $item->id,
+            subject: $item,
+            action: ProjectActivity::ACTION_RESTORED,
+            description: 'Plan #'.$item->item_number.' — "'.ProjectActivityRecorder::truncate($item->title, 80).'" restored',
+        );
+    }
+
     public function updated(Task $item): void
     {
         $original = $item->getOriginal();

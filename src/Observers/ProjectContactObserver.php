@@ -40,4 +40,14 @@ class ProjectContactObserver
             description: 'Contact '.((string) $contact->name).' removed',
         );
     }
+
+    public function restored(ProjectContact $contact): void
+    {
+        ProjectActivityRecorder::record(
+            taskId: $contact->task_id,
+            subject: $contact,
+            action: ProjectActivity::ACTION_RESTORED,
+            description: 'Contact '.((string) $contact->name).' restored',
+        );
+    }
 }

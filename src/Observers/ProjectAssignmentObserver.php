@@ -79,4 +79,16 @@ class ProjectAssignmentObserver
             description: 'Assignment removed',
         );
     }
+
+    public function restored(ProjectAssignment $assignment): void
+    {
+        $name = $assignment->member?->name ?? 'member #'.$assignment->member_id;
+
+        ProjectActivityRecorder::record(
+            taskId: $assignment->task_id,
+            subject: $assignment,
+            action: ProjectActivity::ACTION_RESTORED,
+            description: 'Assignment to '.$name.' restored',
+        );
+    }
 }
