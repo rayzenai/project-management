@@ -23,6 +23,10 @@ use Symfony\Component\HttpFoundation\Response;
  * - `workspaceNotes` — the authenticated user's personal sticky notes
  *   (newest-updated first) so the top-bar notes icon, its count badge, and
  *   the slide-over drawer render instantly everywhere without a fetch.
+ * - `themeCatalogue` — the theme + font catalogue from `config/themes.php`, so
+ *   the appearance onboarding/settings render their cards without fetching the
+ *   Sanctum-protected `GET /api/v1/themes` endpoint (which 401s in the session
+ *   context the web UI runs in).
  */
 class ShareWorkspaceData
 {
@@ -85,6 +89,11 @@ class ShareWorkspaceData
                 'configured' => $request->user()?->preferences()->exists() ?? false,
             ];
         });
+
+        Inertia::share('themeCatalogue', fn (): array => [
+            'themes' => (array) config('themes.themes'),
+            'fontAllowList' => (array) config('themes.font_allow_list'),
+        ]);
 
         Inertia::share('unreadNotifications', fn (): int => $request->user()?->unreadNotifications()->count() ?? 0);
 

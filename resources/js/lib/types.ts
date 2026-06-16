@@ -1,3 +1,5 @@
+import type { FontAllowList, ThemeTokens } from './appearance';
+
 export type Id = number;
 
 export interface User {
@@ -233,6 +235,12 @@ export interface AuthUser extends User {
     role?: string;
 }
 
+/** The theme + font catalogue shared from `config/themes.php` (web only). */
+export interface ThemeCatalogue {
+    themes: Record<string, { label: string; mode: 'light' | 'dark' | null; tokens?: ThemeTokens }>;
+    fontAllowList: FontAllowList;
+}
+
 export interface SharedProps {
     auth: { user: AuthUser | null };
     flash?: Flash;
@@ -243,5 +251,6 @@ export interface SharedProps {
     isSuperAdmin?: boolean;
     ledTeamIds?: Id[];
     unreadNotifications?: number;
+    themeCatalogue?: ThemeCatalogue;
     [key: string]: unknown;
 }

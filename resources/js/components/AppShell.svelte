@@ -7,7 +7,7 @@
     import { quickAdd } from '../lib/quickAdd.svelte';
     import { toast } from '../lib/toast.svelte';
     import type { SharedProps } from '../lib/types';
-    import type { AppearanceProps } from '../lib/appearance';
+    import { themesToList, type AppearanceProps } from '../lib/appearance';
     import AppearanceConfig from './AppearanceConfig.svelte';
     import CommandPalette from './CommandPalette.svelte';
     import QuickAddOverlay from './QuickAddOverlay.svelte';
@@ -24,6 +24,13 @@
     const noteCount = $derived(shared.workspaceNotes?.length ?? 0);
     const unreadNotifications = $derived(shared.unreadNotifications ?? 0);
     const appearance = $derived((shared.appearance ?? null) as AppearanceProps | null);
+
+    // Theme catalogue shared from `config/themes.php` (web only). Feeding it as a
+    // prop lets AppearanceConfig skip the Sanctum-protected `GET /api/v1/themes`
+    // fetch, which 401s in the session context the web UI runs in.
+    const catalogue = $derived(shared.themeCatalogue ?? null);
+    const catalogueThemes = $derived(catalogue ? themesToList(catalogue.themes) : undefined);
+    const catalogueFonts = $derived(catalogue?.fontAllowList);
 
     let mobileOpen = $state(false);
     let lastFlash = $state<string | null>(null);
@@ -284,7 +291,7 @@
                         onclick={() => (settingsOpen = false)}>✕</button
                     >
                 </div>
-                <AppearanceConfig {appearance} onsaved={() => (settingsOpen = false)} />
+                <AppearanceConfig {appearance} themes={catalogueThemes} fontAllowList={catalogueFonts} onsaved={() => (settingsOpen = false)} />
             </div>
         </div>
     {/if}
@@ -300,7 +307,7 @@
                         Choose a theme and fonts before you start. You can change these any time from the ⚙ menu.
                     </p>
                 </div>
-                <AppearanceConfig {appearance} onsaved={() => (onboardingDismissed = true)} />
+                <AppearanceConfig {appearance} themes={catalogueThemes} fontAllowList={catalogueFonts} onsaved={() => (onboardingDismissed = true)} />
                 <div class="mt-6 text-center">
                     <button
                         type="button"
