@@ -103,4 +103,22 @@ return [
 
     'trash_ttl_days' => (int) env('PM_TRASH_TTL_DAYS', 30),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Deadline reminders
+    |--------------------------------------------------------------------------
+    |
+    | Drives the daily reminder command. `reminder_lead_days` lists how many
+    | days before a deadline to send a heads-up (an array so multiple lead
+    | times are possible). `overdue_repeat_days` re-notifies overdue tasks
+    | every N days. `run_at` is the scheduled time of the daily run.
+    |
+    */
+
+    'reminders' => [
+        'reminder_lead_days' => [2],
+        'overdue_repeat_days' => 3,
+        'run_at' => env('PM_REMINDERS_RUN_AT', '08:00'),
+    ],
+
 ];
