@@ -5,13 +5,14 @@ namespace RayzenAI\ProjectManagement\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use RayzenAI\ProjectManagement\Database\Factories\TeamFactory;
 
 class Team extends Model
 {
     /** @use HasFactory<TeamFactory> */
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'teams';
 
