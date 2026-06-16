@@ -60,6 +60,7 @@
                 team={context.team}
                 {currentMemberId}
                 defaultProjectId={quickAdd.projectId}
+                lockProject={quickAdd.lockProject}
                 prefill={quickAdd.prefill}
                 variant="overlay"
                 onSuccess={() => quickAdd.close()}

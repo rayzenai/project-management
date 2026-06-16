@@ -1,14 +1,24 @@
 <script lang="ts">
     import { page, router } from '@inertiajs/svelte';
+    import { StickyNote } from '@lucide/svelte';
     import { formatDate } from '../lib/format';
-    import { NOTE_COLORS as COLORS, paperClass, swatchClass, tilt } from '../lib/noteColors';
+    import { NOTE_COLORS as COLORS, noteTypeColor, paperClass, swatchClass, tilt } from '../lib/noteColors';
     import { notesBoard } from '../lib/notesBoard.svelte';
-    import type { SharedProps, WorkspaceNote, WorkspaceNoteColor } from '../lib/types';
+    import type { Note, SharedProps, WorkspaceNote, WorkspaceNoteColor } from '../lib/types';
 
     let { open = false, onClose }: { open?: boolean; onClose: () => void } = $props();
 
     const shared = $derived((page.props ?? {}) as unknown as SharedProps);
     const notes = $derived(shared.workspaceNotes ?? []);
+    // Read-only task-anchored notes — shown alongside the draggable stickies so
+    // the board surfaces every note the user authored, not just sticky notes.
+    const taskNotes = $derived(shared.taskNotes ?? []);
+
+    function taskNoteHref(note: Note): string | null {
+        const task = note.task;
+        if (!task?.project?.slug || !task.slug) return null;
+        return `/workspace/projects/${task.project.slug}/tasks/${task.slug}?tab=notes`;
+    }
 
     // Local position overrides during/after a drag (id -> {x, y}).
     let pos = $state<Record<number, { x: number; y: number }>>({});
@@ -149,10 +159,10 @@
     function onWindowKey(event: KeyboardEvent) {
         if (event.key !== 'Escape' || !open) return;
         event.preventDefault();
+        // Compose is a modal sub-state, so ESC backs out of it first. Otherwise
+        // ESC closes the board in a single press (no collapse-then-close).
         if (composing) {
             composing = false;
-        } else if (expandedId !== null) {
-            collapse();
         } else {
             onClose();
         }
@@ -178,18 +188,12 @@
 
 {#if open}
     <div class="fixed inset-0 z-50 bg-black/30 backdrop-blur-[2px] select-none">
-        <!-- click empty board to close -->
+        <!-- Clicking the dimmed backdrop (outside any note) closes in one click. -->
         <button
             type="button"
             aria-label="Close notes board"
             class="absolute inset-0 h-full w-full cursor-default"
-            onclick={() => {
-                if (expandedId !== null) {
-                    collapse();
-                } else {
-                    onClose();
-                }
-            }}
+            onclick={onClose}
         ></button>
 
         <!-- toolbar -->
@@ -197,9 +201,10 @@
             <div
                 class="pointer-events-auto flex items-center gap-2 rounded-full bg-surface/90 px-4 py-1.5 text-sm font-semibold shadow-sm ring-1 ring-line"
             >
-                <span>🗒 My notes</span>
+                <StickyNote class="h-4 w-4" />
+                <span>My notes</span>
                 <span class="rounded-full bg-surface-alt px-2 py-0.5 text-xs font-medium text-fg-muted"
-                    >{notes.length}</span
+                    >{notes.length + taskNotes.length}</span
                 >
             </div>
             <div class="pointer-events-auto flex items-center gap-2">
@@ -218,7 +223,7 @@
             </div>
         </div>
 
-        {#if notes.length === 0 && !composing}
+        {#if notes.length === 0 && taskNotes.length === 0 && !composing}
             <div class="pointer-events-none absolute inset-0 flex items-center justify-center">
                 <p class="rounded-xl bg-surface/80 px-4 py-2 text-sm text-fg-muted shadow-sm">
                     No notes yet — tap “+ New note” to pin one.
@@ -335,6 +340,42 @@
                 </div>
             </div>
         {/each}
+
+        <!-- Task-anchored notes: read-only, non-draggable linked cards. Mutating
+             these would touch project_notes, so they are display-only here and
+             deep-link to the task's Notes tab. -->
+        {#if taskNotes.length > 0}
+            <div class="pointer-events-none absolute inset-x-0 bottom-0 z-30 px-4 pb-4">
+                <div class="pointer-events-auto mx-auto max-w-5xl rounded-xl bg-surface/85 p-3 shadow-lg ring-1 ring-line backdrop-blur-sm">
+                    <div class="mb-2 flex items-center gap-2 px-0.5 text-xs font-semibold text-fg-muted">
+                        <span>Task notes</span>
+                        <span class="rounded-full bg-surface-alt px-1.5 py-0.5 text-[10px] font-medium">{taskNotes.length}</span>
+                    </div>
+                    <div class="flex gap-2.5 overflow-x-auto pb-1">
+                        {#each taskNotes as note (`t-${note.id}`)}
+                            {@const href = taskNoteHref(note)}
+                            <svelte:element
+                                this={href ? 'a' : 'div'}
+                                {href}
+                                title={note.body}
+                                style:transform={`rotate(${tilt(note.id)}deg)`}
+                                class={`flex h-24 w-40 shrink-0 flex-col overflow-hidden rounded-md border p-2 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${paperClass[noteTypeColor(note.type)]}`}
+                            >
+                                <span class="mb-0.5 line-clamp-1 text-[9px] font-bold tracking-wider text-neutral-700/80 uppercase dark:text-neutral-200/80">
+                                    {note.type_label}
+                                </span>
+                                <span class="line-clamp-3 flex-1 text-[11px] leading-snug text-neutral-800 dark:text-neutral-100">{note.body}</span>
+                                {#if note.task}
+                                    <span class="mt-0.5 line-clamp-1 text-[10px] font-medium text-neutral-700/70 dark:text-neutral-200/70">
+                                        on: {note.task.short_title || note.task.title}
+                                    </span>
+                                {/if}
+                            </svelte:element>
+                        {/each}
+                    </div>
+                </div>
+            </div>
+        {/if}
 
         <!-- compose -->
         {#if composing}

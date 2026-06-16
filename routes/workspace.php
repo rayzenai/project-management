@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\AssignmentController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\ContactController;
@@ -112,4 +114,12 @@ Route::middleware([...config('project-management.middleware', ['web', 'auth']), 
         Route::get('/100-point-tracker', PlanTrackerController::class)->name('plan-tracker');
 
         Route::patch('/preferences', [PreferenceController::class, 'update'])->name('preferences.update');
+
+        Route::post('/logout', function (Request $request) {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect('/');
+        })->name('logout');
     });

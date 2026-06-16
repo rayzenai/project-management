@@ -6,9 +6,11 @@ use App\Services\ResolveThemeTokens;
 use Closure;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use RayzenAI\ProjectManagement\Http\Resources\NoteResource;
 use RayzenAI\ProjectManagement\Http\Resources\WorkspaceNoteResource;
 use RayzenAI\ProjectManagement\Models\Member;
 use RayzenAI\ProjectManagement\Models\Project;
+use RayzenAI\ProjectManagement\Models\ProjectNote;
 use RayzenAI\ProjectManagement\Models\WorkspaceNote;
 use RayzenAI\ProjectManagement\Support\WorkspaceAccess;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,6 +25,11 @@ use Symfony\Component\HttpFoundation\Response;
  * - `workspaceNotes` — the authenticated user's personal sticky notes
  *   (newest-updated first) so the top-bar notes icon, its count badge, and
  *   the slide-over drawer render instantly everywhere without a fetch.
+ * - `taskNotes` — the authenticated user's recent task-anchored notes
+ *   (`project_notes`), with task + project context for deep-linking. These are
+ *   read-only in the notes panel/board (kept separate from the editable,
+ *   draggable `workspaceNotes` stickies) so every note the user authored is
+ *   visible in one place.
  * - `themeCatalogue` — the theme + font catalogue from `config/themes.php`, so
  *   the appearance onboarding/settings render their cards without fetching the
  *   Sanctum-protected `GET /api/v1/themes` endpoint (which 401s in the session
@@ -71,6 +78,22 @@ class ShareWorkspaceData
                 WorkspaceNote::query()
                     ->where('user_id', $user->id)
                     ->orderByDesc('updated_at')
+                    ->get()
+            )->resolve();
+        });
+
+        Inertia::share('taskNotes', function () use ($request): array {
+            $user = $request->user();
+            if (! $user) {
+                return [];
+            }
+
+            return NoteResource::collection(
+                ProjectNote::query()
+                    ->where('user_id', $user->id)
+                    ->with(['user', 'task.project'])
+                    ->latest()
+                    ->limit(50)
                     ->get()
             )->resolve();
         });

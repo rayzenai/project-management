@@ -6,6 +6,7 @@
 let isOpen = $state(false);
 let prefill = $state('');
 let projectId = $state<number | null>(null);
+let lockProject = $state(false);
 
 export const quickAdd = {
     get isOpen(): boolean {
@@ -17,14 +18,19 @@ export const quickAdd = {
     get projectId(): number | null {
         return projectId;
     },
-    open(options: { prefill?: string; projectId?: number } = {}): void {
+    get lockProject(): boolean {
+        return lockProject;
+    },
+    open(options: { prefill?: string; projectId?: number; lockProject?: boolean } = {}): void {
         prefill = options.prefill ?? '';
         projectId = options.projectId ?? null;
+        lockProject = options.lockProject ?? false;
         isOpen = true;
     },
     close(): void {
         isOpen = false;
         prefill = '';
         projectId = null;
+        lockProject = false;
     },
 };

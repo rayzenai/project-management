@@ -1,15 +1,27 @@
 <script lang="ts">
+    import { page } from '@inertiajs/svelte';
     import { notesBoard } from '../lib/notesBoard.svelte';
     import NoteSticky from './NoteSticky.svelte';
-    import type { Note, WorkspaceNote } from '../lib/types';
+    import type { Note, SharedProps, WorkspaceNote } from '../lib/types';
 
-    let { stickyNotes, taskNotes }: { stickyNotes: WorkspaceNote[]; taskNotes: Note[] } = $props();
+    let {
+        stickyNotes,
+        taskNotes,
+    }: {
+        stickyNotes: WorkspaceNote[];
+        // Optional: falls back to the globally shared `taskNotes` prop when the
+        // parent doesn't pass an explicit (page-scoped) list.
+        taskNotes?: Note[];
+    } = $props();
+
+    const shared = $derived((page.props ?? {}) as unknown as SharedProps);
+    const resolvedTaskNotes = $derived(taskNotes ?? shared.taskNotes ?? []);
 
     const FREEFORM_PREVIEW = 6;
     const TASK_PREVIEW = 8;
 
     const freeformPreview = $derived(stickyNotes.slice(0, FREEFORM_PREVIEW));
-    const taskPreview = $derived(taskNotes.slice(0, TASK_PREVIEW));
+    const taskPreview = $derived(resolvedTaskNotes.slice(0, TASK_PREVIEW));
     const freeformOverflow = $derived(stickyNotes.length - freeformPreview.length);
 </script>
 

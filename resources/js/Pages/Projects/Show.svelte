@@ -112,17 +112,16 @@
     {/if}
 
     <header class="mb-6">
-        <nav class="mb-2 text-xs text-fg-muted">
-            <a href="/workspace/projects" class="hover:underline">Projects</a> /
-            <span>{project.title}</span>
+        <nav class="mb-2 flex items-center gap-2 text-xs text-fg-muted">
+            <span>
+                <a href="/workspace/projects" class="hover:underline">Projects</a> /
+                <span>{project.title}</span>
+            </span>
+            {#if project.can_archive && !project.is_archived}
+                <button type="button" class="text-xs text-fg-faint underline-offset-2 hover:text-fg-muted hover:underline" onclick={archiveProject}>Archive</button>
+            {/if}
         </nav>
         <div>
-            <div class="flex items-center gap-3">
-                <h1 class="text-2xl font-bold tracking-tight">{project.title}</h1>
-                {#if project.can_archive && !project.is_archived}
-                    <button type="button" class="rounded-md border border-line px-3 py-1.5 text-sm font-medium text-fg-muted hover:bg-surface-alt" onclick={archiveProject}>Archive project</button>
-                {/if}
-            </div>
             {#if project.title_np}
                 <div class="mt-1 text-base text-fg-muted">{project.title_np}</div>
             {/if}
@@ -163,7 +162,7 @@
             <button
                 type="button"
                 class="mt-3 rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-bg hover:bg-accent-dim"
-                onclick={() => quickAdd.open({ projectId: project.id })}
+                onclick={() => quickAdd.open({ projectId: project.id, lockProject: true })}
             >
                 + Add task
             </button>
@@ -189,7 +188,7 @@
             <button
                 type="button"
                 class="rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-bg hover:bg-accent-dim"
-                onclick={() => quickAdd.open({ projectId: project.id })}
+                onclick={() => quickAdd.open({ projectId: project.id, lockProject: true })}
             >
                 + Add task
             </button>

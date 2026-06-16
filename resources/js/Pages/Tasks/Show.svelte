@@ -1,9 +1,10 @@
 <script lang="ts">
-    import { router, useForm } from '@inertiajs/svelte';
+    import { page, router, useForm } from '@inertiajs/svelte';
     import AppShell from '../../components/AppShell.svelte';
     import AssigneePicker from '../../components/AssigneePicker.svelte';
     import CommentThread from '../../components/CommentThread.svelte';
     import PillGroup from '../../components/PillGroup.svelte';
+    import Spinner from '../../components/Spinner.svelte';
     import StatusBadge from '../../components/StatusBadge.svelte';
     import { initials, formatDate } from '../../lib/format';
     import type { Assignment, Comment, Contact, Member, Note, Project, Subtask, Task } from '../../lib/types';
@@ -28,7 +29,15 @@
         statuses: { value: string; label: string }[];
     } = $props();
 
-    let activeTab: 'overview' | 'todos' | 'notes' | 'comments' | 'contacts' = $state('overview');
+    type TabId = 'overview' | 'todos' | 'notes' | 'comments' | 'contacts';
+    const tabIds: TabId[] = ['overview', 'todos', 'notes', 'comments', 'contacts'];
+
+    function tabFromUrl(url: string): TabId {
+        const requested = new URL(url, 'http://localhost').searchParams.get('tab');
+        return tabIds.includes(requested as TabId) ? (requested as TabId) : 'overview';
+    }
+
+    let activeTab: TabId = $state(tabFromUrl(page.url));
 
     const todoForm = useForm({ body: '', due_at: '' });
 
@@ -176,6 +185,17 @@
 <svelte:head><title>{task.title} · Workspace</title></svelte:head>
 
 <AppShell>
+    {#if todoForm.processing || noteForm.processing}
+        <div
+            class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center"
+            aria-hidden="true"
+        >
+            <div class="rounded-full border border-line bg-surface/90 p-3 shadow-lg backdrop-blur-sm">
+                <Spinner size={28} />
+            </div>
+        </div>
+    {/if}
+
     <nav class="mb-3 text-xs text-fg-muted">
         <a href="/workspace/projects" class="hover:underline">Projects</a> /
         <a href={`/workspace/projects/${project.slug}`} class="hover:underline">{project.title}</a> /
@@ -374,9 +394,14 @@
                         <button
                             type="submit"
                             disabled={todoForm.processing || !todoForm.body.trim()}
-                            class="rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-bg hover:bg-accent-dim disabled:opacity-50"
-                            >Add</button
+                            class="inline-flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-bg hover:bg-accent-dim disabled:opacity-50"
                         >
+                            {#if todoForm.processing}
+                                <Spinner size={14} class="text-bg" />Adding…
+                            {:else}
+                                Add
+                            {/if}
+                        </button>
                     </div>
                     <p class="mt-1.5 text-xs text-fg-muted">Todos are private to you. They show up in My Workspace too.</p>
                 </form>
@@ -441,9 +466,14 @@
                         <button
                             type="submit"
                             disabled={noteForm.processing || !noteForm.body.trim()}
-                            class="rounded-md bg-accent px-3 py-1 text-xs font-semibold text-bg hover:bg-accent-dim disabled:opacity-50"
-                            >Add note</button
+                            class="inline-flex items-center gap-1.5 rounded-md bg-accent px-3 py-1 text-xs font-semibold text-bg hover:bg-accent-dim disabled:opacity-50"
                         >
+                            {#if noteForm.processing}
+                                <Spinner size={12} class="text-bg" />Adding…
+                            {:else}
+                                Add note
+                            {/if}
+                        </button>
                     </div>
                 </form>
 

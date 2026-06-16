@@ -14,7 +14,7 @@
         if (props.kind !== 'task') return null;
         const task = props.note.task;
         if (!task?.project?.slug || !task.slug) return null;
-        return `/workspace/projects/${task.project.slug}/tasks/${task.slug}`;
+        return `/workspace/projects/${task.project.slug}/tasks/${task.slug}?tab=notes`;
     });
 </script>
 

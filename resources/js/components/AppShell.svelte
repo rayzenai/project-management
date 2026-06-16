@@ -1,5 +1,6 @@
 <script lang="ts">
     import { inertia, page, router } from '@inertiajs/svelte';
+    import { Bell, Menu, Settings, StickyNote, X } from '@lucide/svelte';
     import { initials } from '../lib/format';
     import { notesBoard } from '../lib/notesBoard.svelte';
     import { palette } from '../lib/palette.svelte';
@@ -79,7 +80,7 @@
     }
 
     function logout() {
-        router.post('/logout');
+        router.post('/workspace/logout');
     }
 
     function skipOnboarding() {
@@ -159,14 +160,13 @@
     >
         <div class="mb-8 flex items-center justify-between">
             <div>
-                <div class="ws-eyebrow text-accent">Kiran Timsina</div>
                 <div class="font-display text-lg font-bold tracking-tight">Workspace</div>
             </div>
             <button
                 type="button"
                 aria-label="Close sidebar"
                 class="rounded-md p-1 text-fg-muted hover:bg-surface-alt lg:hidden"
-                onclick={() => (mobileOpen = false)}>✕</button
+                onclick={() => (mobileOpen = false)}><X class="h-5 w-5" /></button
             >
         </div>
 
@@ -219,7 +219,7 @@
                 type="button"
                 aria-label="Open menu"
                 class="rounded-md p-2 text-fg-muted hover:bg-surface-alt lg:hidden"
-                onclick={() => (mobileOpen = true)}>☰</button
+                onclick={() => (mobileOpen = true)}><Menu class="h-5 w-5" /></button
             >
             <div class="flex-1"></div>
             <div class="flex items-center gap-2">
@@ -230,7 +230,7 @@
                     title="Notifications"
                     class="relative rounded-md p-2 text-fg-muted hover:bg-surface-alt"
                 >
-                    <span class="text-base">🔔</span>
+                    <Bell class="h-5 w-5" />
                     {#if unreadNotifications > 0}
                         <span
                             class="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] leading-none font-semibold text-bg"
@@ -246,7 +246,7 @@
                     title="My notes"
                     class="relative rounded-md p-2 text-fg-muted hover:bg-surface-alt"
                 >
-                    <span class="text-base">🗒</span>
+                    <StickyNote class="h-5 w-5" />
                     {#if noteCount > 0}
                         <span
                             class="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] leading-none font-semibold text-bg"
@@ -261,7 +261,7 @@
                     title="Appearance"
                     class="rounded-md p-2 text-fg-muted hover:bg-surface-alt"
                 >
-                    <span class="text-base">⚙</span>
+                    <Settings class="h-5 w-5" />
                 </button>
             </div>
         </header>

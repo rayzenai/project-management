@@ -10,6 +10,7 @@
         team,
         currentMemberId,
         defaultProjectId = null,
+        lockProject = false,
         prefill = '',
         variant = 'inline',
         onSuccess,
@@ -19,6 +20,7 @@
         team: Member[];
         currentMemberId: number | null;
         defaultProjectId?: number | null;
+        lockProject?: boolean;
         prefill?: string;
         variant?: 'inline' | 'overlay';
         onSuccess?: () => void;
@@ -26,6 +28,12 @@
     } = $props();
 
     const initialProject = defaultProjectId ?? projects[0]?.id ?? null;
+
+    // When launched from inside a project, the project is fixed — we hide the
+    // selector and show its name as static text instead.
+    const lockedProjectName = $derived(
+        lockProject ? (projects.find((p) => p.id === defaultProjectId)?.title ?? null) : null,
+    );
 
     // Empty picker values are stripped before POSTing so parsed title tokens
     // (#project @assignee !priority dates) can fill the gaps server-side;
@@ -124,14 +132,20 @@
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                <select
-                    bind:value={form.project_id}
-                    class="rounded-md border border-line bg-surface px-2 py-1 text-sm"
-                >
-                    {#each projects as project (project.id)}
-                        <option value={project.id}>{project.title}</option>
-                    {/each}
-                </select>
+                {#if lockProject}
+                    {#if lockedProjectName}
+                        <span class="text-sm text-fg-muted">Project: <span class="text-fg">{lockedProjectName}</span></span>
+                    {/if}
+                {:else}
+                    <select
+                        bind:value={form.project_id}
+                        class="rounded-md border border-line bg-surface px-2 py-1 text-sm"
+                    >
+                        {#each projects as project (project.id)}
+                            <option value={project.id}>{project.title}</option>
+                        {/each}
+                    </select>
+                {/if}
                 <button
                     type="button"
                     class="text-xs text-fg-muted hover:text-fg"
@@ -172,17 +186,24 @@
         </div>
 
         <div class="flex items-center justify-between gap-2 px-3 py-3">
-            <label class="flex items-center gap-2 text-sm text-fg-muted">
-                Project:
-                <select
-                    bind:value={form.project_id}
-                    class="rounded-md border border-line bg-surface px-2 py-1 text-sm text-fg"
-                >
-                    {#each projects as project (project.id)}
-                        <option value={project.id}>{project.title}</option>
-                    {/each}
-                </select>
-            </label>
+            {#if lockProject}
+                <span class="text-sm text-fg-muted">
+                    Project:
+                    {#if lockedProjectName}<span class="text-fg">{lockedProjectName}</span>{/if}
+                </span>
+            {:else}
+                <label class="flex items-center gap-2 text-sm text-fg-muted">
+                    Project:
+                    <select
+                        bind:value={form.project_id}
+                        class="rounded-md border border-line bg-surface px-2 py-1 text-sm text-fg"
+                    >
+                        {#each projects as project (project.id)}
+                            <option value={project.id}>{project.title}</option>
+                        {/each}
+                    </select>
+                </label>
+            {/if}
             <button
                 type="button"
                 class="text-xs text-fg-muted hover:text-fg"

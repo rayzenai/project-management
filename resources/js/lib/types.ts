@@ -168,6 +168,13 @@ export interface Note {
     task?: NoteTaskRef | null;
 }
 
+/**
+ * A task-anchored note (`project_notes`) surfaced read-only in the workspace
+ * notes panel / sticky board, with task + project context for deep-linking.
+ * Same serialized shape as {@link Note} (from `NoteResource`).
+ */
+export type TaskNote = Note;
+
 export interface Contact {
     id: Id;
     task_id: Id;
@@ -245,6 +252,8 @@ export interface SharedProps {
     auth: { user: AuthUser | null };
     flash?: Flash;
     workspaceNotes?: WorkspaceNote[];
+    /** Read-only task-anchored notes (`project_notes`) the user authored, for the notes panel/board. */
+    taskNotes?: Note[];
     statuses?: Status[];
     completeStatus?: string;
     quickAddContext?: QuickAddContext | null;
