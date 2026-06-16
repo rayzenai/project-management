@@ -29,7 +29,8 @@ package-specific layer, not a replacement.
   `subtask`, `project-assignment`, `team`, `member` (merges with the host's map).
 - Registers 5 observers: `Task`, `ProjectNote`, `ProjectContact`, `Subtask`,
   `ProjectAssignment` (these write the `ProjectActivity` audit log).
-- Registers the `digest:send-weekly` console command (`SendProjectWeeklyDigest`).
+- Registers the `digest:send-weekly` console command (`SendProjectWeeklyDigest`) and
+  the `workspace:prune-trashed` command (`PruneTrashedWorkspaceModels`, scheduled daily).
 - Publishes the config under tag `project-management-config`.
 
 ## Commands
@@ -46,6 +47,7 @@ php artisan test --compact tests/Feature/Workspace
 php artisan test --compact --filter=TeamPermissions
 php artisan migrate                         # package migrations load automatically
 php artisan digest:send-weekly --pretend    # dry-run the weekly digest
+php artisan workspace:prune-trashed --pretend  # dry-run the soft-delete prune (force-deletes rows past trash_ttl_days)
 ```
 
 ## Configuration (`config/project-management.php`)
