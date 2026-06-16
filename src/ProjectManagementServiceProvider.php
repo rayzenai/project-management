@@ -89,6 +89,10 @@ class ProjectManagementServiceProvider extends ServiceProvider
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             $schedule->command('workspace:prune-trashed')->daily()->withoutOverlapping();
+
+            $schedule->command('workspace:send-deadline-reminders')
+                ->dailyAt((string) config('project-management.reminders.run_at', '08:00'))
+                ->withoutOverlapping();
         });
     }
 }
