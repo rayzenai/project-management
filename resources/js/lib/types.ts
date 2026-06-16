@@ -103,6 +103,7 @@ export interface Task {
     assignments_count?: number;
     notes_count?: number;
     contacts_count?: number;
+    comments_count?: number;
     created_at?: string;
     updated_at?: string;
 }
@@ -124,6 +125,26 @@ export interface Subtask {
         project?: { slug: string; title: string } | null;
     };
     created_at?: string;
+}
+
+export interface CommentMention {
+    member_id: Id;
+    name: string;
+}
+
+export interface CommentAuthor {
+    member_id: Id | null;
+    name: string | null;
+}
+
+export interface Comment {
+    id: Id;
+    body: string;
+    mentions: CommentMention[];
+    author: CommentAuthor;
+    can_edit: boolean;
+    created_at?: string | null;
+    updated_at?: string | null;
 }
 
 export interface NoteTaskRef {
@@ -193,6 +214,7 @@ export interface TaskPreview {
     contacts: Contact[];
     activity: ActivityEntry[];
     team: Member[];
+    comments_count: number;
 }
 
 export interface QuickAddContext {

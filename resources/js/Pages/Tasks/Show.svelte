@@ -2,10 +2,11 @@
     import { router, useForm } from '@inertiajs/svelte';
     import AppShell from '../../components/AppShell.svelte';
     import AssigneePicker from '../../components/AssigneePicker.svelte';
+    import CommentThread from '../../components/CommentThread.svelte';
     import PillGroup from '../../components/PillGroup.svelte';
     import StatusBadge from '../../components/StatusBadge.svelte';
     import { initials, formatDate } from '../../lib/format';
-    import type { Assignment, Contact, Member, Note, Project, Subtask, Task } from '../../lib/types';
+    import type { Assignment, Comment, Contact, Member, Note, Project, Subtask, Task } from '../../lib/types';
 
     let {
         project,
@@ -13,6 +14,7 @@
         notes,
         contacts,
         subtasks,
+        comments,
         team,
         statuses,
     }: {
@@ -21,11 +23,12 @@
         notes: Note[];
         contacts: Contact[];
         subtasks: Subtask[];
+        comments: Comment[];
         team: Member[];
         statuses: { value: string; label: string }[];
     } = $props();
 
-    let activeTab: 'overview' | 'todos' | 'notes' | 'contacts' = $state('overview');
+    let activeTab: 'overview' | 'todos' | 'notes' | 'comments' | 'contacts' = $state('overview');
 
     const todoForm = useForm({ body: '', due_at: '' });
 
@@ -222,7 +225,7 @@
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div class="lg:col-span-2">
             <div class="mb-4 flex gap-1 border-b border-neutral-200 dark:border-neutral-800">
-                {#each [['overview', 'Overview'], ['todos', `My todos (${subtasks.filter((s) => !s.is_done).length})`], ['notes', `Notes (${notes.length})`], ['contacts', `Contacts (${contacts.length})`]] as [key, label] (key)}
+                {#each [['overview', 'Overview'], ['todos', `My todos (${subtasks.filter((s) => !s.is_done).length})`], ['notes', `Notes (${notes.length})`], ['comments', `Comments (${comments.length})`], ['contacts', `Contacts (${contacts.length})`]] as [key, label] (key)}
                     <button
                         type="button"
                         class="border-b-2 px-3 py-2 text-sm font-medium transition"
@@ -464,6 +467,10 @@
                         <p class="text-sm text-neutral-500 dark:text-neutral-400">No notes yet.</p>
                     {/each}
                 </div>
+            {/if}
+
+            {#if activeTab === 'comments'}
+                <CommentThread {comments} {task} members={team} />
             {/if}
 
             {#if activeTab === 'contacts'}

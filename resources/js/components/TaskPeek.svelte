@@ -474,6 +474,17 @@
                         </div>
                     </section>
 
+                    {#if preview}
+                        <section class="border-t border-neutral-100 pt-4 dark:border-neutral-800">
+                            <a
+                                href={`/workspace/projects/${projectSlug}/tasks/${task.slug}`}
+                                class="ws-eyebrow flex items-center gap-1 text-neutral-500 hover:text-amber-600 dark:text-neutral-400 dark:hover:text-amber-400"
+                            >
+                                Comments ({preview.comments_count}) ↗
+                            </a>
+                        </section>
+                    {/if}
+
                     <section class="border-t border-neutral-100 pt-4 dark:border-neutral-800">
                         <div class="mb-2 flex items-center justify-between">
                             <h3 class="ws-eyebrow text-neutral-500 dark:text-neutral-400">

@@ -26,12 +26,14 @@ class TaskPreviewQuery
      *     notes: array<int, array<string, mixed>>,
      *     contacts: array<int, array<string, mixed>>,
      *     activity: array<int, array<string, mixed>>,
-     *     team: array<int, array{id: int, name: string, email: ?string, user_id: ?int}>
+     *     team: array<int, array{id: int, name: string, email: ?string, user_id: ?int}>,
+     *     comments_count: int
      * }
      */
     public function data(Task $task): array
     {
         $task->loadMissing(['project', 'notes.user', 'contacts', 'assignments.member', 'subtasks.user']);
+        $task->loadCount('comments');
 
         $activity = ProjectActivity::query()
             ->where('task_id', $task->id)
@@ -59,6 +61,7 @@ class TaskPreviewQuery
             'contacts' => ContactResource::collection($task->contacts)->resolve(),
             'activity' => $activity->all(),
             'team' => $team->all(),
+            'comments_count' => (int) $task->comments_count,
         ];
     }
 }
