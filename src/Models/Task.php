@@ -128,6 +128,14 @@ class Task extends Model
     }
 
     /**
+     * @return HasMany<TaskComment, $this>
+     */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(TaskComment::class);
+    }
+
+    /**
      * Tasks that are "mine" — either explicitly assigned to the member behind
      * the given login, or in one of that member's coordinator categories.
      *

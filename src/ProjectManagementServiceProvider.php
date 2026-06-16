@@ -15,6 +15,7 @@ use RayzenAI\ProjectManagement\Models\ProjectContact;
 use RayzenAI\ProjectManagement\Models\ProjectNote;
 use RayzenAI\ProjectManagement\Models\Subtask;
 use RayzenAI\ProjectManagement\Models\Task;
+use RayzenAI\ProjectManagement\Models\TaskComment;
 use RayzenAI\ProjectManagement\Models\Team;
 use RayzenAI\ProjectManagement\Observers\ProjectAssignmentObserver;
 use RayzenAI\ProjectManagement\Observers\ProjectContactObserver;
@@ -65,6 +66,7 @@ class ProjectManagementServiceProvider extends ServiceProvider
         Relation::enforceMorphMap([
             'user' => config('project-management.user_model'),
             'task' => Task::class,
+            'task-comment' => TaskComment::class,
             'project-note' => ProjectNote::class,
             'project-contact' => ProjectContact::class,
             'subtask' => Subtask::class,
