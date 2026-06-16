@@ -1,7 +1,7 @@
 <script lang="ts">
     import { router } from '@inertiajs/svelte';
     import AppShell from '../../components/AppShell.svelte';
-    import { formatRelative } from '../../lib/format';
+    import { formatTimeAgo } from '../../lib/format';
 
     type NotificationRow = {
         id: string;
@@ -29,11 +29,10 @@
         router.post(`/workspace/notifications/${n.id}/read`, {}, { preserveScroll: true, preserveState: true });
     }
 
-    function open(n: NotificationRow, event: MouseEvent) {
+    function open(n: NotificationRow) {
         markRead(n);
         const url = n.data.url;
         if (url) {
-            event.preventDefault();
             router.visit(url);
         }
     }
@@ -69,36 +68,50 @@
         </div>
     {:else}
         <ul class="flex flex-col gap-2">
+            {#snippet body(n: NotificationRow, unread: boolean)}
+                <span
+                    class={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${unread ? 'bg-amber-500' : 'bg-transparent'}`}
+                    aria-hidden="true"
+                ></span>
+                <div class="min-w-0 flex-1">
+                    <div class={`text-sm ${unread ? 'font-semibold' : 'font-medium'}`}>
+                        {n.data.title ?? 'Notification'}
+                    </div>
+                    {#if n.data.body}
+                        <div class="mt-0.5 truncate text-sm text-neutral-600 dark:text-neutral-400">
+                            {n.data.body}
+                        </div>
+                    {/if}
+                </div>
+                <span class="ws-eyebrow shrink-0 text-neutral-400 dark:text-neutral-500">
+                    {formatTimeAgo(n.created_at)}
+                </span>
+            {/snippet}
+
             {#each notifications.data as n (n.id)}
                 {@const unread = n.read_at === null}
+                {@const itemClass = `flex w-full items-start gap-3 rounded-lg border px-4 py-3 text-left transition ${
+                    unread
+                        ? 'border-amber-300 bg-amber-50 dark:border-amber-500/40 dark:bg-amber-500/10'
+                        : 'border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900'
+                } hover:border-neutral-300 dark:hover:border-neutral-700`}
                 <li>
-                    <a
-                        href={n.data.url ?? '#'}
-                        onclick={(e) => open(n, e)}
-                        class={`flex items-start gap-3 rounded-lg border px-4 py-3 transition ${
-                            unread
-                                ? 'border-amber-300 bg-amber-50 dark:border-amber-500/40 dark:bg-amber-500/10'
-                                : 'border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900'
-                        } hover:border-neutral-300 dark:hover:border-neutral-700`}
-                    >
-                        <span
-                            class={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${unread ? 'bg-amber-500' : 'bg-transparent'}`}
-                            aria-hidden="true"
-                        ></span>
-                        <div class="min-w-0 flex-1">
-                            <div class={`text-sm ${unread ? 'font-semibold' : 'font-medium'}`}>
-                                {n.data.title ?? 'Notification'}
-                            </div>
-                            {#if n.data.body}
-                                <div class="mt-0.5 truncate text-sm text-neutral-600 dark:text-neutral-400">
-                                    {n.data.body}
-                                </div>
-                            {/if}
-                        </div>
-                        <span class="ws-eyebrow shrink-0 text-neutral-400 dark:text-neutral-500">
-                            {formatRelative(n.created_at)}
-                        </span>
-                    </a>
+                    {#if n.data.url}
+                        <a
+                            href={n.data.url}
+                            onclick={(e) => {
+                                e.preventDefault();
+                                open(n);
+                            }}
+                            class={itemClass}
+                        >
+                            {@render body(n, unread)}
+                        </a>
+                    {:else}
+                        <button type="button" onclick={() => open(n)} class={itemClass}>
+                            {@render body(n, unread)}
+                        </button>
+                    {/if}
                 </li>
             {/each}
         </ul>
