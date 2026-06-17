@@ -35,15 +35,15 @@ class QuickAddTaskService
             return ServiceResult::failure('Title is required.', 422);
         }
 
-        if (empty($assigneeMemberIds)) {
-            return ServiceResult::failure('At least one assignee is required.', 422);
-        }
-
+        // An empty assignee list is allowed: the task is created unassigned and can
+        // be assigned later. Any members that ARE provided must be on the project.
         $assigneeMemberIds = array_values(array_unique(array_map('intval', $assigneeMemberIds)));
 
-        $inScope = Member::assignableFor($project)->pluck('id')->all();
-        if (array_diff($assigneeMemberIds, $inScope) !== []) {
-            return ServiceResult::failure("That person is not on this project's teams.", 422);
+        if ($assigneeMemberIds !== []) {
+            $inScope = Member::assignableFor($project)->pluck('id')->all();
+            if (array_diff($assigneeMemberIds, $inScope) !== []) {
+                return ServiceResult::failure("That person is not on this project's teams.", 422);
+            }
         }
 
         try {
@@ -75,7 +75,7 @@ class QuickAddTaskService
 
                 return ServiceResult::success(
                     data: $task->fresh(['assignments.member']),
-                    message: 'Task created and assigned.',
+                    message: $assigneeMemberIds === [] ? 'Task created.' : 'Task created and assigned.',
                 );
             });
         } catch (Throwable $e) {
