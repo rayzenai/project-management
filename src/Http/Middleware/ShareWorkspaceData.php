@@ -58,9 +58,23 @@ class ShareWorkspaceData
                 return null;
             }
 
+            $activeMemberIds = Member::query()->active()->pluck('id')->all();
+
             return [
-                'projects' => Project::query()->visibleTo($request->user())->active()->orderBy('title')->get(['id', 'slug', 'title'])
-                    ->map(fn (Project $p): array => ['id' => $p->id, 'slug' => $p->slug, 'title' => $p->title])
+                'projects' => Project::query()->visibleTo($request->user())->active()->orderBy('title')
+                    ->with(['teams.members' => fn ($q) => $q->where('is_active', true)])
+                    ->get(['id', 'slug', 'title'])
+                    ->map(fn (Project $p): array => [
+                        'id' => $p->id,
+                        'slug' => $p->slug,
+                        'title' => $p->title,
+                        // Members assignable within this project: its teams' active members,
+                        // or every active member when the project has no teams yet. Mirrors
+                        // Member::scopeAssignableFor so the picker only offers valid assignees.
+                        'member_ids' => $p->teams->isEmpty()
+                            ? $activeMemberIds
+                            : $p->teams->flatMap(fn ($t) => $t->members->pluck('id'))->unique()->values()->all(),
+                    ])
                     ->all(),
                 'team' => Member::query()->active()->orderBy('name')
                     ->get(['id', 'name', 'email', 'user_id'])

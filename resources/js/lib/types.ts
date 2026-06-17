@@ -228,8 +228,13 @@ export interface TaskPreview {
     comments_count: number;
 }
 
+/** A project in the quick-add picker, carrying the ids of members assignable to it (its teams' members). */
+export interface QuickAddProject extends ProjectSummary {
+    member_ids?: Id[];
+}
+
 export interface QuickAddContext {
-    projects: ProjectSummary[];
+    projects: QuickAddProject[];
     team: Member[];
     currentMemberId: Id | null;
 }
