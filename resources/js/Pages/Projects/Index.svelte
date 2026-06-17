@@ -23,6 +23,21 @@
     const uid = $props.id();
     const form = useForm({ title: '', title_np: '', description: '', is_public: false, team_ids: [] as number[] });
 
+    const needsTeam = $derived(canCreate && assignableTeams.length === 0);
+    const teamForm = useForm({ name: '', description: '', color: '' });
+
+    function createTeam(e: SubmitEvent) {
+        e.preventDefault();
+        teamForm.post('/workspace/teams', {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: () => {
+                teamForm.reset();
+                router.reload({ only: ['assignableTeams'] });
+            },
+        });
+    }
+
     function submit(e: SubmitEvent) {
         e.preventDefault();
         form.post('/workspace/projects', {
@@ -72,7 +87,39 @@
         >Archived{archivedCount ? ` (${archivedCount})` : ''}</a>
     </div>
 
-    {#if creating}
+    {#if creating && needsTeam}
+        <form onsubmit={createTeam} class="mb-6 rounded-xl border border-line bg-surface p-4">
+            <h2 class="text-base font-semibold text-fg">Create your first team</h2>
+            <p class="mt-1 text-sm text-fg-muted">A project needs a team before you can create it.</p>
+            <div class="mt-3">
+                <label for={`${uid}-team-name`} class="mb-1 block text-xs font-medium text-fg-muted">Team name</label>
+                <input
+                    id={`${uid}-team-name`}
+                    type="text"
+                    bind:value={teamForm.name}
+                    required
+                    class="w-full rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
+                />
+                {#if teamForm.errors.name}<p class="mt-1 text-xs text-danger">{teamForm.errors.name}</p>{/if}
+            </div>
+            <div class="mt-3">
+                <label for={`${uid}-team-desc`} class="mb-1 block text-xs font-medium text-fg-muted">Description (optional)</label>
+                <textarea
+                    id={`${uid}-team-desc`}
+                    bind:value={teamForm.description}
+                    rows="2"
+                    class="w-full rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
+                ></textarea>
+            </div>
+            <div class="mt-3 flex justify-end">
+                <button
+                    type="submit"
+                    disabled={teamForm.processing}
+                    class="rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-bg hover:bg-accent-dim disabled:opacity-50"
+                >Create team &amp; continue</button>
+            </div>
+        </form>
+    {:else if creating}
         <form onsubmit={submit} class="mb-6 rounded-xl border border-line bg-surface p-4">
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
