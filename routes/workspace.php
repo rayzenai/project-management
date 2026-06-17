@@ -1,9 +1,8 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\AssignmentController;
+use RayzenAI\ProjectManagement\Http\Controllers\Workspace\AuthController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\ContactController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\DashboardController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\MemberController;
@@ -24,6 +23,14 @@ use RayzenAI\ProjectManagement\Http\Controllers\Workspace\TeamController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\TeamMemberController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\WorkspaceNoteController;
 use RayzenAI\ProjectManagement\Http\Middleware\ShareWorkspaceData;
+
+Route::middleware(['web', 'guest'])
+    ->prefix('workspace')
+    ->name('workspace.')
+    ->group(function () {
+        Route::get('/login', [AuthController::class, 'create'])->name('login');
+        Route::post('/login', [AuthController::class, 'store'])->name('login.store');
+    });
 
 Route::middleware([...config('project-management.middleware', ['web', 'auth']), ShareWorkspaceData::class])
     ->prefix('workspace')
@@ -115,11 +122,5 @@ Route::middleware([...config('project-management.middleware', ['web', 'auth']), 
 
         Route::patch('/preferences', [PreferenceController::class, 'update'])->name('preferences.update');
 
-        Route::post('/logout', function (Request $request) {
-            Auth::guard('web')->logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-
-            return redirect('/');
-        })->name('logout');
+        Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
     });

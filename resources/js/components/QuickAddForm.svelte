@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { untrack } from 'svelte';
     import { useForm } from '@inertiajs/svelte';
     import type { Member, Priority, ProjectSummary } from '../lib/types';
     import AssigneePicker from './AssigneePicker.svelte';
@@ -27,7 +28,8 @@
         onCancel?: () => void;
     } = $props();
 
-    const initialProject = defaultProjectId ?? projects[0]?.id ?? null;
+    const uid = $props.id();
+    const initialProject = untrack(() => defaultProjectId ?? projects[0]?.id ?? null);
 
     // When launched from inside a project, the project is fixed — we hide the
     // selector and show its name as static text instead.
@@ -36,13 +38,15 @@
     // Empty picker values are stripped before POSTing so parsed title tokens
     // (#project @assignee !priority dates) can fill the gaps server-side;
     // anything explicitly picked here still wins over tokens.
-    const form = useForm({
-        project_id: initialProject,
-        title: prefill,
-        assignee_member_ids: [] as number[],
-        deadline_at: '',
-        priority: '' as Priority | '',
-    });
+    const form = useForm(
+        untrack(() => ({
+            project_id: initialProject,
+            title: prefill,
+            assignee_member_ids: [] as number[],
+            deadline_at: '',
+            priority: '' as Priority | '',
+        })),
+    );
 
     form.transform((data) => {
         const payload: Record<string, unknown> = { project_id: data.project_id, title: data.title };
@@ -83,16 +87,16 @@
 
 {#snippet advancedFields()}
     <div>
-        <label class="text-fg-muted mb-1 block text-xs font-medium">Assign to</label>
+        <span class="text-fg-muted mb-1 block text-xs font-medium">Assign to</span>
         <AssigneePicker {team} bind:selectedIds={form.assignee_member_ids} max={5} placeholder="Pick teammates..." />
         <button type="button" class="text-accent mt-1 text-xs hover:underline" onclick={assignMe}>Assign me</button>
     </div>
     <div>
-        <label class="text-fg-muted mb-1 block text-xs font-medium">Due date</label>
-        <input type="date" bind:value={form.deadline_at} class="bg-surface w-full rounded-md border border-line px-2 py-1 text-sm" />
+        <label for={`${uid}-due`} class="text-fg-muted mb-1 block text-xs font-medium">Due date</label>
+        <input id={`${uid}-due`} type="date" bind:value={form.deadline_at} class="bg-surface w-full rounded-md border border-line px-2 py-1 text-sm" />
     </div>
     <div>
-        <label class="text-fg-muted mb-1 block text-xs font-medium">Priority</label>
+        <span class="text-fg-muted mb-1 block text-xs font-medium">Priority</span>
         <PillGroup
             dot
             bind:value={form.priority}

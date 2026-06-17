@@ -41,10 +41,19 @@
 </script>
 
 <div class="relative">
-    <button
-        type="button"
+    <div
+        role="button"
+        tabindex="0"
+        aria-haspopup="listbox"
+        aria-expanded={open}
         class="flex min-h-[32px] w-full flex-wrap items-center gap-1.5 rounded-md border border-line bg-surface px-2 py-1 text-left text-sm shadow-sm hover:border-line focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
         onclick={() => (open = !open)}
+        onkeydown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                open = !open;
+            }
+        }}
     >
         {#if selected.length === 0}
             <span class="text-fg-faint">{placeholder}</span>
@@ -70,7 +79,7 @@
                 >
             </span>
         {/each}
-    </button>
+    </div>
 
     {#if open}
         <div

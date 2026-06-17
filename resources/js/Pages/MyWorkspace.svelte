@@ -135,6 +135,8 @@
 
             {#if allClear}
                 <section
+                    role="group"
+                    aria-label="Focused tasks drop zone"
                     ondragover={(e) => onZoneDragOver('focused', e)}
                     ondragleave={onZoneDragLeave}
                     ondrop={(e) => onZoneDrop('focused', e)}
@@ -168,6 +170,8 @@
                 </section>
 
                 <section
+                    role="group"
+                    aria-label="Focused tasks drop zone"
                     ondragover={(e) => onZoneDragOver('focused', e)}
                     ondragleave={onZoneDragLeave}
                     ondrop={(e) => onZoneDrop('focused', e)}
@@ -198,6 +202,8 @@
                 <OpenTodos todos={openTodos} />
 
                 <section
+                    role="group"
+                    aria-label="Everything else drop zone"
                     ondragover={(e) => onZoneDragOver('others', e)}
                     ondragleave={onZoneDragLeave}
                     ondrop={(e) => onZoneDrop('others', e)}

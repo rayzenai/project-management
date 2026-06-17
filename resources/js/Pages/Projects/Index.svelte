@@ -10,6 +10,7 @@
     }: { projects: Project[]; archivedView?: boolean; archivedCount?: number } = $props();
 
     let creating = $state(false);
+    const uid = $props.id();
     const form = useForm({ title: '', title_np: '', description: '', is_public: false });
 
     function submit(e: SubmitEvent) {
@@ -63,8 +64,9 @@
         <form onsubmit={submit} class="mb-6 rounded-xl border border-line bg-surface p-4">
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                    <label class="mb-1 block text-xs font-medium text-fg-muted">Title</label>
+                    <label for={`${uid}-title`} class="mb-1 block text-xs font-medium text-fg-muted">Title</label>
                     <input
+                        id={`${uid}-title`}
                         type="text"
                         bind:value={form.title}
                         required
@@ -72,8 +74,9 @@
                     />
                 </div>
                 <div>
-                    <label class="mb-1 block text-xs font-medium text-fg-muted">Title (Nepali)</label>
+                    <label for={`${uid}-title-np`} class="mb-1 block text-xs font-medium text-fg-muted">Title (Nepali)</label>
                     <input
+                        id={`${uid}-title-np`}
                         type="text"
                         bind:value={form.title_np}
                         class="w-full rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
@@ -81,8 +84,9 @@
                 </div>
             </div>
             <div class="mt-3">
-                <label class="mb-1 block text-xs font-medium text-fg-muted">Description</label>
+                <label for={`${uid}-description`} class="mb-1 block text-xs font-medium text-fg-muted">Description</label>
                 <textarea
+                    id={`${uid}-description`}
                     bind:value={form.description}
                     rows="2"
                     class="w-full rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
