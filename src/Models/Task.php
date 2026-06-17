@@ -35,6 +35,7 @@ class Task extends Model
         'source_url',
         'source_links',
         'status_updated_at',
+        'completed_at',
         'metadata',
         // Plan-specific fields now stored in `metadata` but kept fillable for
         // back-compat with factories, seeders, and form requests. Mass-assigning
@@ -47,7 +48,7 @@ class Task extends Model
         'responsible_ministry',
     ];
 
-    protected $appends = ['category_label', 'category_color', 'status_label', 'status_color', 'deadline_label', 'days_relative_label', 'freshness'];
+    protected $appends = ['category_label', 'category_color', 'status_label', 'status_color', 'deadline_label', 'days_relative_label', 'freshness', 'is_late'];
 
     /**
      * @return array<string, string>
@@ -57,6 +58,7 @@ class Task extends Model
         return [
             'deadline_at' => 'date',
             'status_updated_at' => 'datetime',
+            'completed_at' => 'datetime',
             'progress' => 'integer',
             'source_links' => 'array',
             'metadata' => 'array',
@@ -74,6 +76,14 @@ class Task extends Model
                 $days = config("government.deadline_types.{$item->deadline_type}.days");
                 if (is_int($days)) {
                     $item->deadline_at = Carbon::parse(config('government.oath_date'))->addDays($days);
+                }
+            }
+
+            if ($item->isDirty('status')) {
+                if ($item->isComplete() && $item->completed_at === null) {
+                    $item->completed_at = now();
+                } elseif (! $item->isComplete()) {
+                    $item->completed_at = null;
                 }
             }
         });
@@ -441,6 +451,28 @@ class Task extends Model
             }
 
             return abs($diff).'d overdue';
+        });
+    }
+
+    /**
+     * Whether the task is late: an incomplete task past its deadline, or a
+     * completed task finished after its deadline. Derived — never a status.
+     *
+     * @return Attribute<bool, never>
+     */
+    protected function isLate(): Attribute
+    {
+        return Attribute::get(function (): bool {
+            if (! $this->deadline_at) {
+                return false;
+            }
+
+            if ($this->isComplete()) {
+                return $this->completed_at !== null
+                    && $this->completed_at->startOfDay()->gt($this->deadline_at->startOfDay());
+            }
+
+            return $this->deadline_at->lt(Carbon::today());
         });
     }
 
