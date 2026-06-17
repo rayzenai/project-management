@@ -7,6 +7,7 @@ use RayzenAI\ProjectManagement\Models\Member;
 use RayzenAI\ProjectManagement\Models\Project;
 use RayzenAI\ProjectManagement\Support\QuickAddParser;
 use RayzenAI\ProjectManagement\Support\ServiceResult;
+use RayzenAI\ProjectManagement\Support\WorkspaceAccess;
 
 /**
  * Turns a single line of natural language into a task, shared by the web and API
@@ -37,6 +38,10 @@ final readonly class QuickAddDispatcher
 
         $project = $this->resolveProject($tokens, $consumed)
             ?? Project::query()->active()->findOrFail($projectId);
+
+        if (! WorkspaceAccess::canViewProject($user, $project)) {
+            return ServiceResult::failure('That project is not available to you.', 403);
+        }
 
         $assignees = $explicitAssigneeIds;
         if ($assignees === []) {
