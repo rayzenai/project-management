@@ -3,6 +3,7 @@
 namespace RayzenAI\ProjectManagement\Http\Controllers\Workspace;
 
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -16,16 +17,19 @@ use RayzenAI\ProjectManagement\Services\Workspace\CreateTaskService;
 use RayzenAI\ProjectManagement\Services\Workspace\DeleteTaskService;
 use RayzenAI\ProjectManagement\Services\Workspace\RestoreWorkspaceModel;
 use RayzenAI\ProjectManagement\Services\Workspace\UpdateTaskService;
+use RayzenAI\ProjectManagement\Support\WorkspaceAccess;
 
 class TaskController extends Controller
 {
     use RedirectsWithServiceResult;
 
-    public function show(Project $project, Task $task, TaskShowQuery $query): Response
+    public function show(Request $request, Project $project, Task $task, TaskShowQuery $query): Response
     {
+        abort_unless(WorkspaceAccess::canViewProject($request->user(), $project), 403);
+
         abort_unless($task->project_id === $project->id, 404);
 
-        return Inertia::render('Tasks/Show', $query->data($project, $task, request()->user()->id));
+        return Inertia::render('Tasks/Show', $query->data($project, $task, $request->user()->id));
     }
 
     public function store(StoreTaskRequest $request, Project $project, CreateTaskService $service): RedirectResponse

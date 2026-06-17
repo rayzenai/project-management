@@ -16,6 +16,7 @@ use RayzenAI\ProjectManagement\Services\Workspace\CreateTaskService;
 use RayzenAI\ProjectManagement\Services\Workspace\DeleteTaskService;
 use RayzenAI\ProjectManagement\Services\Workspace\RestoreWorkspaceModel;
 use RayzenAI\ProjectManagement\Services\Workspace\UpdateTaskService;
+use RayzenAI\ProjectManagement\Support\WorkspaceAccess;
 
 /**
  * JSON sibling of the Workspace\TaskController. Reuses the same FormRequests
@@ -28,6 +29,8 @@ class TaskController extends Controller
 
     public function show(Request $request, Project $project, Task $task, TaskShowQuery $query): JsonResponse
     {
+        abort_unless(WorkspaceAccess::canViewProject($request->user(), $project), 403);
+
         abort_unless($task->project_id === $project->id, 404);
 
         return response()->json($query->data($project, $task, $request->user()->id));
