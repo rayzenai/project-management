@@ -273,6 +273,7 @@
         onclick={close}
         role="presentation"
     >
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
         <div
             class="bg-surface w-full max-w-2xl overflow-hidden rounded-2xl border border-line shadow-2xl"
             onclick={(e) => e.stopPropagation()}
@@ -307,6 +308,7 @@
                     <div class="ws-eyebrow text-fg-faint px-4 pt-3 pb-1">{group.label}</div>
                     {#each group.items as item, j (itemKey(item))}
                         {@const i = group.offset + j}
+                        <!-- svelte-ignore a11y_click_events_have_key_events -->
                         <div
                             id={`pal-item-${i}`}
                             role="option"

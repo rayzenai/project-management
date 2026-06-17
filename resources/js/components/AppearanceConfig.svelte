@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { untrack } from 'svelte';
     import { router } from '@inertiajs/svelte';
     import {
         previewAppearance,
@@ -24,13 +25,13 @@
         onsaved?: () => void;
     } = $props();
 
-    let themes = $state<ConfigTheme[]>(themesProp ?? []);
-    let fontAllowList = $state<FontAllowList | null>(fontAllowListProp ?? null);
-    let loading = $state(themesProp === undefined || fontAllowListProp === undefined);
+    let themes = $state<ConfigTheme[]>(untrack(() => themesProp ?? []));
+    let fontAllowList = $state<FontAllowList | null>(untrack(() => fontAllowListProp ?? null));
+    let loading = $state(untrack(() => themesProp === undefined || fontAllowListProp === undefined));
 
-    let selectedKey = $state(appearance.theme);
-    let fontOverride = $state<FontOverride>(normalizeOverride(appearance.font_override ?? null));
-    let emailNotifications = $state(appearance.email_notifications);
+    let selectedKey = $state(untrack(() => appearance.theme));
+    let fontOverride = $state<FontOverride>(untrack(() => normalizeOverride(appearance.font_override ?? null)));
+    let emailNotifications = $state(untrack(() => appearance.email_notifications));
     let saving = $state(false);
 
     function normalizeOverride(o: Partial<FontOverride> | null): FontOverride {

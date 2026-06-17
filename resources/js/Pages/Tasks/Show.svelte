@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { untrack } from 'svelte';
     import { page, router, useForm } from '@inertiajs/svelte';
     import AppShell from '../../components/AppShell.svelte';
     import AssigneePicker from '../../components/AssigneePicker.svelte';
@@ -63,16 +64,19 @@
         router.delete(`/workspace/subtasks/${t.id}`, { preserveScroll: true });
     }
 
-    const editForm = useForm({
-        title: task.title,
-        description: task.description ?? '',
-        status: task.status,
-        priority: task.priority ?? 'medium',
-        task_progress: task.progress,
-        deadline_at: task.deadline_at ?? '',
-        status_note: task.status_note ?? '',
-        source_url: task.source_url ?? '',
-    });
+    const uid = $props.id();
+    const editForm = useForm(
+        untrack(() => ({
+            title: task.title,
+            description: task.description ?? '',
+            status: task.status,
+            priority: task.priority ?? 'medium',
+            task_progress: task.progress,
+            deadline_at: task.deadline_at ?? '',
+            status_note: task.status_note ?? '',
+            source_url: task.source_url ?? '',
+        })),
+    );
 
     // `progress` is a reserved field name on useForm, so the form tracks it
     // as `task_progress` and maps it back to what the backend validates.
@@ -267,16 +271,18 @@
                 <form onsubmit={saveEdit} class="bg-surface rounded-xl border border-line p-4">
                     <div class="space-y-3">
                         <div>
-                            <label class="text-fg-muted mb-1 block text-xs font-medium">Title</label>
+                            <label for={`${uid}-title`} class="text-fg-muted mb-1 block text-xs font-medium">Title</label>
                             <input
+                                id={`${uid}-title`}
                                 type="text"
                                 bind:value={editForm.title}
                                 class="bg-surface text-fg w-full rounded-md border border-line px-3 py-1.5 text-sm"
                             />
                         </div>
                         <div>
-                            <label class="text-fg-muted mb-1 block text-xs font-medium">Description</label>
+                            <label for={`${uid}-description`} class="text-fg-muted mb-1 block text-xs font-medium">Description</label>
                             <textarea
+                                id={`${uid}-description`}
                                 bind:value={editForm.description}
                                 rows="4"
                                 placeholder="Add a description..."
@@ -288,8 +294,9 @@
                         </div>
                         <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
                             <div>
-                                <label class="text-fg-muted mb-1 block text-xs font-medium">Status</label>
+                                <label for={`${uid}-status`} class="text-fg-muted mb-1 block text-xs font-medium">Status</label>
                                 <select
+                                    id={`${uid}-status`}
                                     bind:value={editForm.status}
                                     class="bg-surface text-fg w-full rounded-md border border-line px-3 py-1.5 text-sm"
                                 >
@@ -299,11 +306,12 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="text-fg-muted mb-1 flex items-center justify-between text-xs font-medium">
+                                <label for={`${uid}-progress`} class="text-fg-muted mb-1 flex items-center justify-between text-xs font-medium">
                                     <span>Progress</span>
                                     <span class="text-fg font-semibold">{editForm.task_progress}%</span>
                                 </label>
                                 <input
+                                    id={`${uid}-progress`}
                                     type="range"
                                     min="0"
                                     max="100"
@@ -313,8 +321,9 @@
                                 />
                             </div>
                             <div>
-                                <label class="text-fg-muted mb-1 block text-xs font-medium">Due date</label>
+                                <label for={`${uid}-deadline`} class="text-fg-muted mb-1 block text-xs font-medium">Due date</label>
                                 <input
+                                    id={`${uid}-deadline`}
                                     type="date"
                                     bind:value={editForm.deadline_at}
                                     class="bg-surface text-fg w-full rounded-md border border-line px-3 py-1.5 text-sm"
@@ -335,8 +344,9 @@
                             />
                         </div>
                         <div>
-                            <label class="text-fg-muted mb-1 block text-xs font-medium">Status note</label>
+                            <label for={`${uid}-status-note`} class="text-fg-muted mb-1 block text-xs font-medium">Status note</label>
                             <textarea
+                                id={`${uid}-status-note`}
                                 bind:value={editForm.status_note}
                                 rows="3"
                                 placeholder="What's the latest on this?"
@@ -344,8 +354,9 @@
                             ></textarea>
                         </div>
                         <div>
-                            <label class="text-fg-muted mb-1 block text-xs font-medium">Source URL</label>
+                            <label for={`${uid}-source-url`} class="text-fg-muted mb-1 block text-xs font-medium">Source URL</label>
                             <input
+                                id={`${uid}-source-url`}
                                 type="url"
                                 bind:value={editForm.source_url}
                                 placeholder="https://..."

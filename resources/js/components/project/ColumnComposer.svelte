@@ -1,11 +1,12 @@
 <script lang="ts">
+    import { untrack } from 'svelte';
     import { useForm } from '@inertiajs/svelte';
     import type { Project } from '../../lib/types';
 
     let { project, status, onClose }: { project: Project; status: string; onClose?: () => void } = $props();
 
     let input = $state<HTMLInputElement | null>(null);
-    const form = useForm({ title: '', status });
+    const form = useForm(untrack(() => ({ title: '', status })));
 
     $effect(() => {
         input?.focus();
