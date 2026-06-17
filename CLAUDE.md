@@ -47,7 +47,7 @@ package-specific layer, not a replacement.
   Flutter contract (see `docs/api/workspace-api.md` § Notifications).
 - Dispatched from observers (side effects belong there): `ProjectAssignmentObserver::created`
   → `TaskAssigned`; `TaskObserver::updated` → `TaskStatusChanged` when status enters
-  `{done, done_late, late, failed}` (actor excluded, login-less members skipped).
+  `{done, failed}` (i.e. `[...Task::completeStatuses(), 'failed']`; actor excluded, login-less members skipped).
   `MentionedInComment`/`TaskDeadlineDue` are dispatched by the comments/reminders features.
 - Surfaced via `Api\NotificationController` (`/api/v1/notifications…`) + `Workspace\NotificationController`
   (web inbox page + bell, with `unreadNotifications` shared by `ShareWorkspaceData`).
@@ -76,11 +76,14 @@ php artisan workspace:send-deadline-reminders --pretend  # dry-run deadline remi
   relationship (`assignments`, `notes`, `contacts`, `subtasks`, `activities`,
   `Member::user`) resolves through this.
 - `middleware` — applied to the **web** route group; default `['web', 'auth']`.
-- `statuses` — the ordered 7-status task workflow, the single source of truth for
+- `statuses` — the ordered 5-status task workflow, the single source of truth for
   board columns, chips, and dashboards: `not_started`, `unclear`, `in_progress`,
-  `late`, `done` (`is_complete`), `done_late` (`is_complete`), `failed`. Each has
+  `done` (`is_complete`), `failed`. Each has
   `label`, `color`, `is_complete`. `Task::completeStatuses()` derives "finished"
-  from the `is_complete` flags — never hardcode status strings.
+  from the `is_complete` flags — never hardcode status strings. Lateness is **derived,
+  not a status**: a task is "late" when it is incomplete past its `deadline_at`, or
+  completed after its deadline (`completed_at` vs `deadline_at`) — surfaced as the
+  `is_late` attribute on `Task`/`TaskResource`.
 - `complete_status` — status applied by the one-click complete checkbox (`done`).
 - `super_admins` — emails holding `manage-workspace`; comma-separated via
   `PM_SUPER_ADMINS`. `super_admin_default_password` (`PM_SUPER_ADMIN_PASSWORD`,
