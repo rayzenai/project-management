@@ -34,8 +34,11 @@ class TaskSearchQuery
         $pgsql = DB::connection()->getDriverName() === 'pgsql';
         $likeOp = $pgsql ? 'ILIKE' : 'LIKE';
 
+        $visibleProjectIds = Project::query()->visibleTo($request->user())->pluck('id');
+
         $tasks = Task::query()
             ->forActiveProjects()
+            ->whereIn('project_id', $visibleProjectIds)
             ->with('project:id,slug,title')
             ->where(function ($query) use ($like, $likeOp, $q) {
                 $query->where('title', $likeOp, $like)
@@ -54,6 +57,7 @@ class TaskSearchQuery
 
         $matchedProjects = Project::query()
             ->active()
+            ->whereIn('id', $visibleProjectIds)
             ->withCount('tasks')
             ->where(function ($query) use ($likeOp, $like) {
                 $query->where('title', $likeOp, $like)->orWhere('slug', $likeOp, $like);
@@ -64,6 +68,7 @@ class TaskSearchQuery
 
         $notes = ProjectNote::query()
             ->with(['task:id,slug,title,project_id', 'task.project:id,slug,title'])
+            ->whereIn('task_id', Task::query()->whereIn('project_id', $visibleProjectIds)->select('id'))
             ->where('body', $likeOp, $like)
             ->latest()
             ->limit(15)
@@ -81,6 +86,7 @@ class TaskSearchQuery
 
         $contacts = ProjectContact::query()
             ->with(['task:id,slug,title,project_id', 'task.project:id,slug,title'])
+            ->whereIn('task_id', Task::query()->whereIn('project_id', $visibleProjectIds)->select('id'))
             ->where(function ($query) use ($like, $likeOp) {
                 $query->where('name', $likeOp, $like)
                     ->orWhere('organization', $likeOp, $like)
