@@ -87,6 +87,8 @@ export interface Task {
     progress: number;
     sort_order?: number | null;
     deadline_at?: string | null;
+    completed_at?: string | null;
+    is_late?: boolean;
     days_relative_label?: string;
     source_url?: string | null;
     source_links?: unknown[];

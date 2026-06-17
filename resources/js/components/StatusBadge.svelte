@@ -4,12 +4,10 @@
     const bucket = $derived.by(() => {
         switch (status) {
             case 'done':
-            case 'done_late':
                 return 'done';
             case 'in_progress':
             case 'started':
                 return 'progress';
-            case 'late':
             case 'failed':
             case 'blocked':
                 return 'late';
