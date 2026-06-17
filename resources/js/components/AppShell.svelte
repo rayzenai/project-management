@@ -22,7 +22,6 @@
     const user = $derived(shared.auth?.user ?? null);
     const flash = $derived(shared.flash ?? null);
     const path = $derived(page.url ?? '/workspace');
-    const noteCount = $derived(shared.workspaceNotes?.length ?? 0);
     const unreadNotifications = $derived(shared.unreadNotifications ?? 0);
     const appearance = $derived((shared.appearance ?? null) as AppearanceProps | null);
 
@@ -238,18 +237,12 @@
                 <button
                     type="button"
                     onclick={() => notesBoard.toggle()}
-                    aria-label={`My notes${noteCount ? ` (${noteCount})` : ''}`}
+                    aria-label="My notes"
                     aria-expanded={notesBoard.open}
                     title="My notes"
-                    class="text-fg-muted hover:bg-surface-alt relative rounded-md p-2"
+                    class="text-fg-muted hover:bg-surface-alt rounded-md p-2"
                 >
                     <StickyNote class="h-5 w-5" />
-                    {#if noteCount > 0}
-                        <span
-                            class="bg-accent text-bg absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] leading-none font-semibold"
-                            >{noteCount}</span
-                        >
-                    {/if}
                 </button>
                 <button
                     type="button"
