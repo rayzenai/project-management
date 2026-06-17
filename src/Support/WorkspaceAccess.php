@@ -41,7 +41,32 @@ class WorkspaceAccess
         return self::isSuperAdmin($user) || self::leadsTeam($user, $team);
     }
 
-    public static function canArchiveProject(?Authenticatable $user, Project $project): bool
+    public static function canViewProject(?Authenticatable $user, Project $project): bool
+    {
+        if ($project->is_public) {
+            return true;
+        }
+
+        if (self::isSuperAdmin($user)) {
+            return true;
+        }
+
+        if ($user === null) {
+            return false;
+        }
+
+        $memberId = Member::query()->where('user_id', $user->getAuthIdentifier())->value('id');
+
+        return $memberId !== null
+            && $project->teams()->whereHas('members', fn ($m) => $m->where('members.id', $memberId))->exists();
+    }
+
+    public static function canCreateProject(?Authenticatable $user): bool
+    {
+        return self::isSuperAdmin($user) || self::ledTeamIds($user) !== [];
+    }
+
+    public static function canManageProjectAccess(?Authenticatable $user, Project $project): bool
     {
         if (self::isSuperAdmin($user)) {
             return true;
@@ -51,6 +76,11 @@ class WorkspaceAccess
 
         return $ledTeamIds !== []
             && $project->teams()->whereIn('teams.id', $ledTeamIds)->exists();
+    }
+
+    public static function canArchiveProject(?Authenticatable $user, Project $project): bool
+    {
+        return self::canManageProjectAccess($user, $project);
     }
 
     /**
