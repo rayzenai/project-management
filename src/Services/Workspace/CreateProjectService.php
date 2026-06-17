@@ -29,6 +29,10 @@ class CreateProjectService
                 'is_public' => (bool) ($attributes['is_public'] ?? false),
             ]);
 
+            if (array_key_exists('team_ids', $attributes)) {
+                $project->teams()->sync($attributes['team_ids'] ?? []);
+            }
+
             return ServiceResult::success($project, 'Project created.');
         } catch (Throwable $e) {
             report($e);
