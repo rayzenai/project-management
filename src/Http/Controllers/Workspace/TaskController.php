@@ -34,6 +34,8 @@ class TaskController extends Controller
 
     public function store(StoreTaskRequest $request, Project $project, CreateTaskService $service): RedirectResponse
     {
+        abort_unless(WorkspaceAccess::canViewProject($request->user(), $project), 403);
+
         $result = $service->execute($project, $request->validated());
 
         if ($result->success && $result->data instanceof Task) {
@@ -47,6 +49,8 @@ class TaskController extends Controller
 
     public function update(UpdateTaskRequest $request, Project $project, Task $task, UpdateTaskService $service): RedirectResponse
     {
+        abort_unless(WorkspaceAccess::canViewProject($request->user(), $project), 403);
+
         abort_unless($task->project_id === $project->id, 404);
 
         $result = $service->execute($task, $request->validated());
@@ -54,8 +58,10 @@ class TaskController extends Controller
         return $this->redirectWithResult($result);
     }
 
-    public function destroy(Project $project, Task $task, DeleteTaskService $service): RedirectResponse
+    public function destroy(Request $request, Project $project, Task $task, DeleteTaskService $service): RedirectResponse
     {
+        abort_unless(WorkspaceAccess::canViewProject($request->user(), $project), 403);
+
         abort_unless($task->project_id === $project->id, 404);
 
         $result = $service->execute($task);
@@ -76,8 +82,10 @@ class TaskController extends Controller
         return $this->redirectWithResult($result);
     }
 
-    public function restore(Project $project, Task $task, RestoreWorkspaceModel $service): RedirectResponse
+    public function restore(Request $request, Project $project, Task $task, RestoreWorkspaceModel $service): RedirectResponse
     {
+        abort_unless(WorkspaceAccess::canViewProject($request->user(), $project), 403);
+
         abort_unless($task->project_id === $project->id, 404);
 
         $service->execute($task);

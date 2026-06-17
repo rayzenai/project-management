@@ -38,6 +38,8 @@ class TaskController extends Controller
 
     public function store(StoreTaskRequest $request, Project $project, CreateTaskService $service): JsonResponse
     {
+        abort_unless(WorkspaceAccess::canViewProject($request->user(), $project), 403);
+
         $result = $service->execute($project, $request->validated());
 
         return $this->respondWithResult(
@@ -49,6 +51,8 @@ class TaskController extends Controller
 
     public function update(UpdateTaskRequest $request, Project $project, Task $task, UpdateTaskService $service): JsonResponse
     {
+        abort_unless(WorkspaceAccess::canViewProject($request->user(), $project), 403);
+
         abort_unless($task->project_id === $project->id, 404);
 
         $result = $service->execute($task, $request->validated());
@@ -59,8 +63,10 @@ class TaskController extends Controller
         );
     }
 
-    public function destroy(Project $project, Task $task, DeleteTaskService $service): JsonResponse
+    public function destroy(Request $request, Project $project, Task $task, DeleteTaskService $service): JsonResponse
     {
+        abort_unless(WorkspaceAccess::canViewProject($request->user(), $project), 403);
+
         abort_unless($task->project_id === $project->id, 404);
 
         $result = $service->execute($task);
@@ -68,8 +74,10 @@ class TaskController extends Controller
         return $this->respondWithResult($result);
     }
 
-    public function restore(Project $project, Task $task, RestoreWorkspaceModel $service): JsonResponse
+    public function restore(Request $request, Project $project, Task $task, RestoreWorkspaceModel $service): JsonResponse
     {
+        abort_unless(WorkspaceAccess::canViewProject($request->user(), $project), 403);
+
         abort_unless($task->project_id === $project->id, 404);
 
         $result = $service->execute($task);
