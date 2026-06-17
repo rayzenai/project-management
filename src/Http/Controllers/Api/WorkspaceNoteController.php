@@ -2,6 +2,7 @@
 
 namespace RayzenAI\ProjectManagement\Http\Controllers\Api;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -9,7 +10,10 @@ use RayzenAI\ProjectManagement\Http\Controllers\Api\Concerns\RespondsWithService
 use RayzenAI\ProjectManagement\Http\Requests\StoreWorkspaceNoteRequest;
 use RayzenAI\ProjectManagement\Http\Requests\UpdateWorkspaceNotePlacementRequest;
 use RayzenAI\ProjectManagement\Http\Requests\UpdateWorkspaceNoteRequest;
+use RayzenAI\ProjectManagement\Http\Resources\NoteResource;
 use RayzenAI\ProjectManagement\Http\Resources\WorkspaceNoteResource;
+use RayzenAI\ProjectManagement\Models\Member;
+use RayzenAI\ProjectManagement\Models\ProjectNote;
 use RayzenAI\ProjectManagement\Models\WorkspaceNote;
 use RayzenAI\ProjectManagement\Services\Workspace\CreateWorkspaceNoteService;
 use RayzenAI\ProjectManagement\Services\Workspace\DeleteWorkspaceNoteService;
@@ -26,6 +30,48 @@ use RayzenAI\ProjectManagement\Services\Workspace\UpdateWorkspaceNoteService;
 class WorkspaceNoteController extends Controller
 {
     use RespondsWithServiceResult;
+
+    /**
+     * The signed-in user's notes board, mirroring the two sources the web
+     * surface shares via Inertia (ShareWorkspaceData) so the API/mobile client
+     * can hydrate the same "My notes" view:
+     *   • workspace_notes — the user's own free-form sticky notes, newest first
+     *   • task_notes      — task-anchored notes the user authored OR that live
+     *                       on a task assigned to them (latest 50)
+     */
+    public function index(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $memberId = Member::query()->where('user_id', $user->id)->value('id');
+
+        $workspaceNotes = WorkspaceNote::query()
+            ->where('user_id', $user->id)
+            ->orderByDesc('updated_at')
+            ->get();
+
+        $taskNotes = ProjectNote::query()
+            ->where(function (Builder $query) use ($user, $memberId): void {
+                $query->where('user_id', $user->id);
+
+                if ($memberId !== null) {
+                    $query->orWhereHas(
+                        'task.assignments',
+                        fn (Builder $assignment): Builder => $assignment->where('member_id', $memberId),
+                    );
+                }
+            })
+            ->with(['user', 'task.project'])
+            ->latest()
+            ->limit(50)
+            ->get();
+
+        return response()->json([
+            'data' => [
+                'workspace_notes' => WorkspaceNoteResource::collection($workspaceNotes)->resolve(),
+                'task_notes' => NoteResource::collection($taskNotes)->resolve(),
+            ],
+        ]);
+    }
 
     public function store(StoreWorkspaceNoteRequest $request, CreateWorkspaceNoteService $service): JsonResponse
     {

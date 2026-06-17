@@ -103,6 +103,7 @@ Route::middleware('api')->prefix('api/v1')->name('api.')->group(function () {
             Route::post('/tasks/{task}/contacts', [ContactController::class, 'store'])->name('contacts.store');
 
             // Personal workspace notes
+            Route::get('/my-notes', [WorkspaceNoteController::class, 'index'])->name('my-notes.index');
             Route::post('/my-notes', [WorkspaceNoteController::class, 'store'])->name('my-notes.store');
             Route::patch('/my-notes/{workspaceNote}', [WorkspaceNoteController::class, 'update'])->name('my-notes.update');
             Route::patch('/my-notes/{workspaceNote}/placement', [WorkspaceNoteController::class, 'placement'])->name('my-notes.placement');
