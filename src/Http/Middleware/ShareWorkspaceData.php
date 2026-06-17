@@ -4,6 +4,7 @@ namespace RayzenAI\ProjectManagement\Http\Middleware;
 
 use App\Services\ResolveThemeTokens;
 use Closure;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use RayzenAI\ProjectManagement\Http\Resources\NoteResource;
@@ -25,10 +26,11 @@ use Symfony\Component\HttpFoundation\Response;
  * - `workspaceNotes` — the authenticated user's personal sticky notes
  *   (newest-updated first) so the top-bar notes icon, its count badge, and
  *   the slide-over drawer render instantly everywhere without a fetch.
- * - `taskNotes` — the authenticated user's recent task-anchored notes
- *   (`project_notes`), with task + project context for deep-linking. These are
- *   read-only in the notes panel/board (kept separate from the editable,
- *   draggable `workspaceNotes` stickies) so every note the user authored is
+ * - `taskNotes` — recent task-anchored notes (`project_notes`) relevant to the
+ *   user: notes they authored, plus notes on any task assigned to them (even when
+ *   authored by a teammate). Includes task + project context for deep-linking.
+ *   These are read-only in the notes panel/board (kept separate from the editable,
+ *   draggable `workspaceNotes` stickies) so every note relevant to the user is
  *   visible in one place.
  * - `themeCatalogue` — the theme + font catalogue from `config/themes.php`, so
  *   the appearance onboarding/settings render their cards without fetching the
@@ -88,9 +90,20 @@ class ShareWorkspaceData
                 return [];
             }
 
+            $memberId = Member::query()->where('user_id', $user->id)->value('id');
+
             return NoteResource::collection(
                 ProjectNote::query()
-                    ->where('user_id', $user->id)
+                    ->where(function (Builder $query) use ($user, $memberId): void {
+                        $query->where('user_id', $user->id);
+
+                        if ($memberId !== null) {
+                            $query->orWhereHas(
+                                'task.assignments',
+                                fn (Builder $assignment): Builder => $assignment->where('member_id', $memberId),
+                            );
+                        }
+                    })
                     ->with(['user', 'task.project'])
                     ->latest()
                     ->limit(50)
