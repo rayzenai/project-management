@@ -26,6 +26,18 @@
     const needsTeam = $derived(canCreate && assignableTeams.length === 0);
     const teamForm = useForm({ name: '', description: '', color: '' });
 
+    /** True once the user creates a team inside the wizard — keeps the stepper visible on step 2. */
+    let teamJustCreated = $state(false);
+    /** Show the two-step stepper only inside the no-team wizard flow, not for the normal project form. */
+    const showStepper = $derived(needsTeam || teamJustCreated);
+
+    function toggleCreating() {
+        creating = !creating;
+        if (!creating) {
+            teamJustCreated = false;
+        }
+    }
+
     function createTeam(e: SubmitEvent) {
         e.preventDefault();
         teamForm.post('/workspace/teams', {
@@ -33,6 +45,7 @@
             preserveState: true,
             onSuccess: () => {
                 teamForm.reset();
+                teamJustCreated = true;
                 router.reload({ only: ['assignableTeams'] });
             },
         });
@@ -45,6 +58,7 @@
             onSuccess: () => {
                 form.reset();
                 creating = false;
+                teamJustCreated = false;
             },
         });
     }
@@ -71,7 +85,7 @@
             <button
                 type="button"
                 class="rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-bg hover:bg-accent-dim"
-                onclick={() => (creating = !creating)}>{creating ? 'Cancel' : '+ New project'}</button
+                onclick={toggleCreating}>{creating ? 'Cancel' : '+ New project'}</button
             >
         {/if}
     </div>
@@ -87,17 +101,43 @@
         >Archived{archivedCount ? ` (${archivedCount})` : ''}</a>
     </div>
 
-    {#if creating && needsTeam}
-        <form onsubmit={createTeam} class="mb-6 rounded-xl border border-line bg-surface p-4">
-            <h2 class="text-base font-semibold text-fg">Create your first team</h2>
-            <p class="mt-1 text-sm text-fg-muted">A project needs a team before you can create it.</p>
-            <div class="mt-3">
+    {#if creating}
+    <div class="mb-6 rounded-xl border border-line bg-surface p-4">
+        {#if showStepper}
+            <ol class="mb-4 flex items-center gap-3 text-sm font-medium">
+                <li class="flex items-center gap-2 {needsTeam ? 'text-fg' : 'text-fg-muted'}">
+                    <span class="flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold {needsTeam ? 'bg-accent text-bg' : 'bg-success/20 text-success'}">
+                        {needsTeam ? '1' : '✓'}
+                    </span>
+                    Create a team
+                </li>
+                <li class="h-px w-8 {needsTeam ? 'bg-line' : 'bg-success/40'}" aria-hidden="true"></li>
+                <li class="flex items-center gap-2 {needsTeam ? 'text-fg-faint' : 'text-fg'}">
+                    <span class="flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold {needsTeam ? 'bg-surface-alt text-fg-faint' : 'bg-accent text-bg'}">
+                        2
+                    </span>
+                    Create the project
+                </li>
+            </ol>
+        {/if}
+
+        {#if needsTeam}
+        <form onsubmit={createTeam}>
+            <h2 class="text-lg font-bold tracking-tight text-fg">Create a team first</h2>
+            <div class="mt-2 rounded-lg border border-line bg-surface-alt p-3">
+                <p class="text-sm text-fg-muted">
+                    Projects belong to teams, and you don't have one yet. Create your first team below —
+                    then you'll continue to the project form.
+                </p>
+            </div>
+            <div class="mt-4">
                 <label for={`${uid}-team-name`} class="mb-1 block text-xs font-medium text-fg-muted">Team name</label>
                 <input
                     id={`${uid}-team-name`}
                     type="text"
                     bind:value={teamForm.name}
                     required
+                    placeholder="e.g. Mayor's Office, Engineering, Comms"
                     class="w-full rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
                 />
                 {#if teamForm.errors.name}<p class="mt-1 text-xs text-danger">{teamForm.errors.name}</p>{/if}
@@ -111,16 +151,17 @@
                     class="w-full rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
                 ></textarea>
             </div>
-            <div class="mt-3 flex justify-end">
+            <div class="mt-4 flex justify-end">
                 <button
                     type="submit"
                     disabled={teamForm.processing}
                     class="rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-bg hover:bg-accent-dim disabled:opacity-50"
-                >Create team &amp; continue</button>
+                >Create team &amp; continue →</button>
             </div>
         </form>
-    {:else if creating}
-        <form onsubmit={submit} class="mb-6 rounded-xl border border-line bg-surface p-4">
+        {:else}
+        <form onsubmit={submit}>
+            <h2 class="mb-4 text-lg font-bold tracking-tight text-fg">New project</h2>
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
                     <label for={`${uid}-title`} class="mb-1 block text-xs font-medium text-fg-muted">Title</label>
@@ -187,6 +228,8 @@
             </div>
             {#if form.errors.title}<p class="mt-2 text-xs text-danger">{form.errors.title}</p>{/if}
         </form>
+        {/if}
+    </div>
     {/if}
 
     {#if projects.length === 0}
