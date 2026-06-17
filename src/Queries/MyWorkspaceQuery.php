@@ -47,7 +47,8 @@ class MyWorkspaceQuery
         $snoozedCount = ProjectAssignment::query()
             ->where('member_id', $member->id)
             ->where('snoozed_until', '>', $now)
-            ->whereHas('task', fn ($q) => $q->forActiveProjects())
+            ->whereHas('task', fn ($q) => $q->forActiveProjects()
+                ->whereIn('project_id', Project::query()->visibleTo($user)->select('id')))
             ->count();
 
         $openTaskIds = $assignments
