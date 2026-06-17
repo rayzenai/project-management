@@ -8,6 +8,7 @@ use Illuminate\Routing\Controller;
 use RayzenAI\ProjectManagement\Http\Controllers\Api\Concerns\RespondsWithServiceResult;
 use RayzenAI\ProjectManagement\Models\Project;
 use RayzenAI\ProjectManagement\Services\Workspace\ReorderTasksService;
+use RayzenAI\ProjectManagement\Support\WorkspaceAccess;
 
 /**
  * JSON sibling of the Workspace\TaskReorderController. Reuses the same inline
@@ -20,6 +21,8 @@ class TaskReorderController extends Controller
 
     public function __invoke(Request $request, Project $project, ReorderTasksService $service): JsonResponse
     {
+        abort_unless(WorkspaceAccess::canViewProject($request->user(), $project), 403);
+
         $data = $request->validate([
             'task_ids' => ['required', 'array', 'min:1'],
             'task_ids.*' => ['integer'],

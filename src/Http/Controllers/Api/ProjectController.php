@@ -30,8 +30,10 @@ class ProjectController extends Controller
         return response()->json($query->data($request));
     }
 
-    public function show(Project $project, ProjectShowQuery $query): JsonResponse
+    public function show(Request $request, Project $project, ProjectShowQuery $query): JsonResponse
     {
+        abort_unless(WorkspaceAccess::canViewProject($request->user(), $project), 403);
+
         return response()->json($query->data($project));
     }
 

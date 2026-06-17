@@ -2,6 +2,7 @@
 
 namespace RayzenAI\ProjectManagement\Models;
 
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use RayzenAI\ProjectManagement\Database\Factories\ProjectFactory;
+use RayzenAI\ProjectManagement\Support\WorkspaceAccess;
 
 class Project extends Model
 {
@@ -87,6 +89,32 @@ class Project extends Model
     public function scopeArchived(Builder $query): Builder
     {
         return $query->whereNotNull('archived_at');
+    }
+
+    /**
+     * Projects the user may see: public, or attached to a team the user's
+     * member belongs to. Super-admins see everything (unconstrained).
+     *
+     * @param  Builder<Project>  $query
+     * @return Builder<Project>
+     */
+    public function scopeVisibleTo(Builder $query, ?Authenticatable $user): Builder
+    {
+        if (WorkspaceAccess::isSuperAdmin($user)) {
+            return $query;
+        }
+
+        $memberId = $user === null
+            ? null
+            : Member::query()->where('user_id', $user->getAuthIdentifier())->value('id');
+
+        return $query->where(function (Builder $q) use ($memberId): void {
+            $q->where('is_public', true);
+
+            if ($memberId !== null) {
+                $q->orWhereHas('teams.members', fn (Builder $m): Builder => $m->where('members.id', $memberId));
+            }
+        });
     }
 
     /**

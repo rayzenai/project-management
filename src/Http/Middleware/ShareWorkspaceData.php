@@ -59,7 +59,7 @@ class ShareWorkspaceData
             }
 
             return [
-                'projects' => Project::query()->active()->orderBy('title')->get(['id', 'slug', 'title'])
+                'projects' => Project::query()->visibleTo($request->user())->active()->orderBy('title')->get(['id', 'slug', 'title'])
                     ->map(fn (Project $p): array => ['id' => $p->id, 'slug' => $p->slug, 'title' => $p->title])
                     ->all(),
                 'team' => Member::query()->active()->orderBy('name')

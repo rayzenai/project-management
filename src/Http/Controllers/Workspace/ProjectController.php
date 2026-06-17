@@ -26,8 +26,10 @@ class ProjectController extends Controller
         return Inertia::render('Projects/Index', $query->data($request));
     }
 
-    public function show(Project $project, ProjectShowQuery $query): Response
+    public function show(Request $request, Project $project, ProjectShowQuery $query): Response
     {
+        abort_unless(WorkspaceAccess::canViewProject($request->user(), $project), 403);
+
         return Inertia::render('Projects/Show', $query->data($project));
     }
 

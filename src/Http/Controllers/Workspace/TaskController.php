@@ -3,6 +3,7 @@
 namespace RayzenAI\ProjectManagement\Http\Controllers\Workspace;
 
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -16,20 +17,25 @@ use RayzenAI\ProjectManagement\Services\Workspace\CreateTaskService;
 use RayzenAI\ProjectManagement\Services\Workspace\DeleteTaskService;
 use RayzenAI\ProjectManagement\Services\Workspace\RestoreWorkspaceModel;
 use RayzenAI\ProjectManagement\Services\Workspace\UpdateTaskService;
+use RayzenAI\ProjectManagement\Support\WorkspaceAccess;
 
 class TaskController extends Controller
 {
     use RedirectsWithServiceResult;
 
-    public function show(Project $project, Task $task, TaskShowQuery $query): Response
+    public function show(Request $request, Project $project, Task $task, TaskShowQuery $query): Response
     {
+        abort_unless(WorkspaceAccess::canViewProject($request->user(), $project), 403);
+
         abort_unless($task->project_id === $project->id, 404);
 
-        return Inertia::render('Tasks/Show', $query->data($project, $task, request()->user()->id));
+        return Inertia::render('Tasks/Show', $query->data($project, $task, $request->user()->id));
     }
 
     public function store(StoreTaskRequest $request, Project $project, CreateTaskService $service): RedirectResponse
     {
+        abort_unless(WorkspaceAccess::canViewProject($request->user(), $project), 403);
+
         $result = $service->execute($project, $request->validated());
 
         if ($result->success && $result->data instanceof Task) {
@@ -43,6 +49,8 @@ class TaskController extends Controller
 
     public function update(UpdateTaskRequest $request, Project $project, Task $task, UpdateTaskService $service): RedirectResponse
     {
+        abort_unless(WorkspaceAccess::canViewProject($request->user(), $project), 403);
+
         abort_unless($task->project_id === $project->id, 404);
 
         $result = $service->execute($task, $request->validated());
@@ -50,8 +58,10 @@ class TaskController extends Controller
         return $this->redirectWithResult($result);
     }
 
-    public function destroy(Project $project, Task $task, DeleteTaskService $service): RedirectResponse
+    public function destroy(Request $request, Project $project, Task $task, DeleteTaskService $service): RedirectResponse
     {
+        abort_unless(WorkspaceAccess::canViewProject($request->user(), $project), 403);
+
         abort_unless($task->project_id === $project->id, 404);
 
         $result = $service->execute($task);
@@ -72,8 +82,10 @@ class TaskController extends Controller
         return $this->redirectWithResult($result);
     }
 
-    public function restore(Project $project, Task $task, RestoreWorkspaceModel $service): RedirectResponse
+    public function restore(Request $request, Project $project, Task $task, RestoreWorkspaceModel $service): RedirectResponse
     {
+        abort_unless(WorkspaceAccess::canViewProject($request->user(), $project), 403);
+
         abort_unless($task->project_id === $project->id, 404);
 
         $service->execute($task);

@@ -7,11 +7,21 @@
         projects,
         archivedView = false,
         archivedCount = 0,
-    }: { projects: Project[]; archivedView?: boolean; archivedCount?: number } = $props();
+        assignableTeams = [],
+        canCreate = false,
+        isSuperAdmin = false,
+    }: {
+        projects: Project[];
+        archivedView?: boolean;
+        archivedCount?: number;
+        assignableTeams?: { id: number; name: string; slug: string }[];
+        canCreate?: boolean;
+        isSuperAdmin?: boolean;
+    } = $props();
 
     let creating = $state(false);
     const uid = $props.id();
-    const form = useForm({ title: '', title_np: '', description: '', is_public: false });
+    const form = useForm({ title: '', title_np: '', description: '', is_public: false, team_ids: [] as number[] });
 
     function submit(e: SubmitEvent) {
         e.preventDefault();
@@ -42,11 +52,13 @@
             <h1 class="text-2xl font-bold tracking-tight">Projects</h1>
             <p class="mt-1 text-sm text-fg-muted">Every initiative the office is tracking.</p>
         </div>
-        <button
-            type="button"
-            class="rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-bg hover:bg-accent-dim"
-            onclick={() => (creating = !creating)}>{creating ? 'Cancel' : '+ New project'}</button
-        >
+        {#if canCreate}
+            <button
+                type="button"
+                class="rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-bg hover:bg-accent-dim"
+                onclick={() => (creating = !creating)}>{creating ? 'Cancel' : '+ New project'}</button
+            >
+        {/if}
     </div>
 
     <div class="mb-4 flex items-center gap-4 text-sm">
@@ -92,11 +104,33 @@
                     class="w-full rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-fg"
                 ></textarea>
             </div>
-            <div class="mt-3 flex items-center gap-2">
-                <label class="flex items-center gap-2 text-sm">
-                    <input type="checkbox" bind:checked={form.is_public} />
-                    Public (visible on /plans)
+            <fieldset class="mt-4">
+                <legend class="text-sm font-medium text-fg">Teams with access</legend>
+                <div class="mt-2 flex flex-wrap gap-2">
+                    {#each assignableTeams as team (team.id)}
+                        <label class="flex items-center gap-2 rounded-lg border border-line px-3 py-1.5 text-sm">
+                            <input type="checkbox" value={team.id}
+                                checked={form.team_ids.includes(team.id)}
+                                onchange={(e) => {
+                                    const id = team.id;
+                                    form.team_ids = e.currentTarget.checked
+                                        ? [...form.team_ids, id]
+                                        : form.team_ids.filter((t) => t !== id);
+                                }} />
+                            {team.name}
+                        </label>
+                    {/each}
+                </div>
+                {#if form.errors.team_ids}<p class="mt-1 text-xs text-danger">{form.errors.team_ids}</p>{/if}
+            </fieldset>
+
+            {#if isSuperAdmin}
+                <label class="mt-4 flex items-center gap-2 text-sm text-fg-muted">
+                    <input type="checkbox" bind:checked={form.is_public} /> Public (visible to everyone)
                 </label>
+            {/if}
+
+            <div class="mt-3 flex items-center gap-2">
                 <div class="flex-1"></div>
                 <button
                     type="submit"

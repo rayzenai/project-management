@@ -3,12 +3,18 @@
 namespace RayzenAI\ProjectManagement\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
+use RayzenAI\ProjectManagement\Models\Project;
+use RayzenAI\ProjectManagement\Support\WorkspaceAccess;
 
 class UpdateProjectRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return (bool) $this->user();
+        $project = $this->route('project');
+
+        return $project instanceof Project
+            && WorkspaceAccess::canManageProjectAccess($this->user(), $project);
     }
 
     /**
@@ -25,5 +31,33 @@ class UpdateProjectRequest extends FormRequest
             'team_ids' => ['sometimes', 'array'],
             'team_ids.*' => ['integer', 'exists:teams,id'],
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator): void {
+            if (WorkspaceAccess::isSuperAdmin($this->user()) || ! $this->has('team_ids')) {
+                return;
+            }
+
+            $led = WorkspaceAccess::ledTeamIds($this->user());
+            foreach (array_map('intval', (array) $this->input('team_ids', [])) as $id) {
+                if (! in_array($id, $led, true)) {
+                    $validator->errors()->add('team_ids', 'You can only grant access to teams you lead.');
+                    break;
+                }
+            }
+        });
+    }
+
+    public function validated($key = null, $default = null): mixed
+    {
+        $data = parent::validated();
+
+        if (! WorkspaceAccess::isSuperAdmin($this->user())) {
+            unset($data['is_public']);
+        }
+
+        return data_get($data, $key, $default);
     }
 }

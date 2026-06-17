@@ -22,6 +22,7 @@ use RayzenAI\ProjectManagement\Http\Controllers\Workspace\TaskSearchController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\TeamController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\TeamMemberController;
 use RayzenAI\ProjectManagement\Http\Controllers\Workspace\WorkspaceNoteController;
+use RayzenAI\ProjectManagement\Http\Middleware\EnsureProjectVisible;
 use RayzenAI\ProjectManagement\Http\Middleware\ShareWorkspaceData;
 
 Route::middleware(['web', 'guest'])
@@ -63,56 +64,62 @@ Route::middleware([...config('project-management.middleware', ['web', 'auth']), 
         Route::patch('/projects/{project:slug}/archive', [ProjectController::class, 'archive'])->name('projects.archive');
         Route::patch('/projects/{project:slug}/restore', [ProjectController::class, 'restore'])->name('projects.restore');
 
-        Route::post('/projects/{project:slug}/tasks/reorder', TaskReorderController::class)
-            ->name('tasks.reorder');
+        // Every route that acts on a task or a task-child is gated centrally by
+        // EnsureProjectVisible: route-model binding has already resolved the
+        // bound parameter to a model instance, so the middleware walks it back
+        // to its parent project and 403s anyone who cannot view that project.
+        Route::middleware(EnsureProjectVisible::class)->group(function () {
+            Route::post('/projects/{project:slug}/tasks/reorder', TaskReorderController::class)
+                ->name('tasks.reorder');
 
-        Route::get('/tasks/{task}/preview', TaskPreviewController::class)
-            ->name('tasks.preview');
+            Route::get('/tasks/{task}/preview', TaskPreviewController::class)
+                ->name('tasks.preview');
 
-        Route::post('/projects/{project:slug}/tasks', [TaskController::class, 'store'])
-            ->scopeBindings()
-            ->name('tasks.store');
-        Route::get('/projects/{project:slug}/tasks/{task:slug}', [TaskController::class, 'show'])
-            ->scopeBindings()
-            ->name('tasks.show');
-        Route::patch('/projects/{project:slug}/tasks/{task:slug}', [TaskController::class, 'update'])
-            ->scopeBindings()
-            ->name('tasks.update');
-        Route::delete('/projects/{project:slug}/tasks/{task:slug}', [TaskController::class, 'destroy'])
-            ->scopeBindings()
-            ->name('tasks.destroy');
-        Route::post('/projects/{project:slug}/tasks/{task:slug}/restore', [TaskController::class, 'restore'])
-            ->scopeBindings()
-            ->withTrashed()
-            ->name('tasks.restore');
+            Route::post('/projects/{project:slug}/tasks', [TaskController::class, 'store'])
+                ->scopeBindings()
+                ->name('tasks.store');
+            Route::get('/projects/{project:slug}/tasks/{task:slug}', [TaskController::class, 'show'])
+                ->scopeBindings()
+                ->name('tasks.show');
+            Route::patch('/projects/{project:slug}/tasks/{task:slug}', [TaskController::class, 'update'])
+                ->scopeBindings()
+                ->name('tasks.update');
+            Route::delete('/projects/{project:slug}/tasks/{task:slug}', [TaskController::class, 'destroy'])
+                ->scopeBindings()
+                ->name('tasks.destroy');
+            Route::post('/projects/{project:slug}/tasks/{task:slug}/restore', [TaskController::class, 'restore'])
+                ->scopeBindings()
+                ->withTrashed()
+                ->name('tasks.restore');
 
-        Route::post('/tasks/{task}/assignments', [AssignmentController::class, 'store'])->name('assignments.store');
-        Route::patch('/assignments/{assignment}', [AssignmentController::class, 'update'])->name('assignments.update');
-        Route::delete('/assignments/{assignment}', [AssignmentController::class, 'destroy'])->name('assignments.destroy');
-        Route::post('/assignments/{assignment}/restore', [AssignmentController::class, 'restore'])->name('assignments.restore')->withTrashed();
+            Route::post('/tasks/{task}/assignments', [AssignmentController::class, 'store'])->name('assignments.store');
+            Route::patch('/assignments/{assignment}', [AssignmentController::class, 'update'])->name('assignments.update');
+            Route::delete('/assignments/{assignment}', [AssignmentController::class, 'destroy'])->name('assignments.destroy');
+            Route::post('/assignments/{assignment}/restore', [AssignmentController::class, 'restore'])->name('assignments.restore')->withTrashed();
 
-        Route::post('/tasks/{task}/notes', [NoteController::class, 'store'])->name('notes.store');
-        Route::delete('/notes/{note}', [NoteController::class, 'destroy'])->name('notes.destroy');
-        Route::post('/notes/{note}/restore', [NoteController::class, 'restore'])->name('notes.restore')->withTrashed();
+            Route::post('/tasks/{task}/notes', [NoteController::class, 'store'])->name('notes.store');
+            Route::delete('/notes/{note}', [NoteController::class, 'destroy'])->name('notes.destroy');
+            Route::post('/notes/{note}/restore', [NoteController::class, 'restore'])->name('notes.restore')->withTrashed();
+
+            Route::post('/tasks/{task}/contacts', [ContactController::class, 'store'])->name('contacts.store');
+
+            Route::get('/tasks/{task}/comments', [TaskCommentController::class, 'index'])->name('tasks.comments.index');
+            Route::post('/tasks/{task}/comments', [TaskCommentController::class, 'store'])->name('tasks.comments.store');
+            Route::patch('/comments/{comment}', [TaskCommentController::class, 'update'])->name('comments.update');
+            Route::delete('/comments/{comment}', [TaskCommentController::class, 'destroy'])->name('comments.destroy');
+            Route::post('/comments/{comment}/restore', [TaskCommentController::class, 'restore'])->name('comments.restore')->withTrashed();
+
+            Route::post('/tasks/{task}/subtasks', [SubtaskController::class, 'store'])->name('subtasks.store');
+            Route::patch('/subtasks/{subtask}', [SubtaskController::class, 'update'])->name('subtasks.update');
+            Route::delete('/subtasks/{subtask}', [SubtaskController::class, 'destroy'])->name('subtasks.destroy');
+            Route::post('/subtasks/{subtask}/restore', [SubtaskController::class, 'restore'])->name('subtasks.restore')->withTrashed();
+        });
 
         Route::post('/my-notes', [WorkspaceNoteController::class, 'store'])->name('my-notes.store');
         Route::patch('/my-notes/{workspaceNote}', [WorkspaceNoteController::class, 'update'])->name('my-notes.update');
         Route::patch('/my-notes/{workspaceNote}/placement', [WorkspaceNoteController::class, 'placement'])->name('my-notes.placement');
         Route::delete('/my-notes/{workspaceNote}', [WorkspaceNoteController::class, 'destroy'])->name('my-notes.destroy');
         Route::post('/my-notes/{workspaceNote}/restore', [WorkspaceNoteController::class, 'restore'])->name('my-notes.restore')->withTrashed();
-
-        Route::post('/tasks/{task}/contacts', [ContactController::class, 'store'])->name('contacts.store');
-
-        Route::get('/tasks/{task}/comments', [TaskCommentController::class, 'index'])->name('tasks.comments.index');
-        Route::post('/tasks/{task}/comments', [TaskCommentController::class, 'store'])->name('tasks.comments.store');
-        Route::patch('/comments/{comment}', [TaskCommentController::class, 'update'])->name('comments.update');
-        Route::delete('/comments/{comment}', [TaskCommentController::class, 'destroy'])->name('comments.destroy');
-        Route::post('/comments/{comment}/restore', [TaskCommentController::class, 'restore'])->name('comments.restore')->withTrashed();
-
-        Route::post('/tasks/{task}/subtasks', [SubtaskController::class, 'store'])->name('subtasks.store');
-        Route::patch('/subtasks/{subtask}', [SubtaskController::class, 'update'])->name('subtasks.update');
-        Route::delete('/subtasks/{subtask}', [SubtaskController::class, 'destroy'])->name('subtasks.destroy');
-        Route::post('/subtasks/{subtask}/restore', [SubtaskController::class, 'restore'])->name('subtasks.restore')->withTrashed();
 
         Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
         Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
