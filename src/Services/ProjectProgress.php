@@ -37,7 +37,7 @@ class ProjectProgress
      */
     public const STATUS_BUCKETS = [
         'in_progress' => ['in_progress'],
-        'late' => ['late', 'failed'],
+        'blocked' => ['failed'],
         'unclear' => ['not_started', 'unclear'],
     ];
 
@@ -53,7 +53,7 @@ class ProjectProgress
             'total' => $items->count(),
             'done' => $items->whereIn('status', Task::completeStatuses())->count(),
             'in_progress' => $items->whereIn('status', self::STATUS_BUCKETS['in_progress'])->count(),
-            'late' => $items->whereIn('status', self::STATUS_BUCKETS['late'])->count(),
+            'blocked' => $items->whereIn('status', self::STATUS_BUCKETS['blocked'])->count(),
             'unclear' => $items->whereIn('status', self::STATUS_BUCKETS['unclear'])->count(),
         ];
     }

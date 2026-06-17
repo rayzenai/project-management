@@ -40,6 +40,9 @@ class DashboardQuery
             && $t->deadline_at !== null
             && $t->deadline_at->gte($today)
             && $t->deadline_at->lte($weekEnd);
+        $isOverdue = fn (Task $t): bool => ! $isComplete($t)
+            && $t->deadline_at !== null
+            && $t->deadline_at->lt($today);
 
         $percent = function (Collection $items) use ($isComplete): int {
             $total = $items->count();
@@ -62,7 +65,7 @@ class DashboardQuery
             ])->values()->all();
         };
 
-        $projectRows = $projects->map(function (Project $project) use ($byProject, $percent, $isStalled, $isDueThisWeek, $breakdown): array {
+        $projectRows = $projects->map(function (Project $project) use ($byProject, $percent, $isStalled, $isDueThisWeek, $isOverdue, $breakdown): array {
             $items = $byProject->get($project->id, new Collection);
 
             return [
@@ -72,6 +75,7 @@ class DashboardQuery
                 'percent_complete' => $percent($items),
                 'stalled' => $items->filter($isStalled)->count(),
                 'due_this_week' => $items->filter($isDueThisWeek)->count(),
+                'overdue' => $items->filter($isOverdue)->count(),
                 'status_breakdown' => $breakdown($items),
             ];
         })->all();
@@ -101,6 +105,7 @@ class DashboardQuery
                 'percent_complete' => $percent($tasks),
                 'due_this_week' => $tasks->filter($isDueThisWeek)->count(),
                 'stalled' => $tasks->filter($isStalled)->count(),
+                'overdue' => $tasks->filter($isOverdue)->count(),
             ],
             'status_breakdown' => $breakdown($tasks),
             'projects' => $projectRows,

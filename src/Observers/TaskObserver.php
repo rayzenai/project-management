@@ -129,11 +129,11 @@ class TaskObserver
 
     /**
      * Notify a task's assignees (linked users) — except the acting user —
-     * when the task transitions into a completed/late/failed status.
+     * when the task transitions into a completed or failed status.
      */
     private function notifyStatusChange(Task $item): void
     {
-        $notifyStatuses = [...Task::completeStatuses(), 'late', 'failed'];
+        $notifyStatuses = [...Task::completeStatuses(), 'failed'];
 
         if (! in_array($item->status, $notifyStatuses, true)) {
             return;

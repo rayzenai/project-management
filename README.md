@@ -13,6 +13,10 @@ Laravel + Inertia (Svelte) host application, with a JSON API for mobile clients.
 > Projects are private to the teams attached to them; attach a team to grant
 > access; public projects are visible to everyone.
 
+> Creating a project requires at least one team. A user with no teams is shown a
+> team-creation step first (team creation is super-admin-only), then the project
+> form. Team leaders always have a team, so they go straight to the project form.
+
 ## Installation
 
 Require the package (this repo consumes it via a path repository with `symlink: true`):
@@ -210,7 +214,7 @@ are deferred.
 | Method | Path | Notes |
 | --- | --- | --- |
 | GET | `/workspace/projects` | list — **visibility-scoped** (only projects visible to the caller; see *Concepts* + *Conventions*). `?archived=1` for archived |
-| POST | `/workspace/projects` | create. Body accepts `team_ids: int[]` (required & non-empty **unless** `is_public`; non-super-admins may only attach teams they lead) and `is_public: bool` (**super-admin only** — silently ignored from others) |
+| POST | `/workspace/projects` | create. Body accepts `team_ids: int[]` (required & non-empty **unless** `is_public`; non-super-admins may only attach teams they lead) and `is_public: bool` (**super-admin only** — silently ignored from others). The web UI presents a team-creation step first when the caller has no teams |
 | GET | `/workspace/projects/{slug}` | show (board + tasks) — **403** if the project isn't visible to the caller |
 | PATCH | `/workspace/projects/{slug}` | update. Same `team_ids` / `is_public` rules as create |
 | PATCH | `/workspace/projects/{slug}/archive` | soft-archive (leader of an attached team / super-admin) |

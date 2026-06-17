@@ -49,9 +49,7 @@ return [
         'not_started' => ['label' => 'Not Started', 'color' => '#9CA3AF', 'is_complete' => false],
         'unclear' => ['label' => 'Unclear', 'color' => '#9CA3AF', 'is_complete' => false],
         'in_progress' => ['label' => 'In Progress', 'color' => '#3B82F6', 'is_complete' => false],
-        'late' => ['label' => 'Late', 'color' => '#F59E0B', 'is_complete' => false],
         'done' => ['label' => 'Done', 'color' => '#10B981', 'is_complete' => true],
-        'done_late' => ['label' => 'Done (Late)', 'color' => '#059669', 'is_complete' => true],
         'failed' => ['label' => 'Failed', 'color' => '#EF4444', 'is_complete' => false],
     ],
 
