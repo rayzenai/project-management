@@ -1,7 +1,7 @@
 <script lang="ts">
     import { untrack } from 'svelte';
     import { useForm } from '@inertiajs/svelte';
-    import type { Member, Priority, ProjectSummary } from '../lib/types';
+    import type { Member, Priority, QuickAddProject } from '../lib/types';
     import AssigneePicker from './AssigneePicker.svelte';
     import PillGroup from './PillGroup.svelte';
     import TokenInput from './TokenInput.svelte';
@@ -17,7 +17,7 @@
         onSuccess,
         onCancel,
     }: {
-        projects: ProjectSummary[];
+        projects: QuickAddProject[];
         team: Member[];
         currentMemberId: number | null;
         defaultProjectId?: number | null;
@@ -48,12 +48,44 @@
         })),
     );
 
+    // A title may carry an `@assignee` token that the server resolves. Detect it so an
+    // auto-defaulted "self" assignee doesn't silently override what the user typed.
+    const titleHasAssigneeToken = $derived(/(^|\s)@\S/.test(form.title));
+
     form.transform((data) => {
         const payload: Record<string, unknown> = { project_id: data.project_id, title: data.title };
-        if (data.assignee_member_ids.length > 0) payload.assignee_member_ids = data.assignee_member_ids;
+        let assignees = data.assignee_member_ids;
+        // If the only assignee is the auto-defaulted self AND the title names an @assignee,
+        // drop it so the token wins; an explicit pick of anyone else is always kept.
+        if (titleHasAssigneeToken && assignees.length === 1 && assignees[0] === currentMemberId) {
+            assignees = [];
+        }
+        if (assignees.length > 0) payload.assignee_member_ids = assignees;
         if (data.deadline_at) payload.deadline_at = data.deadline_at;
         if (data.priority) payload.priority = data.priority;
         return payload;
+    });
+
+    // Only members on the selected project's team(s) are assignable. Falls back to the
+    // full member list when a caller doesn't supply per-project membership.
+    const selectedProject = $derived(projects.find((p) => p.id === form.project_id) ?? null);
+    const projectMemberIds = $derived(new Set(selectedProject?.member_ids ?? team.map((m) => m.id)));
+    const projectTeam = $derived(team.filter((m) => projectMemberIds.has(m.id)));
+    const selfEligible = $derived(currentMemberId !== null && projectMemberIds.has(currentMemberId));
+
+    // When the project changes (and on mount), drop assignees who aren't on the new
+    // project, then default to self when self is on that project.
+    let seededProjectId = $state<number | null | undefined>(undefined);
+    $effect(() => {
+        const pid = form.project_id;
+        if (untrack(() => seededProjectId) === pid) return;
+        untrack(() => {
+            seededProjectId = pid;
+            form.assignee_member_ids = form.assignee_member_ids.filter((id) => projectMemberIds.has(id));
+            if (form.assignee_member_ids.length === 0 && selfEligible && currentMemberId !== null && !titleHasAssigneeToken) {
+                form.assignee_member_ids = [currentMemberId];
+            }
+        });
     });
 
     let advanced = $state(false);
@@ -69,7 +101,8 @@
             preserveScroll: true,
             onSuccess: () => {
                 form.reset('title', 'deadline_at');
-                form.assignee_member_ids = [];
+                // Re-seed the default assignee (self when eligible) for the next task.
+                form.assignee_member_ids = selfEligible && currentMemberId !== null ? [currentMemberId] : [];
                 form.priority = '';
                 tokenInput?.focus();
                 onSuccess?.();
@@ -88,8 +121,14 @@
 {#snippet advancedFields()}
     <div>
         <span class="text-fg-muted mb-1 block text-xs font-medium">Assign to</span>
-        <AssigneePicker {team} bind:selectedIds={form.assignee_member_ids} max={5} placeholder="Pick teammates..." flow={variant === 'overlay'} />
-        <button type="button" class="text-accent mt-1 text-xs hover:underline" onclick={assignMe}>Assign me</button>
+        {#if projectTeam.length > 0}
+            <AssigneePicker team={projectTeam} bind:selectedIds={form.assignee_member_ids} max={5} placeholder="Pick teammates..." flow={variant === 'overlay'} />
+            {#if selfEligible && !form.assignee_member_ids.includes(currentMemberId ?? -1)}
+                <button type="button" class="text-accent mt-1 text-xs hover:underline" onclick={assignMe}>Assign me</button>
+            {/if}
+        {:else}
+            <p class="text-fg-faint rounded-md border border-line bg-surface px-2 py-1.5 text-sm">No teammates on this project's team yet.</p>
+        {/if}
     </div>
     <div>
         <label for={`${uid}-due`} class="text-fg-muted mb-1 block text-xs font-medium">Due date</label>
