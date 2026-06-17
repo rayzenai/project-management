@@ -47,8 +47,14 @@ final readonly class QuickAddDispatcher
         if ($assignees === []) {
             $assignees = $this->resolveAssignees($project, $tokens, $consumed);
         }
+        // Default to self only when the acting user is actually assignable on this
+        // project (on one of its teams, or the project has no teams). Otherwise the
+        // task is created unassigned — to be assigned later — rather than rejected.
         if ($assignees === []) {
-            $assignees = [Member::forUser($user)->id];
+            $self = Member::forUser($user)->id;
+            if (Member::assignableFor($project)->whereKey($self)->exists()) {
+                $assignees = [$self];
+            }
         }
 
         foreach ($tokens as $token) {
