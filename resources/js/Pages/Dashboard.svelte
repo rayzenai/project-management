@@ -10,6 +10,7 @@
         percent_complete: number;
         stalled: number;
         due_this_week: number;
+        overdue: number;
         status_breakdown: StatusSlice[];
     };
     type Activity = {
@@ -27,6 +28,7 @@
         percent_complete: number;
         due_this_week: number;
         stalled: number;
+        overdue: number;
     };
 
     let {
@@ -56,6 +58,7 @@
         { label: '% Complete', value: `${stats.percent_complete}%`, tone: 'text-success' },
         { label: 'Due This Week', value: stats.due_this_week, tone: 'text-warn' },
         { label: 'Stalled', value: stats.stalled, tone: 'text-danger' },
+        { label: 'Overdue', value: stats.overdue, tone: 'text-danger' },
     ]);
 </script>
 
@@ -67,7 +70,7 @@
         <p class="mt-1 text-sm text-fg-muted">Portfolio health across all projects.</p>
     </header>
 
-    <div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+    <div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {#each statCards as card (card.label)}
             <div class="rounded-xl border border-line bg-surface p-4">
                 <div class="text-2xl font-bold {card.tone}">{card.value}</div>
@@ -128,6 +131,7 @@
                                 {#if project.due_this_week > 0}· <span class="text-warn"
                                         >{project.due_this_week} due this week</span
                                     >{/if}
+                                {#if project.overdue > 0}· <span class="text-danger">{project.overdue} overdue</span>{/if}
                             </div>
                         </div>
                         <div class="shrink-0 text-right">
