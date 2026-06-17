@@ -88,7 +88,7 @@
 {#snippet advancedFields()}
     <div>
         <span class="text-fg-muted mb-1 block text-xs font-medium">Assign to</span>
-        <AssigneePicker {team} bind:selectedIds={form.assignee_member_ids} max={5} placeholder="Pick teammates..." />
+        <AssigneePicker {team} bind:selectedIds={form.assignee_member_ids} max={5} placeholder="Pick teammates..." flow={variant === 'overlay'} />
         <button type="button" class="text-accent mt-1 text-xs hover:underline" onclick={assignMe}>Assign me</button>
     </div>
     <div>
@@ -199,7 +199,7 @@
         </div>
 
         {#if advanced}
-            <div class="grid grid-cols-1 gap-3 border-t border-line px-3 py-3 sm:grid-cols-3">
+            <div class="grid grid-cols-1 items-start gap-3 border-t border-line px-3 py-3 sm:grid-cols-3">
                 {@render advancedFields()}
             </div>
         {/if}

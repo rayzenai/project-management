@@ -7,11 +7,14 @@
         selectedIds = $bindable([]),
         placeholder = 'Assign...',
         max = 1,
+        flow = false,
     }: {
         team: Member[];
         selectedIds: number[];
         placeholder?: string;
         max?: number;
+        /** Render the dropdown in-flow (expands the container) instead of as a clipped absolute popover. Use inside modals. */
+        flow?: boolean;
     } = $props();
 
     let open = $state(false);
@@ -83,7 +86,9 @@
 
     {#if open}
         <div
-            class="absolute right-0 left-0 z-30 mt-1 max-h-72 overflow-auto rounded-md border border-line bg-surface shadow-lg"
+            class={flow
+                ? 'mt-1 max-h-72 overflow-auto rounded-md border border-line bg-surface shadow-sm'
+                : 'absolute right-0 left-0 z-30 mt-1 max-h-72 overflow-auto rounded-md border border-line bg-surface shadow-lg'}
         >
             <input
                 type="text"
