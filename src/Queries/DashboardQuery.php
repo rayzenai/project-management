@@ -25,8 +25,11 @@ class DashboardQuery
         $weekEnd = $today->copy()->addDays(7);
         $stalledBefore = now()->subDays(14);
 
-        $tasks = Task::query()->forActiveProjects()->get(['id', 'project_id', 'status', 'progress', 'status_updated_at', 'deadline_at']);
-        $projects = Project::query()->active()->orderBy('title')->get(['id', 'slug', 'title']);
+        $user = $request->user();
+        $visibleProjectIds = Project::query()->visibleTo($user)->pluck('id');
+
+        $tasks = Task::query()->forActiveProjects()->whereIn('project_id', $visibleProjectIds)->get(['id', 'project_id', 'status', 'progress', 'status_updated_at', 'deadline_at']);
+        $projects = Project::query()->visibleTo($user)->active()->orderBy('title')->get(['id', 'slug', 'title']);
         $byProject = $tasks->groupBy('project_id');
 
         $isComplete = fn (Task $t): bool => $t->isComplete();

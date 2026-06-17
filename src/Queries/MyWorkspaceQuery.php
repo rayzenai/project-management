@@ -35,7 +35,8 @@ class MyWorkspaceQuery
         $assignments = ProjectAssignment::query()
             ->with(['task.project', 'task.assignments.member', 'member'])
             ->where('member_id', $member->id)
-            ->whereHas('task', fn ($q) => $q->incomplete()->forActiveProjects())
+            ->whereHas('task', fn ($q) => $q->incomplete()->forActiveProjects()
+                ->whereIn('project_id', Project::query()->visibleTo($user)->select('id')))
             ->where(function ($q) use ($now) {
                 $q->whereNull('snoozed_until')->orWhere('snoozed_until', '<=', $now);
             })
@@ -75,7 +76,7 @@ class MyWorkspaceQuery
                 ->get()
             : collect();
 
-        $projects = Project::query()->active()->orderBy('title')->get(['id', 'slug', 'title']);
+        $projects = Project::query()->visibleTo($user)->active()->orderBy('title')->get(['id', 'slug', 'title']);
 
         $teamMembers = Member::query()->active()->orderBy('name')->get(['id', 'name', 'email', 'user_id']);
 
