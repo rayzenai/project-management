@@ -74,36 +74,45 @@ page via a full-page Inertia location visit.
 
 ### 2. Inertia root view + Vite entry for the workspace SPA
 
-The workspace renders through its **own** Inertia app (separate bundle from your
-host's pages). Add a root Blade view and a Vite entry, and switch to them for
-`/workspace/*` requests.
+The workspace renders through its **own** Inertia app — a separate JS bundle and a
+separate HTML shell from your host's own pages. Every Inertia page needs an HTML
+document to mount into, so the workspace ships **two host files** you must create:
 
-`resources/views/workspace.blade.php` — load the workspace CSS + JS entry and
-`@inertia`/`@inertiaHead` (see this host's copy for the full template):
+- `resources/views/workspace.blade.php` — the root Blade view (the `@inertia`
+  shell that loads the workspace bundle).
+- `resources/js/workspace/app.ts` — the Inertia + Svelte entry whose `resolve()`
+  globs the package's `Pages/`.
 
-```blade
-@vite(['packages/project-management/resources/js/styles/workspace.css', 'resources/js/workspace/app.ts'])
+**Publish them (recommended):**
+
+```bash
+php artisan vendor:publish --tag=project-management-host
 ```
 
-`resources/js/workspace/app.ts` — an Inertia + Svelte entry whose `resolve()`
-globs the package's pages:
+This drops both files into place. Prefer to **copy manually**? Grab them from
+`vendor/rayzenai/project-management/resources/stubs/workspace.blade.php` and
+`…/resources/stubs/workspace-app.ts` and place them at the two paths above.
 
-```ts
-import.meta.glob('../../../packages/project-management/resources/js/Pages/**/*.svelte', { eager: true });
-```
+> **Adjust the package path inside both files.** The stubs reference
+> `vendor/rayzenai/project-management/…` (a normal `composer require` install). If
+> you consume the package via a **path repository / monorepo** (as this repo does),
+> change those references to `packages/project-management/…`. The `@vite([...])`
+> path in the Blade and the two `import`/`import.meta.glob` paths in `app.ts` must
+> all point at wherever the package actually lives, and must match your Vite input.
 
-`vite.config.*` — add both inputs:
+Then wire the two things the package **can't** publish (they edit existing files):
+
+`vite.config.*` — add both inputs (match the path you used above):
 
 ```ts
 input: [
     /* …your host inputs… */
-    'packages/project-management/resources/js/styles/workspace.css',
+    'vendor/rayzenai/project-management/resources/js/styles/workspace.css',
     'resources/js/workspace/app.ts',
 ],
 ```
 
-Your `HandleInertiaRequests` middleware returns the workspace root view for
-`/workspace` paths:
+`HandleInertiaRequests` — return the workspace root view for `/workspace` paths:
 
 ```php
 public function rootView(Request $request): string
@@ -111,6 +120,10 @@ public function rootView(Request $request): string
     return $request->is('workspace', 'workspace/*') ? 'workspace' : $this->rootView;
 }
 ```
+
+Without `workspace.blade.php` every `/workspace/*` route (including
+`/workspace/login`) throws *“View [workspace] not found”* — it is the load-bearing
+HTML shell for the whole workspace SPA, not an optional file.
 
 ### 3. API auth (mobile clients)
 

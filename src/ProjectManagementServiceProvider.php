@@ -56,6 +56,14 @@ class ProjectManagementServiceProvider extends ServiceProvider
             __DIR__.'/../config/project-management.php' => config_path('project-management.php'),
         ], 'project-management-config');
 
+        // Host scaffold for the workspace Inertia app: the root Blade view and the
+        // Svelte/Inertia JS entry. Both are host-app files the package cannot load
+        // itself; publish them, then wire Vite + the rootView switch (see README).
+        $this->publishes([
+            __DIR__.'/../resources/stubs/workspace.blade.php' => resource_path('views/workspace.blade.php'),
+            __DIR__.'/../resources/stubs/workspace-app.ts' => resource_path('js/workspace/app.ts'),
+        ], 'project-management-host');
+
         // Morph map for the project-management entities. enforceMorphMap()
         // merges with whatever has already been registered, so this is safe
         // alongside the host-app's own morph map registrations.
