@@ -8,6 +8,11 @@ Laravel + Inertia (Svelte) host application, with a JSON API for mobile clients.
 - Web/Inertia surface at `/workspace/*` (session auth) and a JSON API at
   `/api/v1/*` (Sanctum token auth).
 
+## Concepts
+
+> Projects are private to the teams attached to them; attach a team to grant
+> access; public projects are visible to everyone.
+
 ## Installation
 
 Require the package (this repo consumes it via a path repository with `symlink: true`):
@@ -152,6 +157,16 @@ envelope differs:
   unauthenticated, `403` forbidden, `404` not found, `422` validation.
 - **Authorization** is enforced server-side via `WorkspaceAccess` (three tiers:
   super-admin → team-leader → member). Clients mirror role gating in the UI only.
+- **Project visibility:** a project is visible to a user iff `is_public` OR the
+  user's member is in a team attached to the project OR the user is a super-admin.
+  Implemented as `Project::scopeVisibleTo($user)` and enforced on the project index
+  (web + API), project/task `show` (403 otherwise), dashboard, My Workspace, search,
+  and the quick-add picker. Relevant `WorkspaceAccess` gates:
+    - `canViewProject($user, $project)` — the visibility rule above (drives the `show` 403).
+    - `canCreateProject($user)` — super-admin, or a user who leads ≥1 team.
+    - `canManageProjectAccess($user, $project)` — super-admin, or a user who leads a
+      team attached to the project. Gates project update/access changes;
+      `canArchiveProject` delegates to it.
 - **Soft delete + undo:** every `DELETE` soft-deletes; each resource has a
   matching `…/restore` (authorization for restore equals authorization for the
   delete). Trashed rows are pruned after `trash_ttl_days` (default 30).
@@ -194,11 +209,11 @@ are deferred.
 
 | Method | Path | Notes |
 | --- | --- | --- |
-| GET | `/workspace/projects` | list (active; `?archived=1` for archived) |
-| POST | `/workspace/projects` | create |
-| GET | `/workspace/projects/{slug}` | show (board + tasks) |
-| PATCH | `/workspace/projects/{slug}` | update |
-| PATCH | `/workspace/projects/{slug}/archive` | soft-archive (leader/super-admin) |
+| GET | `/workspace/projects` | list — **visibility-scoped** (only projects visible to the caller; see *Concepts* + *Conventions*). `?archived=1` for archived |
+| POST | `/workspace/projects` | create. Body accepts `team_ids: int[]` (required & non-empty **unless** `is_public`; non-super-admins may only attach teams they lead) and `is_public: bool` (**super-admin only** — silently ignored from others) |
+| GET | `/workspace/projects/{slug}` | show (board + tasks) — **403** if the project isn't visible to the caller |
+| PATCH | `/workspace/projects/{slug}` | update. Same `team_ids` / `is_public` rules as create |
+| PATCH | `/workspace/projects/{slug}/archive` | soft-archive (leader of an attached team / super-admin) |
 | PATCH | `/workspace/projects/{slug}/restore` | un-archive |
 
 ### Tasks
