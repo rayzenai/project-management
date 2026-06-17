@@ -43,6 +43,8 @@ class TaskResource extends JsonResource
             'progress' => (int) $this->progress,
             'sort_order' => (int) $this->sort_order,
             'deadline_at' => $this->deadline_at?->toDateString(),
+            'completed_at' => $this->completed_at?->toIso8601String(),
+            'is_late' => (bool) $this->is_late,
             'days_relative_label' => $this->days_relative_label,
             'source_url' => $this->source_url,
             'source_links' => $this->source_links ?? [],
