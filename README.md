@@ -257,6 +257,7 @@ Mentions are stored canonically as `@[Display Name](member:ID)`; the resolved
 
 | Method | Path | Notes |
 | --- | --- | --- |
+| GET | `/workspace/my-notes` | the caller's notes board: `{ data: { workspace_notes, task_notes } }` — own stickies (newest first) plus task notes they authored or that live on a task assigned to them (latest 50). Mirrors what the web shares via Inertia. |
 | POST | `/workspace/my-notes` | create |
 | PATCH | `/workspace/my-notes/{note}` | edit body/color |
 | PATCH | `/workspace/my-notes/{note}/placement` | move (`position_x/y`) |
