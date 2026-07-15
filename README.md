@@ -19,21 +19,32 @@ Laravel + Inertia (Svelte) host application, with a JSON API for mobile clients.
 
 ## Installation
 
-Require the package (this repo consumes it via a path repository with `symlink: true`):
-
-```json
-"repositories": [
-    { "type": "path", "path": "packages/project-management", "options": { "symlink": true } }
-],
-"require": {
-    "rayzenai/project-management": "*"
-}
-```
+Published on [Packagist](https://packagist.org/packages/rayzenai/project-management):
 
 ```bash
 composer require rayzenai/project-management
 php artisan migrate
 ```
+
+### Local development against a host app
+
+This package lives at `~/packages/project-management`, sibling to the Laravel host
+apps under `~/rayzen`. While co-developing the package alongside a host, point the
+host at the local checkout instead of Packagist via a relative path repository with
+`symlink: true` (adjust the relative path depth to wherever the host repo sits):
+
+```json
+"repositories": [
+    { "type": "path", "url": "../../packages/project-management", "options": { "symlink": true } }
+],
+"require": {
+    "rayzenai/project-management": "@dev"
+}
+```
+
+Edits under `~/packages/project-management` are then live in the host immediately —
+no `composer update` needed. Bump the version and tag a release (see below) once
+changes are ready to ship to other consumers.
 
 The service provider is auto-discovered. It registers the migrations, the
 `/workspace` (web) and `/api/v1` (API) routes, the `manage-workspace` gate, the

@@ -3,19 +3,24 @@
 Guidance for Claude Code working **inside this package**. This is the heart of the
 workspace system: a Laravel library that ships a project/task tracking workspace
 (projects → tasks → subtasks, assignments, notes, contacts, teams, members,
-activity log, weekly digest) for a Laravel + Inertia host app. The repo-root
-`/Users/kiran/rayzen/kiranwork/CLAUDE.md` and `/Users/kiran/rayzen/CLAUDE.md`
-still apply (PHP 8.5, Pint, Pest, CI standards) — this file is the
+activity log, weekly digest) for a Laravel + Inertia host app. This package lives
+at `~/packages/project-management`, a standalone repo published on
+[Packagist](https://packagist.org/packages/rayzenai/project-management) and
+consumed by host apps (e.g. `~/rayzen/kiranwork`) — each host's own `CLAUDE.md`
+still applies there (PHP 8.5, Pint, Pest, CI standards); this file is the
 package-specific layer, not a replacement.
 
 ## What this is
 
-- Composer package `rayzenai/project-management`, type `library`, version `0.1.0`, MIT.
+- Composer package `rayzenai/project-management`, type `library`, version `1.0.0`, MIT.
 - PSR-4: `RayzenAI\ProjectManagement\` → `src/`; factories → `database/factories/`.
 - Requires `php ^8.5`, `laravel/framework ^12 || ^13`. Dev: `orchestra/testbench`, `pestphp/pest ^4`.
-- **Not an app.** It has no `phpunit.xml` and no `tests/` of its own. It is consumed
-  by the host at `/Users/kiran/rayzen/kiranwork` via a **path repository with
-  `symlink: true`** (`"rayzenai/project-management": "*"`). Edits here are live in the host immediately.
+- **Not an app.** It has no `phpunit.xml` and no `tests/` of its own. Consumers on
+  Packagist get it the normal way (`composer require`, real vendor copy). Hosts
+  actively co-developing it (e.g. kiranwork) instead point at the local checkout
+  via a **relative path repository with `symlink: true`**
+  (`"rayzenai/project-management": "@dev"`) — edits here are live in the host
+  immediately, no publish/tag/update cycle needed.
 - Auto-discovered: `extra.laravel.providers` → `ProjectManagementServiceProvider`.
 
 ### What the service provider wires (`src/ProjectManagementServiceProvider.php`)
