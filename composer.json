@@ -2,7 +2,7 @@
     "name": "rayzenai/project-management",
     "description": "Project & task tracking workspace (projects, tasks, subtasks, assignments, notes, contacts) for Laravel + Inertia applications.",
     "type": "library",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "license": "MIT",
     "require": {
         "php": "^8.5",
