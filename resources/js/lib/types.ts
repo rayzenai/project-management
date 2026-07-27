@@ -45,6 +45,7 @@ export interface Project extends ProjectSummary {
     is_archived?: boolean;
     archived_at?: string | null;
     can_archive?: boolean;
+    can_manage_access?: boolean;
     tasks_count?: number;
     created_at?: string;
     updated_at?: string;

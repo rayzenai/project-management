@@ -6,6 +6,7 @@
     import BoardView from '../../components/project/BoardView.svelte';
     import ListView from '../../components/project/ListView.svelte';
     import PeopleView from '../../components/project/PeopleView.svelte';
+    import ProjectEditForm from '../../components/project/ProjectEditForm.svelte';
     import ProjectFilters, { type CategoryOption, type ProjectFiltersState } from '../../components/project/ProjectFilters.svelte';
     import ProjectSummaryStrip from '../../components/project/ProjectSummaryStrip.svelte';
     import { peek } from '../../lib/peek.svelte';
@@ -13,6 +14,8 @@
     import type { Member, Project, SharedProps, Task, Team } from '../../lib/types';
 
     let { project, tasks, teams = [] }: { project: Project; tasks: Task[]; teams?: Team[] } = $props();
+
+    let editing = $state(false);
 
     function toggleProjectTeam(team: Team) {
         const current = project.team_ids ?? [];
@@ -117,11 +120,32 @@
                 <a href="/workspace/projects" class="hover:underline">Projects</a> /
                 <span>{project.title}</span>
             </span>
-            {#if project.can_archive && !project.is_archived}
-                <button type="button" class="text-xs text-fg-faint underline-offset-2 hover:text-fg-muted hover:underline" onclick={archiveProject}>Archive</button>
-            {/if}
         </nav>
+        {#if editing}
+            <ProjectEditForm {project} isSuperAdmin={shared.isSuperAdmin ?? false} onclose={() => (editing = false)} />
+        {:else}
         <div>
+            <div class="flex flex-wrap items-center gap-3">
+                <h1 class="text-2xl font-bold tracking-tight text-fg">{project.title}</h1>
+                {#if project.can_manage_access && !project.is_archived}
+                    <button
+                        type="button"
+                        class="rounded-md border border-accent px-3 py-1.5 text-sm font-semibold text-accent transition hover:bg-accent/10"
+                        onclick={() => (editing = true)}
+                    >
+                        Edit project
+                    </button>
+                {/if}
+                {#if project.can_archive && !project.is_archived}
+                    <button
+                        type="button"
+                        class="rounded-md border border-line px-3 py-1.5 text-sm font-medium text-fg-muted transition hover:bg-surface-alt hover:text-fg"
+                        onclick={archiveProject}
+                    >
+                        Archive
+                    </button>
+                {/if}
+            </div>
             {#if project.title_np}
                 <div class="mt-1 text-base text-fg-muted">{project.title_np}</div>
             {/if}
@@ -153,6 +177,7 @@
                 </div>
             {/if}
         </div>
+        {/if}
     </header>
 
     {#if tasks.length === 0}

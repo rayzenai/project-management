@@ -21,9 +21,9 @@
     // ---- Teams panel ----
     let creatingTeam = $state(false);
     let editingTeamId = $state<number | null>(null);
-    let teamNameDraft = $state('');
 
     const teamForm = useForm({ name: '', description: '' });
+    const teamEditForm = useForm({ name: '', description: '' });
 
     function createTeam(e: SubmitEvent) {
         e.preventDefault();
@@ -37,16 +37,19 @@
         });
     }
 
-    function startRename(team: Team) {
+    function startEditTeam(team: Team) {
         editingTeamId = team.id;
-        teamNameDraft = team.name;
+        teamEditForm.name = team.name;
+        teamEditForm.description = team.description ?? '';
     }
 
-    function renameTeam(team: Team) {
-        const name = teamNameDraft.trim();
-        editingTeamId = null;
-        if (!name || name === team.name) return;
-        router.patch(`/workspace/teams/${team.id}`, { name }, { preserveScroll: true });
+    function saveTeam(e: SubmitEvent, team: Team) {
+        e.preventDefault();
+        if (!teamEditForm.name.trim()) return;
+        teamEditForm.patch(`/workspace/teams/${team.id}`, {
+            preserveScroll: true,
+            onSuccess: () => (editingTeamId = null),
+        });
     }
 
     function deleteTeam(team: Team) {
@@ -178,23 +181,47 @@
                     <div class="rounded-xl border border-line bg-surface p-4">
                         <div class="flex items-center gap-2">
                             {#if editingTeamId === team.id}
-                                <input
-                                    type="text"
-                                    bind:value={teamNameDraft}
-                                    class={inputClass}
-                                    onblur={() => renameTeam(team)}
-                                    onkeydown={(e) => {
-                                        if (e.key === 'Enter') renameTeam(team);
-                                        if (e.key === 'Escape') editingTeamId = null;
-                                    }}
-                                />
+                                <form onsubmit={(e) => saveTeam(e, team)} class="w-full">
+                                    <label class="mb-1 block text-xs font-medium text-fg-muted" for={`team-${team.id}-name`}>Name</label>
+                                    <input
+                                        id={`team-${team.id}-name`}
+                                        type="text"
+                                        bind:value={teamEditForm.name}
+                                        required
+                                        class={inputClass}
+                                        onkeydown={(e) => {
+                                            if (e.key === 'Escape') editingTeamId = null;
+                                        }}
+                                    />
+                                    <label class="mt-3 mb-1 block text-xs font-medium text-fg-muted" for={`team-${team.id}-description`}>Description (optional)</label>
+                                    <input
+                                        id={`team-${team.id}-description`}
+                                        type="text"
+                                        bind:value={teamEditForm.description}
+                                        class={inputClass}
+                                    />
+                                    <div class="mt-3 flex justify-end gap-2">
+                                        <button
+                                            type="button"
+                                            class="rounded-md border border-line px-3 py-1.5 text-sm font-medium text-fg-muted transition hover:bg-surface-alt"
+                                            onclick={() => (editingTeamId = null)}>Cancel</button
+                                        >
+                                        <button
+                                            type="submit"
+                                            disabled={teamEditForm.processing || !teamEditForm.name.trim()}
+                                            class="rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-bg hover:bg-accent-dim disabled:opacity-50"
+                                            >Save</button
+                                        >
+                                    </div>
+                                    {#if teamEditForm.errors.name}<p class="mt-2 text-xs text-danger">{teamEditForm.errors.name}</p>{/if}
+                                </form>
                             {:else}
                                 {#if isSuperAdmin}
                                     <button
                                         type="button"
                                         class="min-w-0 flex-1 truncate text-left text-base font-semibold hover:text-accent"
-                                        title="Rename"
-                                        onclick={() => startRename(team)}>{team.name}</button
+                                        title="Edit"
+                                        onclick={() => startEditTeam(team)}>{team.name}</button
                                     >
                                 {:else}
                                     <span class="min-w-0 flex-1 truncate text-base font-semibold">{team.name}</span>
@@ -205,6 +232,11 @@
                                 {#if isSuperAdmin}
                                     <button
                                         type="button"
+                                        class="shrink-0 text-xs text-fg-muted hover:text-fg"
+                                        onclick={() => startEditTeam(team)}>Edit</button
+                                    >
+                                    <button
+                                        type="button"
                                         aria-label={`Delete ${team.name}`}
                                         class="shrink-0 rounded p-1 text-fg-faint hover:text-danger"
                                         onclick={() => deleteTeam(team)}>✕</button
@@ -212,7 +244,7 @@
                                 {/if}
                             {/if}
                         </div>
-                        {#if team.description}
+                        {#if team.description && editingTeamId !== team.id}
                             <p class="mt-1 text-sm text-fg-muted">{team.description}</p>
                         {/if}
                         {#if canManageTeam(team) && members.length > 0}
